@@ -1,0 +1,1436 @@
+{
+  "lesson-00-sample-database": {
+    "id": "lesson-00-sample-database",
+    "slug": "00-sample-database",
+    "title": "employer_database — MySQL Dataset",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-00-sample-database",
+    "order": 0,
+    "content": "# employer_database — MySQL Dataset\n\n## Database Setup\n\n```sql\nCREATE DATABASE employer_database;\nUSE employer_database;\n```\n\n---\n\n## Tables\n\n| # | Table | Rows | Duplicates |\n|---|---|---|---|\n| 1 | `employees` | 52 | Yes (IDs 48–52) |\n| 2 | `bonuses` | 22 | Yes (rows 19–22) |\n| 3 | `attendance` | 35 | Yes (rows 31–35) |\n| 4 | `projects` | 5 | — |\n| 5 | `employee_projects` | 19 | Yes (rows 18–19) |\n| 6 | `salary_history` | 16 | — |\n| 7 | `leaves_data` | 15 | — |\n| 8 | `clients` | 5 | — |\n| 9 | `orders_data` | 18 | — |\n\n---\n\n## Entity Relationships\n\n```\nemployees (self) ────────────── (self) employees   [manager_id → employee_id]\nemployees      (1) ──────────── (N)    bonuses\nemployees      (1) ──────────── (N)    attendance\nemployees      (N) ──────────── (N)    projects     [via employee_projects]\nemployees      (1) ──────────── (N)    salary_history\nemployees      (1) ──────────── (N)    leaves_data\nemployees      (1) ──────────── (N)    orders_data\nclients        (1) ──────────── (N)    orders_data\nclients        (1) ──────────── (N)    projects\n```\n\n---\n\n## employees\n\n```sql\nCREATE TABLE employees (\n    employee_id       INT PRIMARY KEY,\n    employee_name     VARCHAR(100),\n    gender            VARCHAR(10),\n    department        VARCHAR(50),\n    salary            INT,\n    manager_id        INT,\n    hire_date         DATE,\n    city              VARCHAR(50),\n    state             VARCHAR(50),\n    email             VARCHAR(100),\n    employment_status VARCHAR(20),\n    FOREIGN KEY (manager_id) REFERENCES employees(employee_id)\n);\n\nINSERT INTO employees (employee_id, employee_name, gender, department, salary, manager_id, hire_date, city, state, email, employment_status) VALUES\n(1, 'Raj Sharma',   'Male',   'IT',        120000, NULL, '2012-03-01', 'Mumbai',    'Maharashtra', 'raj.sharma@company.com',   'Active'),\n(2, 'Ankit Verma',  'Male',   'HR',         90000, NULL, '2015-06-15', 'Delhi',     'Delhi',       'ankit.verma@company.com',  'Active'),\n(3, 'Priya Singh',  'Female', 'Finance',   100000, NULL, '2010-09-20', 'Pune',      'Maharashtra', 'priya.singh@company.com',  'Active'),\n(4, 'Amit Patel',   'Male',   'Sales',      85000, NULL, '2017-01-10', 'Bangalore', 'Karnataka',   'amit.patel@company.com',   'Active'),\n(5, 'Neha Joshi',   'Female', 'Marketing',  88000, NULL, '2014-04-05', 'Hyderabad', 'Telangana',   'neha.joshi@company.com',   'Active'),\n(6, 'Rohit Mehta',  'Male',   'Support',    75000, NULL, '2018-07-22', 'Chennai',   'Tamil Nadu',  'rohit.mehta@company.com',  'Active'),\n(7, 'Sneha Kapoor', 'Female', 'IT',        115000, NULL, '2011-11-30', 'Mumbai',    'Maharashtra', 'sneha.kapoor@company.com', 'Active'),\n(8, 'Kunal Shah',   'Male',   'Finance',   105000, NULL, '2013-02-14', 'Ahmedabad', 'Gujarat',     'kunal.shah@company.com',   'Active'),\n(9,  'Aarav Sharma',  'Male',   'IT',        75000,  1, '2021-01-15', 'Mumbai',    'Maharashtra', 'aarav@gmail.com',    'Active'),\n(10, 'Priya Mehta',   'Female', 'HR',        55000,  2, '2020-03-10', 'Delhi',     'Delhi',       'priya@gmail.com',    'Active'),\n(11, 'Rohit Jain',    'Male',   'Finance',   68000,  3, '2019-07-23', 'Pune',      'Maharashtra', 'rohit@gmail.com',    'Active'),\n(12, 'Sneha Patil',   'Female', 'IT',        80000,  1, '2022-02-12', 'Mumbai',    'Maharashtra', 'sneha@gmail.com',    'Active'),\n(13, 'Vikas Singh',   'Male',   'Sales',     45000,  4, '2021-11-05', 'Bangalore', 'Karnataka',   'vikas@gmail.com',    'Active'),\n(14, 'Anjali Verma',  'Female', 'Marketing', 60000,  5, '2020-09-17', 'Hyderabad', 'Telangana',   'anjali@gmail.com',   'Active'),\n(15, 'Karan Shah',    'Male',   'IT',        95000,  1, '2018-04-19', 'Mumbai',    'Maharashtra', 'karan@gmail.com',    'Active'),\n(16, 'Meera Joshi',   'Female', 'HR',        53000,  2, '2021-06-14', 'Pune',      'Maharashtra', 'meera@gmail.com',    'Active'),\n(17, 'Pooja Nair',    'Female', 'Finance',   72000,  3, '2019-12-01', 'Chennai',   'Tamil Nadu',  'pooja@gmail.com',    'Active'),\n(18, 'Low Salary',    'Male',   'Support',   25000,  6, '2023-01-01', 'Pune',      'Maharashtra', 'low@gmail.com',      'Active'),\n(19, 'Arjun Gupta',   'Male',   'IT',        78000,  1, '2020-08-11', 'Mumbai',    'Maharashtra', 'arjun@gmail.com',    'Active'),\n(20, 'Rahul Kapoor',  'Male',   'Sales',     47000,  4, '2023-01-08', 'Delhi',     'Delhi',       'rahul@gmail.com',    'Active'),\n(21, 'Simran Kaur',   'Female', 'Marketing', 62000,  5, '2022-10-09', 'Chandigarh','Punjab',      'simran@gmail.com',   'Active'),\n(22, 'Aman Mishra',   'Male',   'HR',        54000,  2, '2021-04-30', 'Lucknow',   'UP',          'aman@gmail.com',     'Active'),\n(23, 'Dev Malhotra',  'Male',   'Finance',   67000,  3, '2017-03-15', 'Delhi',     'Delhi',       'dev@gmail.com',      'Active'),\n(24, 'Nisha Rao',     'Female', 'IT',        83000,  1, '2021-05-25', 'Bangalore', 'Karnataka',   'nisha@gmail.com',    'Active'),\n(25, 'Ravi Kumar',    'Male',   'Support',   30000,  6, '2022-05-15', 'Chennai',   'Tamil Nadu',  'ravi@gmail.com',     'Active'),\n(26, 'Yash Thakur',   'Male',   'Sales',     50000,  4, '2022-01-20', 'Mumbai',    'Maharashtra', 'yash@gmail.com',     'Active'),\n(27, 'Ritika Sen',    'Female', 'Marketing', 59000,  5, '2019-11-13', 'Kolkata',   'West Bengal', 'ritika@gmail.com',   'Active'),\n(28, 'Tanvi Desai',   'Female', 'HR',        52000,  2, '2019-09-27', 'Ahmedabad', 'Gujarat',     'tanvi@gmail.com',    'On Leave'),\n(29, 'Mohit Arora',   'Male',   'IT',        91000,  7, '2018-07-07', 'Delhi',     'Delhi',       'mohit@gmail.com',    'Active'),\n(30, 'Kriti Sharma',  'Female', 'Finance',   71000,  3, '2020-12-21', 'Pune',      'Maharashtra', 'kriti@gmail.com',    'Active'),\n(31, 'Neha Iyer',     'Female', 'Sales',     49000,  4, '2023-03-18', 'Chennai',   'Tamil Nadu',  'nehaiyer@gmail.com', 'Active'),\n(32, 'Varun Sethi',   'Male',   'Marketing', 61000,  5, '2020-01-05', 'Delhi',     'Delhi',       'varun@gmail.com',    'Active'),\n(33, 'Harsh Pandey',  'Male',   'IT',        76000,  7, '2022-06-11', 'Mumbai',    'Maharashtra', 'harsh@gmail.com',    'On Leave'),\n(34, 'Divya Pillai',  'Female', 'Support',   32000,  6, '2021-09-10', 'Hyderabad', 'Telangana',   'divya@gmail.com',    'On Leave'),\n(35, 'Isha Kulkarni', 'Female', 'Finance',   69000,  3, '2021-08-14', 'Pune',      'Maharashtra', 'isha@gmail.com',     'Active'),\n(36, 'Sonal Jain',    'Female', 'HR',        51000,  2, '2023-04-04', 'Jaipur',    'Rajasthan',   'sonal@gmail.com',    'Active'),\n(37, 'Aisha Khan',    'Female', 'Sales',     46000,  4, '2022-02-28', 'Hyderabad', 'Telangana',   'aisha@gmail.com',    'Inactive'),\n(38, 'Siddharth Roy', 'Male',   'IT',        87000,  1, '2018-05-17', 'Kolkata',   'West Bengal', 'sid@gmail.com',      'Active'),\n(39, 'Preeti Das',    'Female', 'Marketing', 64000,  5, '2020-10-10', 'Kolkata',   'West Bengal', 'preeti@gmail.com',   'Terminated'),\n(40, 'Rajat Saxena',  'Male',   'Finance',   73000,  3, '2019-06-06', 'Delhi',     'Delhi',       'rajat@gmail.com',    'Terminated'),\n(41, 'Akash Yadav',   'Male',   'IT',        88000,  7, '2017-08-22', 'Lucknow',   'UP',          'akash@gmail.com',    'Active'),\n(42, 'No Manager',    'Male',   'Finance',   65000, NULL, '2020-02-20', 'Nagpur',  'Maharashtra', 'nomgr@gmail.com',    'Active'),\n(43, 'Same Salary A', 'Female', 'IT',        70000,  1, '2021-03-03', 'Mumbai',    'Maharashtra', 'same1@gmail.com',    'Active'),\n(44, 'Same Salary B', 'Male',   'IT',        70000,  1, '2021-03-04', 'Mumbai',    'Maharashtra', 'same2@gmail.com',    'Active'),\n(45, 'High Salary',   'Female', 'IT',       150000,  1, '2016-05-15', 'Mumbai',    'Maharashtra', 'high@gmail.com',     'Active'),\n(46, 'Test User',     'Female', 'IT',          NULL,  1, '2022-09-01', 'Mumbai',   'Maharashtra', 'test@gmail.com',     'Inactive'),\n(47, 'NULL Employee', 'Male',    NULL,       40000, NULL, '2023-02-10', 'Indore',  NULL,          NULL,                 'Inactive'),\n(48, 'Aarav Sharma',  'Male',   'IT',        75000,  1, '2021-01-15', 'Mumbai',    'Maharashtra', 'aarav@gmail.com',    'Active'),\n(49, 'Rohit Jain',    'Male',   'Finance',   68000,  3, '2019-07-23', 'Pune',      'Maharashtra', 'rohit@gmail.com',    'Active'),\n(50, 'Priya Mehta',   'Female', 'HR',        55000,  2, '2020-03-10', 'Delhi',     'Delhi',       'priya@gmail.com',    'Active'),\n(51, 'Vikas Singh',   'Male',   'Sales',     45000,  4, '2021-11-05', 'Bangalore', 'Karnataka',   'vikas@gmail.com',    'Active'),\n(52, 'Anjali Verma',  'Female', 'Marketing', 60000,  5, '2020-09-17', 'Hyderabad', 'Telangana',   'anjali@gmail.com',   'Active');\n```\n\n---\n\n## bonuses\n\n```sql\nCREATE TABLE bonuses (\n    bonus_id     INT PRIMARY KEY AUTO_INCREMENT,\n    employee_id  INT,\n    bonus_amount INT,\n    bonus_date   DATE,\n    bonus_type   VARCHAR(30)\n);\n\nINSERT INTO bonuses (bonus_id, employee_id, bonus_amount, bonus_date, bonus_type) VALUES\n(1,  9,  10000, '2024-01-10', 'Performance'),\n(2,  22,  5000, '2024-01-15', 'Performance'),\n(3,  27,  7000, '2024-02-01', 'Performance'),\n(4,  10, 12000, '2024-02-05', 'Performance'),\n(5,  34,  3000, '2024-02-10', 'Diwali'),\n(6,  11, 15000, '2024-03-01', 'Performance'),\n(7,  28,  8000, '2024-03-05', 'Performance'),\n(8,  23,  4000, '2024-03-15', 'Diwali'),\n(9,  12,  9000, '2024-04-01', 'Performance'),\n(10, 13, 11000, '2024-04-10', 'Performance'),\n(11, 14, 14000, '2024-04-20', 'Performance'),\n(12, 30,  7500, '2024-05-01', 'Joining'),\n(13, 15,  9500, '2024-05-10', 'Performance'),\n(14, 16, 16000, '2024-05-20', 'Performance'),\n(15, 17, 17000, '2024-06-01', 'Performance'),\n(16, 20, 20000, '2024-06-15', 'Performance'),\n(17, 39,  6000, '2024-07-01', 'Referral'),\n(18, 36,  5500, '2024-07-10', 'Diwali'),\n(19, 9,  10000, '2024-01-10', 'Performance'),\n(20, 11, 15000, '2024-03-01', 'Performance'),\n(21, 17, 17000, '2024-06-01', 'Performance'),\n(22, 20, 20000, '2024-06-15', 'Performance');\n```\n\n---\n\n## attendance\n\n```sql\nCREATE TABLE attendance (\n    attendance_id   INT PRIMARY KEY AUTO_INCREMENT,\n    employee_id     INT,\n    attendance_date DATE,\n    status          VARCHAR(20)\n);\n\nINSERT INTO attendance (attendance_id, employee_id, attendance_date, status) VALUES\n(1,  9,  '2025-01-01', 'Present'),\n(2,  10, '2025-01-01', 'Absent'),\n(3,  11, '2025-01-01', 'Present'),\n(4,  12, '2025-01-01', 'WFH'),\n(5,  13, '2025-01-01', 'Present'),\n(6,  14, '2025-01-01', 'Present'),\n(7,  15, '2025-01-01', 'Absent'),\n(8,  16, '2025-01-01', 'Present'),\n(9,  17, '2025-01-01', 'WFH'),\n(10, 18, '2025-01-01', 'Present'),\n(11, 19, '2025-01-02', 'Present'),\n(12, 20, '2025-01-02', 'Absent'),\n(13, 21, '2025-01-02', 'Present'),\n(14, 22, '2025-01-02', 'Present'),\n(15, 23, '2025-01-02', 'WFH'),\n(16, 24, '2025-01-02', 'Present'),\n(17, 25, '2025-01-02', 'Present'),\n(18, 26, '2025-01-02', 'Absent'),\n(19, 27, '2025-01-02', 'Half Day'),\n(20, 28, '2025-01-02', 'Present'),\n(21, 9,  '2025-01-03', 'WFH'),\n(22, 10, '2025-01-03', 'Present'),\n(23, 11, '2025-01-03', 'Absent'),\n(24, 12, '2025-01-03', 'Present'),\n(25, 13, '2025-01-03', 'Present'),\n(26, 22, '2025-01-03', 'Present'),\n(27, 27, '2025-01-03', 'Present'),\n(28, 34, '2025-01-03', 'Absent'),\n(29, 39, '2025-01-03', 'WFH'),\n(30, 44, '2025-01-03', 'Half Day'),\n(31, 9,  '2025-01-01', 'Present'),\n(32, 15, '2025-01-01', 'Absent'),\n(33, 22, '2025-01-02', 'Present'),\n(34, 27, '2025-01-02', 'Half Day'),\n(35, 11, '2025-01-03', 'Absent');\n```\n\n---\n\n## projects\n\n```sql\nCREATE TABLE projects (\n    project_id     INT PRIMARY KEY AUTO_INCREMENT,\n    project_name   VARCHAR(100),\n    project_budget INT,\n    client_id      INT,\n    start_date     DATE,\n    status         VARCHAR(20)\n);\n\nINSERT INTO projects (project_id, project_name, project_budget, client_id, start_date, status) VALUES\n(1, 'CRM System',           500000, 1, '2025-01-01', 'Ongoing'),\n(2, 'Banking App',          800000, 2, '2024-06-01', 'Ongoing'),\n(3, 'Ecommerce Platform',   650000, 3, '2024-09-01', 'Completed'),\n(4, 'Analytics Dashboard',  300000, 4, '2025-02-01', 'On Hold'),\n(5, 'HR Management System', 250000, 5, '2025-03-01', 'Ongoing');\n```\n\n---\n\n## employee_projects\n\n```sql\nCREATE TABLE employee_projects (\n    ep_id         INT PRIMARY KEY AUTO_INCREMENT,\n    employee_id   INT,\n    project_id    INT,\n    assigned_date DATE,\n    role          VARCHAR(50)\n);\n\nINSERT INTO employee_projects (ep_id, employee_id, project_id, assigned_date, role) VALUES\n(1,  9,  1, '2025-01-01', 'Lead'),\n(2,  9,  2, '2025-01-10', 'Developer'),\n(3,  22, 5, '2025-01-11', 'Analyst'),\n(4,  27, 2, '2025-01-15', 'Developer'),\n(5,  10, 1, '2025-01-20', 'Tester'),\n(6,  34, 3, '2025-01-22', 'Lead'),\n(7,  39, 4, '2025-01-25', 'Analyst'),\n(8,  11, 1, '2025-01-28', 'Developer'),\n(9,  28, 2, '2025-02-01', 'Tester'),\n(10, 35, 3, '2025-02-05', 'Developer'),\n(11, 23, 5, '2025-02-10', 'Analyst'),\n(12, 12, 1, '2025-02-12', 'Developer'),\n(13, 40, 4, '2025-02-15', 'Tester'),\n(14, 27, 2, '2025-02-18', 'Developer'),\n(15, 13, 1, '2025-02-20', 'Lead'),\n(16, 16, 2, '2025-02-25', 'Developer'),\n(17, 17, 1, '2025-03-01', 'Tester'),\n(18, 9,  1, '2025-01-01', 'Lead'),\n(19, 34, 3, '2025-01-22', 'Lead');\n```\n\n---\n\n## salary_history\n\n```sql\nCREATE TABLE salary_history (\n    history_id     INT PRIMARY KEY AUTO_INCREMENT,\n    employee_id    INT,\n    old_salary     INT,\n    new_salary     INT,\n    increment_date DATE,\n    increment_pct  DECIMAL(5,2)\n);\n\nINSERT INTO salary_history (history_id, employee_id, old_salary, new_salary, increment_date, increment_pct) VALUES\n(1,  9,  65000, 75000, '2024-01-01', 15.38),\n(2,  10, 48000, 55000, '2024-02-01', 14.58),\n(3,  11, 60000, 68000, '2024-01-01', 13.33),\n(4,  12, 72000, 80000, '2024-02-01', 11.11),\n(5,  13, 40000, 45000, '2024-03-01', 12.50),\n(6,  14, 53000, 60000, '2024-03-01', 13.21),\n(7,  15, 85000, 95000, '2024-04-01', 11.76),\n(8,  16, 47000, 53000, '2024-04-01', 12.77),\n(9,  17, 65000, 72000, '2024-05-01', 10.77),\n(10, 20, 42000, 47000, '2024-03-01', 11.90),\n(11, 22, 48000, 54000, '2024-01-01', 12.50),\n(12, 23, 60000, 67000, '2024-02-01', 11.67),\n(13, 27, 52000, 59000, '2024-04-01', 13.46),\n(14, 28, 46000, 52000, '2024-03-01', 13.04),\n(15, 34, 28000, 32000, '2024-05-01', 14.29),\n(16, 39, 58000, 64000, '2024-02-01', 10.34);\n```\n\n---\n\n## leaves_data\n\n```sql\nCREATE TABLE leaves_data (\n    leave_id    INT PRIMARY KEY AUTO_INCREMENT,\n    employee_id INT,\n    leave_type  VARCHAR(50),\n    days        INT,\n    leave_date  DATE\n);\n\nINSERT INTO leaves_data (leave_id, employee_id, leave_type, days, leave_date) VALUES\n(1,  9,  'Sick Leave',   2, '2025-01-10'),\n(2,  22, 'Casual Leave', 1, '2025-01-12'),\n(3,  27, 'Paid Leave',   5, '2025-01-15'),\n(4,  10, 'Sick Leave',   3, '2025-01-20'),\n(5,  34, 'Casual Leave', 2, '2025-01-22'),\n(6,  39, 'Paid Leave',   4, '2025-01-25'),\n(7,  11, 'Sick Leave',   1, '2025-02-01'),\n(8,  28, 'Paid Leave',   6, '2025-02-05'),\n(9,  35, 'Casual Leave', 2, '2025-02-10'),\n(10, 23, 'Sick Leave',   3, '2025-02-12'),\n(11, 12, 'Paid Leave',   2, '2025-02-15'),\n(12, 13, 'Casual Leave', 1, '2025-02-18'),\n(13, 14, 'Sick Leave',   4, '2025-03-01'),\n(14, 16, 'Paid Leave',   3, '2025-03-05'),\n(15, 17, 'Casual Leave', 2, '2025-03-10');\n```\n\n---\n\n## clients\n\n```sql\nCREATE TABLE clients (\n    client_id     INT PRIMARY KEY AUTO_INCREMENT,\n    client_name   VARCHAR(100),\n    country       VARCHAR(50),\n    industry      VARCHAR(50),\n    contact_email VARCHAR(100)\n);\n\nINSERT INTO clients (client_id, client_name, country, industry, contact_email) VALUES\n(1, 'Infosys', 'India', 'IT',        'contact@infosys.com'),\n(2, 'HDFC',    'India', 'Banking',   'contact@hdfc.com'),\n(3, 'Amazon',  'USA',   'Ecommerce', 'contact@amazon.com'),\n(4, 'TCS',     'India', 'IT',        'contact@tcs.com'),\n(5, 'Wipro',   'India', 'IT',        'contact@wipro.com');\n```\n\n---\n\n## orders_data\n\n```sql\nCREATE TABLE orders_data (\n    order_id     INT PRIMARY KEY AUTO_INCREMENT,\n    employee_id  INT,\n    client_id    INT,\n    order_amount INT,\n    order_date   DATE,\n    order_status VARCHAR(20)\n);\n\nINSERT INTO orders_data (order_id, employee_id, client_id, order_amount, order_date, order_status) VALUES\n(1,  13, 1, 50000, '2025-01-05', 'Completed'),\n(2,  20, 2, 65000, '2025-01-08', 'Completed'),\n(3,  26, 3, 70000, '2025-01-12', 'Completed'),\n(4,  31, 4, 45000, '2025-01-15', 'Pending'),\n(5,  37, 5, 30000, '2025-01-20', 'Completed'),\n(6,  13, 2, 55000, '2025-01-25', 'Cancelled'),\n(7,  13, 3, 80000, '2025-02-03', 'Completed'),\n(8,  20, 1, 72000, '2025-02-07', 'Completed'),\n(9,  26, 5, 39000, '2025-02-12', 'Completed'),\n(10, 31, 2, 47000, '2025-02-18', 'Pending'),\n(11, 37, 4, 60000, '2025-02-24', 'Completed'),\n(12, 13, 1, 75000, '2025-03-04', 'Completed'),\n(13, 20, 3, 82000, '2025-03-09', 'Completed'),\n(14, 26, 4, 41000, '2025-03-14', 'Completed'),\n(15, 31, 5, 35000, '2025-03-19', 'Completed'),\n(16, 37, 3, 68000, '2025-03-23', 'Pending'),\n(17, 13, 4, 90000, '2025-03-28', 'Completed'),\n(18, 20, 2, 55000, '2025-03-31', 'Completed');\n```\n\n---\n\n## Employee ID Reference Map\n\n| ID | Name | Department | manager_id |\n|---|---|---|---|\n| 1 | Raj Sharma | IT | NULL |\n| 2 | Ankit Verma | HR | NULL |\n| 3 | Priya Singh | Finance | NULL |\n| 4 | Amit Patel | Sales | NULL |\n| 5 | Neha Joshi | Marketing | NULL |\n| 6 | Rohit Mehta | Support | NULL |\n| 7 | Sneha Kapoor | IT | NULL |\n| 8 | Kunal Shah | Finance | NULL |\n| 9 | Aarav Sharma | IT | 1 |\n| 10 | Priya Mehta | HR | 2 |\n| 11 | Rohit Jain | Finance | 3 |\n| 12 | Sneha Patil | IT | 1 |\n| 13 | Vikas Singh | Sales | 4 |\n| 14 | Anjali Verma | Marketing | 5 |\n| 15 | Karan Shah | IT | 1 |\n| 16 | Meera Joshi | HR | 2 |\n| 17 | Pooja Nair | Finance | 3 |\n| 18 | Low Salary | Support | 6 |\n| 19 | Arjun Gupta | IT | 1 |\n| 20 | Rahul Kapoor | Sales | 4 |\n| 21 | Simran Kaur | Marketing | 5 |\n| 22 | Aman Mishra | HR | 2 |\n| 23 | Dev Malhotra | Finance | 3 |\n| 24 | Nisha Rao | IT | 1 |\n| 25 | Ravi Kumar | Support | 6 |\n| 26 | Yash Thakur | Sales | 4 |\n| 27 | Ritika Sen | Marketing | 5 |\n| 28 | Tanvi Desai | HR | 2 |\n| 29 | Mohit Arora | IT | 7 |\n| 30 | Kriti Sharma | Finance | 3 |\n| 31 | Neha Iyer | Sales | 4 |\n| 32 | Varun Sethi | Marketing | 5 |\n| 33 | Harsh Pandey | IT | 7 |\n| 34 | Divya Pillai | Support | 6 |\n| 35 | Isha Kulkarni | Finance | 3 |\n| 36 | Sonal Jain | HR | 2 |\n| 37 | Aisha Khan | Sales | 4 |\n| 38 | Siddharth Roy | IT | 1 |\n| 39 | Preeti Das | Marketing | 5 |\n| 40 | Rajat Saxena | Finance | 3 |\n| 41 | Akash Yadav | IT | 7 |\n| 42 | No Manager | Finance | NULL |\n| 43 | Same Salary A | IT | 1 |\n| 44 | Same Salary B | IT | 1 |\n| 45 | High Salary | IT | 1 |\n| 46 | Test User | IT | 1 |\n| 47 | NULL Employee | NULL | NULL |\n| 48 | Aarav Sharma | IT | 1 |\n| 49 | Rohit Jain | Finance | 3 |\n| 50 | Priya Mehta | HR | 2 |\n| 51 | Vikas Singh | Sales | 4 |\n| 52 | Anjali Verma | Marketing | 5 |\n\n---\n\n## Duplicate Records Map\n\n| Table | Duplicate Logic | Affected Rows |\n|---|---|---|\n| `employees` | Same name + dept + salary + email | IDs 48–52 (copies of 9–14) |\n| `bonuses` | Same employee + amount + date | Rows 19–22 |\n| `attendance` | Same employee + date + status | Rows 31–35 |\n| `employee_projects` | Same employee + project + role + date | Rows 18–19 |\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "Database Setup",
+        "id": "database-setup"
+      },
+      {
+        "level": 2,
+        "text": "Tables",
+        "id": "tables"
+      },
+      {
+        "level": 2,
+        "text": "Entity Relationships",
+        "id": "entity-relationships"
+      },
+      {
+        "level": 2,
+        "text": "employees",
+        "id": "employees"
+      },
+      {
+        "level": 2,
+        "text": "bonuses",
+        "id": "bonuses"
+      },
+      {
+        "level": 2,
+        "text": "attendance",
+        "id": "attendance"
+      },
+      {
+        "level": 2,
+        "text": "projects",
+        "id": "projects"
+      },
+      {
+        "level": 2,
+        "text": "employeeprojects",
+        "id": "employeeprojects"
+      },
+      {
+        "level": 2,
+        "text": "salaryhistory",
+        "id": "salaryhistory"
+      },
+      {
+        "level": 2,
+        "text": "leavesdata",
+        "id": "leavesdata"
+      },
+      {
+        "level": 2,
+        "text": "clients",
+        "id": "clients"
+      },
+      {
+        "level": 2,
+        "text": "ordersdata",
+        "id": "ordersdata"
+      },
+      {
+        "level": 2,
+        "text": "Employee ID Reference Map",
+        "id": "employee-id-reference-map"
+      },
+      {
+        "level": 2,
+        "text": "Duplicate Records Map",
+        "id": "duplicate-records-map"
+      }
+    ]
+  },
+  "lesson-01-filtering-data": {
+    "id": "lesson-01-filtering-data",
+    "slug": "01-filtering-data",
+    "title": "️ MySQL Data Filtering — Query Reference",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-01-filtering-data",
+    "order": 1,
+    "content": "# 🗄️ MySQL Data Filtering — Query Reference\n\nA structured reference for filtering, sorting, and retrieving data from a MySQL `employees` table. Covers `WHERE`, `LIKE`, `IN`, `BETWEEN`, `IS NULL`, `ORDER BY`, and `LIMIT`.\n\n---\n\n## 📋 Table of Contents\n\n- [Table Schema](#-table-schema)\n- [Basic SELECT](#-basic-select)\n- [Filtering with WHERE](#-filtering-with-where)\n- [Pattern Matching with LIKE](#-pattern-matching-with-like)\n- [NULL Checks](#-null-checks)\n- [Sorting with ORDER BY](#-sorting-with-order-by)\n- [Limiting Results](#-limiting-results)\n- [Combined Queries](#-combined-queries)\n\n---\n\n## 🏗️ Table Schema\n\n> Assumed structure of the `employees` table used throughout this guide.\n\n| Column              | Type         | Description                        |\n|---------------------|--------------|------------------------------------|\n| `employee_id`       | INT          | Primary key                        |\n| `employee_name`     | VARCHAR      | Full name of the employee          |\n| `department`        | VARCHAR      | Department (IT, HR, Finance, etc.) |\n| `salary`            | DECIMAL      | Monthly salary in ₹                |\n| `email`             | VARCHAR      | Employee email address             |\n| `employment_status` | VARCHAR      | Active / Inactive / On Leave       |\n| `manager_id`        | INT          | FK to manager's employee_id        |\n\n---\n\n## 📌 Basic SELECT\n\n### Q1 — Retrieve all employee details\n\n```sql\nSELECT *\nFROM employees;\n```\n\n### Q2 — Retrieve name, department, and salary only\n\n```sql\nSELECT employee_name, department, salary\nFROM employees;\n```\n\n### Q3 — Find all unique departments\n\n```sql\nSELECT DISTINCT department\nFROM employees\nWHERE department IS NOT NULL;\n```\n\n> `DISTINCT` removes duplicate values. `IS NOT NULL` excludes rows with no department assigned.\n\n---\n\n## 🔍 Filtering with WHERE\n\n### Q4 — Employees in the IT department\n\n```sql\nSELECT *\nFROM employees\nWHERE department = 'IT';\n```\n\n### Q5 — Employees earning more than ₹80,000\n\n```sql\nSELECT *\nFROM employees\nWHERE salary > 80000;\n```\n\n### Q6 — IT employees earning more than ₹80,000\n\n```sql\nSELECT *\nFROM employees\nWHERE department = 'IT'\n  AND salary > 80000;\n```\n\n> `AND` requires **both** conditions to be true.\n\n### Q7 — Employees in IT or Finance\n\n```sql\n-- Using OR\nSELECT *\nFROM employees\nWHERE department = 'IT' OR department = 'Finance';\n\n-- Using IN (cleaner for multiple values)\nSELECT *\nFROM employees\nWHERE department IN ('IT', 'Finance');\n```\n\n### Q8 — Employees who are NOT Active\n\n```sql\n-- Using not-equal operator\nSELECT *\nFROM employees\nWHERE employment_status <> 'Active';\n\n-- Using NOT keyword\nSELECT *\nFROM employees\nWHERE NOT employment_status = 'Active';\n```\n\n### Q9 — Employees in IT, HR, or Finance\n\n```sql\n-- Using IN\nSELECT *\nFROM employees\nWHERE department IN ('IT', 'HR', 'Finance');\n\n-- Using OR (equivalent, verbose)\nSELECT *\nFROM employees\nWHERE department = 'IT'\n   OR department = 'HR'\n   OR department = 'Finance';\n```\n\n> ✅ Prefer `IN` over chained `OR` — it's cleaner and easier to maintain.\n\n### Q10 — Employees with salary between ₹50,000 and ₹80,000\n\n```sql\n-- Using BETWEEN (inclusive)\nSELECT *\nFROM employees\nWHERE salary BETWEEN 50000 AND 80000;\n\n-- Using comparison operators (equivalent)\nSELECT *\nFROM employees\nWHERE salary >= 50000 AND salary <= 80000;\n```\n\n---\n\n## 🔎 Pattern Matching with LIKE\n\n| Wildcard | Meaning                     |\n|----------|-----------------------------|\n| `%`      | Zero or more characters     |\n| `_`      | Exactly one character       |\n\n### Q11 — Employees whose name starts with 'A'\n\n```sql\nSELECT *\nFROM employees\nWHERE employee_name LIKE 'A%';\n```\n\n### Q12 — Employees with a Gmail address\n\n```sql\nSELECT *\nFROM employees\nWHERE email LIKE '%@gmail.com';\n```\n\n### Q13 — Active employees whose name starts with 'S'\n\n```sql\nSELECT *\nFROM employees\nWHERE employment_status = 'Active'\n  AND employee_name LIKE 'S%';\n```\n\n---\n\n## 🚫 NULL Checks\n\n### Q14 — Employees with no manager assigned\n\n```sql\nSELECT *\nFROM employees\nWHERE manager_id IS NULL;\n```\n\n### Q15 — Employees with an email on record\n\n```sql\nSELECT *\nFROM employees\nWHERE email IS NOT NULL;\n```\n\n> ⚠️ Never use `= NULL` — it always returns false. Always use `IS NULL` / `IS NOT NULL`.\n\n---\n\n## 📊 Sorting with ORDER BY\n\n### Q16 — Sort by salary (lowest to highest)\n\n```sql\nSELECT salary, employee_name\nFROM employees\nWHERE salary IS NOT NULL\nORDER BY salary ASC;\n```\n\n### Q17 — Sort by salary (highest to lowest)\n\n```sql\nSELECT salary, employee_name\nFROM employees\nWHERE salary IS NOT NULL\nORDER BY salary DESC;\n```\n\n### Q18 — Sort by department, then salary descending\n\n```sql\nSELECT salary, department, employee_name\nFROM employees\nWHERE department IS NOT NULL\nORDER BY department ASC, salary DESC;\n```\n\n> Multiple columns in `ORDER BY` are evaluated left to right. Here: sort alphabetically by department first, then within each department by salary descending.\n\n---\n\n## 🔢 Limiting Results\n\n### Q19 — Top 5 highest-paid employees\n\n```sql\nSELECT *\nFROM employees\nORDER BY salary DESC\nLIMIT 5;\n```\n\n---\n\n## 🧩 Combined Queries\n\n### Q20 — Top 3 highest-paid IT/Finance employees earning ₹70K–₹1L\n\n```sql\nSELECT *\nFROM employees\nWHERE department IN ('IT', 'Finance')\n  AND salary BETWEEN 70000 AND 100000\nORDER BY salary DESC\nLIMIT 3;\n```\n\n> This query chains `IN`, `BETWEEN`, `ORDER BY`, and `LIMIT` — a common pattern for ranked, filtered reports.\n\n---\n\n## 🧠 Quick Concept Cheatsheet\n\n| Clause / Keyword  | Purpose                                      |\n|-------------------|----------------------------------------------|\n| `WHERE`           | Filter rows based on condition               |\n| `AND` / `OR`      | Combine multiple conditions                  |\n| `NOT`             | Negate a condition                           |\n| `IN (...)`        | Match against a list of values               |\n| `BETWEEN a AND b` | Range check (inclusive on both ends)         |\n| `LIKE`            | Pattern match (`%` = any chars, `_` = one)   |\n| `IS NULL`         | Check for missing/null values                |\n| `DISTINCT`        | Return unique values only                    |\n| `ORDER BY`        | Sort results (`ASC` default, `DESC` reverse) |\n| `LIMIT n`         | Return only the first `n` rows               |\n\n---\n\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "📋 Table of Contents",
+        "id": "-table-of-contents"
+      },
+      {
+        "level": 2,
+        "text": "🏗️ Table Schema",
+        "id": "-table-schema"
+      },
+      {
+        "level": 2,
+        "text": "📌 Basic SELECT",
+        "id": "-basic-select"
+      },
+      {
+        "level": 3,
+        "text": "Q1 — Retrieve all employee details",
+        "id": "q1-retrieve-all-employee-details"
+      },
+      {
+        "level": 3,
+        "text": "Q2 — Retrieve name, department, and salary only",
+        "id": "q2-retrieve-name-department-and-salary-only"
+      },
+      {
+        "level": 3,
+        "text": "Q3 — Find all unique departments",
+        "id": "q3-find-all-unique-departments"
+      },
+      {
+        "level": 2,
+        "text": "🔍 Filtering with WHERE",
+        "id": "-filtering-with-where"
+      },
+      {
+        "level": 3,
+        "text": "Q4 — Employees in the IT department",
+        "id": "q4-employees-in-the-it-department"
+      },
+      {
+        "level": 3,
+        "text": "Q5 — Employees earning more than ₹80,000",
+        "id": "q5-employees-earning-more-than-80000"
+      },
+      {
+        "level": 3,
+        "text": "Q6 — IT employees earning more than ₹80,000",
+        "id": "q6-it-employees-earning-more-than-80000"
+      },
+      {
+        "level": 3,
+        "text": "Q7 — Employees in IT or Finance",
+        "id": "q7-employees-in-it-or-finance"
+      },
+      {
+        "level": 3,
+        "text": "Q8 — Employees who are NOT Active",
+        "id": "q8-employees-who-are-not-active"
+      },
+      {
+        "level": 3,
+        "text": "Q9 — Employees in IT, HR, or Finance",
+        "id": "q9-employees-in-it-hr-or-finance"
+      },
+      {
+        "level": 3,
+        "text": "Q10 — Employees with salary between ₹50,000 and ₹80,000",
+        "id": "q10-employees-with-salary-between-50000-and-80000"
+      },
+      {
+        "level": 2,
+        "text": "🔎 Pattern Matching with LIKE",
+        "id": "-pattern-matching-with-like"
+      },
+      {
+        "level": 3,
+        "text": "Q11 — Employees whose name starts with 'A'",
+        "id": "q11-employees-whose-name-starts-with-a"
+      },
+      {
+        "level": 3,
+        "text": "Q12 — Employees with a Gmail address",
+        "id": "q12-employees-with-a-gmail-address"
+      },
+      {
+        "level": 3,
+        "text": "Q13 — Active employees whose name starts with 'S'",
+        "id": "q13-active-employees-whose-name-starts-with-s"
+      },
+      {
+        "level": 2,
+        "text": "🚫 NULL Checks",
+        "id": "-null-checks"
+      },
+      {
+        "level": 3,
+        "text": "Q14 — Employees with no manager assigned",
+        "id": "q14-employees-with-no-manager-assigned"
+      },
+      {
+        "level": 3,
+        "text": "Q15 — Employees with an email on record",
+        "id": "q15-employees-with-an-email-on-record"
+      },
+      {
+        "level": 2,
+        "text": "📊 Sorting with ORDER BY",
+        "id": "-sorting-with-order-by"
+      },
+      {
+        "level": 3,
+        "text": "Q16 — Sort by salary (lowest to highest)",
+        "id": "q16-sort-by-salary-lowest-to-highest"
+      },
+      {
+        "level": 3,
+        "text": "Q17 — Sort by salary (highest to lowest)",
+        "id": "q17-sort-by-salary-highest-to-lowest"
+      },
+      {
+        "level": 3,
+        "text": "Q18 — Sort by department, then salary descending",
+        "id": "q18-sort-by-department-then-salary-descending"
+      },
+      {
+        "level": 2,
+        "text": "🔢 Limiting Results",
+        "id": "-limiting-results"
+      },
+      {
+        "level": 3,
+        "text": "Q19 — Top 5 highest-paid employees",
+        "id": "q19-top-5-highest-paid-employees"
+      },
+      {
+        "level": 2,
+        "text": "🧩 Combined Queries",
+        "id": "-combined-queries"
+      },
+      {
+        "level": 3,
+        "text": "Q20 — Top 3 highest-paid IT/Finance employees earning ₹70K–₹1L",
+        "id": "q20-top-3-highest-paid-itfinance-employees-earning-70k1l"
+      },
+      {
+        "level": 2,
+        "text": "🧠 Quick Concept Cheatsheet",
+        "id": "-quick-concept-cheatsheet"
+      }
+    ]
+  },
+  "lesson-02-aggregate-functions-and-group-by": {
+    "id": "lesson-02-aggregate-functions-and-group-by",
+    "slug": "02-aggregate-functions-and-group-by",
+    "title": "Part 2 — Aggregate Functions + GROUP BY + HAVING",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-02-aggregate-functions-and-group-by",
+    "order": 2,
+    "content": "# 📊 Part 2 — Aggregate Functions + GROUP BY + HAVING\n\n> **MySQL Course | employer_database**  \n> This module covers how to summarize and group data using aggregate functions, GROUP BY, and HAVING — essential tools for data analysis and reporting.\n\n---\n\n## 🧠 Core Concepts\n\n### What is an Aggregate Function?\nWe use **aggregate functions** when we want to perform a calculation on **multiple rows** and return a **single value**.\n\n| Function | Description |\n|----------|-------------|\n| `COUNT()` | Counts the number of rows |\n| `SUM()` | Returns the total sum of a column |\n| `AVG()` | Returns the average value of a column |\n| `MAX()` | Returns the highest value |\n| `MIN()` | Returns the lowest value |\n\n---\n\n### What is GROUP BY?\nWe use **GROUP BY** when we want to **divide rows into groups** and perform calculations on **each group separately**.\n\n> Without GROUP BY, aggregate functions collapse all rows into one result.  \n> With GROUP BY, aggregate functions run independently for each group.\n\n---\n\n### What is HAVING?\nWe use **HAVING** to **filter groups** after `GROUP BY` and aggregate functions have been applied.\n\n| Clause | Filters | Runs When |\n|--------|---------|-----------|\n| `WHERE` | Individual rows | Before grouping |\n| `HAVING` | Groups | After grouping |\n\n---\n\n## 🔄 SQL Order of Execution\n\nUnderstanding **how MySQL processes a query** is key to writing correct SQL:\n\n```\nFROM      →  Choose the table(s) and perform joins\nWHERE     →  Filter individual rows\nGROUP BY  →  Create groups from the remaining rows\nHAVING    →  Filter groups after aggregation\nSELECT    →  Choose the columns to return\nDISTINCT  →  Remove duplicate rows from the result\nORDER BY  →  Sort the final result\nLIMIT     →  Restrict the number of rows returned\n```\n\n> 💡 **Key Insight:** `WHERE` runs *before* grouping, so you cannot use aggregate functions inside `WHERE`. That's exactly what `HAVING` is for.\n\n---\n\n## 📝 COUNT(*) vs COUNT(column) vs COUNT(1)\n\nThis is one of the most commonly misunderstood concepts in SQL:\n\n| Expression | What It Counts | Includes NULLs? |\n|------------|----------------|-----------------|\n| `COUNT(*)` | All rows in the result set | ✅ Yes |\n| `COUNT(1)` | All rows — `1` is just a constant value, every row qualifies | ✅ Yes |\n| `COUNT(column)` | Only rows where the specified column is **NOT NULL** | ❌ No |\n\n> `COUNT(*)` and `COUNT(1)` produce identical results. Use `COUNT(*)` as the standard convention.\n\n---\n\n## ✅ Practice Questions\n\n### Section 1 — Basic Aggregate Functions\n\n---\n\n#### Q1: Find the total number of employees in the company.\n\n**Goal:** Count every row in the `employees` table, regardless of NULLs.\n\n```sql\nSELECT COUNT(*) AS total_employees\nFROM employees;\n```\n\n> 💡 `COUNT(*)` counts all rows including those with NULL values in any column. Perfect for getting the total headcount.\n\n---\n\n#### Q2: Find how many employees have a manager assigned.\n\n**Goal:** Count only employees where `manager_id` is not NULL.\n\n```sql\nSELECT COUNT(manager_id) AS total_manager_assigned\nFROM employees;\n```\n\n> 💡 `COUNT(column)` skips NULLs. So if some employees have no manager (`manager_id IS NULL`), those rows are excluded from the count — giving us only the employees who actually have a manager assigned.\n\n---\n\n#### Q3: Understanding COUNT(*) vs COUNT(column) vs COUNT(1)\n\n```sql\n-- Counts all rows (including rows where any column is NULL)\nSELECT COUNT(*) FROM employees;\n\n-- Also counts all rows (1 is a constant, so every row qualifies)\nSELECT COUNT(1) FROM employees;\n\n-- Counts only rows where manager_id is NOT NULL\nSELECT COUNT(manager_id) FROM employees;\n```\n\n> 💡 Think of it this way: `COUNT(*)` asks \"how many rows exist?\", while `COUNT(column)` asks \"how many rows have a value in this column?\"\n\n---\n\n#### Q4: Find the total salary expense of the company.\n\n**Goal:** Add up all salaries across all employees.\n\n```sql\nSELECT SUM(salary) AS total_salary_expense\nFROM employees;\n```\n\n> 💡 `SUM()` ignores NULL values automatically. Only rows with an actual salary value are included in the total.\n\n---\n\n#### Q5: Find the average salary of employees.\n\n**Goal:** Calculate the mean salary across all employees.\n\n```sql\nSELECT AVG(salary) AS average_salary\nFROM employees;\n```\n\n> 💡 `AVG()` = `SUM(salary) / COUNT(salary)`. It also ignores NULLs — it won't treat a NULL salary as 0.\n\n---\n\n#### Q6: Find the highest and lowest salary in the company.\n\n**Goal:** Return both extremes in a single query.\n\n```sql\nSELECT \n    MAX(salary) AS highest_salary,\n    MIN(salary) AS lowest_salary\nFROM employees;\n```\n\n> 💡 You can use multiple aggregate functions in a single `SELECT`. This returns one row with two summary values.\n\n---\n\n### Section 2 — GROUP BY\n\n---\n\n#### Q7: Find the total number of employees in each department.\n\n**Goal:** Break down headcount by department.\n\n```sql\nSELECT department, COUNT(*) AS total_department_employee\nFROM employees\nWHERE department IS NOT NULL\nGROUP BY department;\n```\n\n> 💡 `WHERE department IS NOT NULL` filters out rows with no department *before* grouping happens. Without this, NULL would appear as its own group.\n\n---\n\n#### Q8: Find the average salary of employees in each city.\n\n**Goal:** Get salary averages per city location.\n\n```sql\nSELECT city, AVG(salary) AS average_salary\nFROM employees\nGROUP BY city;\n```\n\n> 💡 Each city becomes a group, and `AVG()` runs independently within each group. The result has one row per city.\n\n---\n\n#### Q9: Find the total number of Active employees in each department.\n\n**Goal:** Count only Active employees, grouped by department.\n\n```sql\nSELECT department, COUNT(*) AS total_active_employee\nFROM employees\nWHERE employment_status = 'Active'\nGROUP BY department;\n```\n\n> 💡 `WHERE` filters rows first — only `Active` employees enter the grouping step. So `COUNT(*)` inside each group only counts active employees.\n\n---\n\n#### Q10: Find the total salary expense of employees working in Mumbai for each department.\n\n**Goal:** Filter by city first, then group by department.\n\n```sql\nSELECT department, SUM(salary) AS total_salary_expense\nFROM employees\nWHERE city = 'Mumbai'\nGROUP BY department;\n```\n\n> 💡 First, `WHERE city = 'Mumbai'` keeps only Mumbai employees. Then `GROUP BY department` splits them into department groups, and `SUM(salary)` totals each group.\n\n---\n\n### Section 3 — HAVING\n\n---\n\n#### Q11: Find departments having more than 5 employees.\n\n**Goal:** Filter groups based on count — use HAVING, not WHERE.\n\n```sql\n-- Using alias in HAVING (MySQL supports this)\nSELECT department, COUNT(*) AS total_employee_department\nFROM employees\nGROUP BY department\nHAVING total_employee_department > 5;\n\n-- Using the aggregate function directly in HAVING (standard SQL)\nSELECT department, COUNT(*) AS total_employee_department\nFROM employees\nGROUP BY department\nHAVING COUNT(*) > 5;\n```\n\n> 💡 Both versions work in MySQL. Why can't we use `WHERE COUNT(*) > 5`? Because `WHERE` runs *before* grouping, and at that point, aggregates haven't been calculated yet. `HAVING` runs *after* aggregation.\n\n---\n\n#### Q12: Find cities whose average salary is greater than ₹70,000.\n\n**Goal:** Filter groups by an aggregate condition.\n\n```sql\n-- Using alias in HAVING\nSELECT city, AVG(salary) AS average_salary\nFROM employees\nGROUP BY city\nHAVING average_salary > 70000;\n\n-- Using the aggregate function directly\nSELECT city, AVG(salary) AS average_salary\nFROM employees\nGROUP BY city\nHAVING AVG(salary) > 70000;\n```\n\n> 💡 Notice the pattern: `GROUP BY city` creates one group per city, `AVG(salary)` calculates the average for each, and `HAVING` keeps only the cities that pass the condition.\n\n---\n\n#### Q13: Find departments whose average salary lies between ₹60,000 and ₹80,000.\n\n**Goal:** Use HAVING with a range condition.\n\n```sql\nSELECT department, AVG(salary) AS average_salary\nFROM employees\nGROUP BY department\nHAVING average_salary BETWEEN 60000 AND 80000;\n```\n\n> 💡 `BETWEEN` is inclusive on both ends. Departments with an average of exactly ₹60,000 or exactly ₹80,000 are included.\n\n---\n\n#### Q14: Find departments having at least 4 employees who are currently Active.\n\n**Goal:** Combine WHERE (row filter) with HAVING (group filter).\n\n```sql\nSELECT department, COUNT(*) AS total_employee_department\nFROM employees\nWHERE employment_status = 'Active'\nGROUP BY department\nHAVING COUNT(*) >= 4;\n```\n\n> 💡 This query demonstrates using `WHERE` and `HAVING` together:  \n> - `WHERE` filters out non-active employees *before* grouping  \n> - `HAVING` filters out departments with fewer than 4 active employees *after* grouping\n\n---\n\n### Section 4 — Finding Duplicates\n\n---\n\n#### Q15: Find Duplicate Records By Email\n\n**Goal:** Identify email addresses that appear more than once.\n\n```sql\nSELECT email, COUNT(*) AS duplicate_email_count\nFROM employees\nGROUP BY email\nHAVING duplicate_email_count > 1;\n```\n\n> 💡 This is a classic duplicate-detection pattern. `GROUP BY email` groups all rows sharing the same email, `COUNT(*)` counts how many rows are in each group, and `HAVING > 1` keeps only the emails that appear more than once — meaning they're duplicated.\n\n---\n\n## 🗂️ Quick Reference Cheatsheet\n\n```sql\n-- Basic aggregate on entire table\nSELECT COUNT(*), SUM(col), AVG(col), MAX(col), MIN(col)\nFROM table_name;\n\n-- Aggregate per group\nSELECT group_col, COUNT(*)\nFROM table_name\nGROUP BY group_col;\n\n-- Filter rows BEFORE grouping\nSELECT group_col, COUNT(*)\nFROM table_name\nWHERE condition\nGROUP BY group_col;\n\n-- Filter groups AFTER aggregation\nSELECT group_col, COUNT(*)\nFROM table_name\nGROUP BY group_col\nHAVING COUNT(*) > n;\n\n-- Combine both\nSELECT group_col, COUNT(*)\nFROM table_name\nWHERE row_condition\nGROUP BY group_col\nHAVING COUNT(*) > n;\n```\n\n---\n\n## 📌 Key Rules to Remember\n\n- **`WHERE` vs `HAVING`** — `WHERE` filters rows before grouping; `HAVING` filters groups after aggregation. You cannot use aggregate functions in `WHERE`.\n- **`COUNT(*)` vs `COUNT(col)`** — `COUNT(*)` counts all rows; `COUNT(col)` only counts non-NULL values.\n- **Columns in SELECT with GROUP BY** — Every column in `SELECT` that is *not* an aggregate must appear in `GROUP BY`.\n- **Alias in HAVING** — MySQL allows using a `SELECT` alias in `HAVING`, but standard SQL requires repeating the aggregate expression.\n- **NULL in groups** — NULLs form their own group in `GROUP BY`. Use `WHERE col IS NOT NULL` to exclude them.\n\n---\n\n\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "🧠 Core Concepts",
+        "id": "-core-concepts"
+      },
+      {
+        "level": 3,
+        "text": "What is an Aggregate Function?",
+        "id": "what-is-an-aggregate-function"
+      },
+      {
+        "level": 3,
+        "text": "What is GROUP BY?",
+        "id": "what-is-group-by"
+      },
+      {
+        "level": 3,
+        "text": "What is HAVING?",
+        "id": "what-is-having"
+      },
+      {
+        "level": 2,
+        "text": "🔄 SQL Order of Execution",
+        "id": "-sql-order-of-execution"
+      },
+      {
+        "level": 2,
+        "text": "📝 COUNT() vs COUNT(column) vs COUNT(1)",
+        "id": "-count-vs-countcolumn-vs-count1"
+      },
+      {
+        "level": 2,
+        "text": "✅ Practice Questions",
+        "id": "-practice-questions"
+      },
+      {
+        "level": 3,
+        "text": "Section 1 — Basic Aggregate Functions",
+        "id": "section-1-basic-aggregate-functions"
+      },
+      {
+        "level": 3,
+        "text": "Section 2 — GROUP BY",
+        "id": "section-2-group-by"
+      },
+      {
+        "level": 3,
+        "text": "Section 3 — HAVING",
+        "id": "section-3-having"
+      },
+      {
+        "level": 3,
+        "text": "Section 4 — Finding Duplicates",
+        "id": "section-4-finding-duplicates"
+      },
+      {
+        "level": 2,
+        "text": "🗂️ Quick Reference Cheatsheet",
+        "id": "-quick-reference-cheatsheet"
+      },
+      {
+        "level": 2,
+        "text": "📌 Key Rules to Remember",
+        "id": "-key-rules-to-remember"
+      }
+    ]
+  },
+  "lesson-03-joins": {
+    "id": "lesson-03-joins",
+    "slug": "03-joins",
+    "title": "JOINs in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-03-joins",
+    "order": 3,
+    "content": "# 🔗 Part 3: JOINs in MySQL\n\n> Combine data from multiple tables using a shared key — the backbone of relational databases.\n\n---\n\n## 📌 What is a JOIN?\n\nA **JOIN** clause is used to combine rows from two or more tables based on a **related column** between them. Instead of storing all data in one giant table, relational databases split data into logical tables and use JOINs to stitch them back together at query time.\n\n```sql\n-- Basic pattern\nSELECT columns\nFROM table_A\nJOIN table_B ON table_A.key = table_B.key\n```\n\n---\n\n## 🗺️ Types of JOINs — Visual Reference\n\n![MySQL JOIN Types](../assets/joins.png)\n\n| JOIN Type | Returns | Use When |\n|-----------|---------|----------|\n| `INNER JOIN` | Only matching rows in **both** tables | You only care about records with a match on both sides |\n| `LEFT JOIN` | All rows from **left** table + matched rows from right (NULL if no match) | You want every left-side record, even if the right side has nothing |\n| `RIGHT JOIN` | All rows from **right** table + matched rows from left (NULL if no match) | You want every right-side record, even if the left side has nothing |\n| `FULL OUTER JOIN` | All rows from **both** tables (NULL where no match) | You want a complete picture regardless of matches |\n| `SELF JOIN` | A table joined with **itself** | Hierarchical data like employee → manager relationships |\n| `CROSS JOIN` | Every row of left × every row of right (Cartesian product) | Generating all combinations (rare in practice) |\n\n---\n\n## 🧱 Database Schema (Context)\n\nThe queries below operate on these tables:\n\n```\nemployees        bonuses          projects         employee_projects    clients    orders_data\n───────────      ────────         ────────         ─────────────────    ───────    ──────────\nemployee_id  ←── employee_id      project_id  ←── project_id           client_id ←── client_id\nemployee_name    bonus_amount     project_name     employee_id ──→ employees\nemail            bonus_date       ...              role\nmanager_id ──┐   bonus_id\nemployment_status\n              └──→ employee_id (self-reference for manager)\n```\n\n---\n\n## 📋 Queries\n\n---\n\n### Q1 — Employee Name, Bonus Amount & Bonus Date\n\n```sql\nSELECT e.employee_name, b.bonus_amount, b.bonus_date\nFROM employees e\nINNER JOIN bonuses b\nON e.employee_id = b.employee_id;\n```\n\n**🔍 Explanation:**\nUses an `INNER JOIN` between `employees` and `bonuses` on the shared `employee_id` key. Only employees **who have received at least one bonus** appear in the result — if an employee has no bonus record, they're excluded entirely.\n\n---\n\n### Q2 — Employee Name, Project Name & Role\n\n```sql\nSELECT e.employee_name, ep.role, ep.project_id, p.project_name\nFROM employees e\nINNER JOIN employee_projects ep ON e.employee_id = ep.employee_id\nINNER JOIN projects p           ON ep.project_id = p.project_id;\n```\n\n**🔍 Explanation:**\nA **chained (multi-table) INNER JOIN** across three tables. `employee_projects` is the bridge/junction table linking employees to projects. The first join connects employees to their project assignments; the second join enriches that with the actual project name from the `projects` table. Only employees assigned to at least one project are returned.\n\n---\n\n### Q3 — Employees with Bonus Greater than ₹10,000\n\n```sql\nSELECT e.employee_name  AS employerName,\n       e.email          AS employeeEmail,\n       b.bonus_amount   AS bonusAmount\nFROM employees e\nINNER JOIN bonuses b ON e.employee_id = b.employee_id\nWHERE b.bonus_amount > 10000;\n```\n\n**🔍 Explanation:**\nSame `INNER JOIN` as Q1, but filtered with a `WHERE` clause to keep only high-value bonuses. Column aliases (`AS`) make the output cleaner and more readable. The filter runs **after** the join, so only matched rows that also satisfy the amount condition are returned.\n\n---\n\n### Q4 — Employees On Leave with Their Manager Names\n\n```sql\nSELECT e.employee_name  AS employeName,\n       m.employee_name  AS managerName,\n       e.employment_status\nFROM employees e\nINNER JOIN employees m ON e.manager_id = m.employee_id\nWHERE e.employment_status = 'On Leave';\n```\n\n**🔍 Explanation:**\nA **SELF JOIN** — the `employees` table is joined to **itself**. The same table is aliased twice: `e` for the employee and `m` for the manager. The join condition `e.manager_id = m.employee_id` links each employee to their manager within the same table. The `WHERE` clause then filters to only show employees currently on leave.\n\n---\n\n### Q5 — Employees Who Never Received a Bonus\n\n```sql\nSELECT e.employee_name AS employerName,\n       b.bonus_id      AS bonus_id,\n       b.bonus_amount\nFROM employees e\nLEFT JOIN bonuses b ON e.employee_id = b.employee_id\nWHERE b.bonus_id IS NULL;\n```\n\n**🔍 Explanation:**\nClassic **anti-join pattern** using `LEFT JOIN` + `IS NULL`. A `LEFT JOIN` keeps all employees regardless of whether they have a bonus record. Where no bonus exists, the bonus columns come back as `NULL`. The `WHERE b.bonus_id IS NULL` filter then isolates exactly those employees — the ones with **no bonus at all**.\n\n---\n\n### Q6 — All Managers with Their Direct Reports (Including Managers with No Reports)\n\n```sql\nSELECT m.employee_name AS managerName, e.employee_name AS employeeName\nFROM employees m \nLEFT JOIN employees e \nON m.employee_id = e.manager_id \nWHERE m.employee_id IN(\n\tSELECT DISTINCT employee_id\n\tFROM employees \n\tWHERE manager_id IS NULL\n)\n```\n\n**🔍 Explanation:**\nAnother **SELF JOIN**, but with `LEFT JOIN` to ensure managers with zero direct reports still appear. The subquery in the `WHERE` clause restricts results to only employees who are actually managers (i.e., someone else has their `employee_id` as their `manager_id`). Employees under them are listed alongside — if a manager has no reportees, `employeeName` will be `NULL`.\n\n---\n\n### Q7 — Employees Working on More Than One Project\n\n```sql\nSELECT e.employee_name,\n       COUNT(ep.project_id) AS total_project\nFROM employees e\nINNER JOIN employee_projects ep ON e.employee_id = ep.employee_id\nGROUP BY e.employee_id\nHAVING COUNT(ep.project_id) > 1;\n```\n\n**🔍 Explanation:**\nJoins employees with their project assignments, then **aggregates with `GROUP BY`** to count projects per employee. The key distinction here: `WHERE` filters rows before grouping, but `HAVING` filters **after** aggregation — which is why we use `HAVING COUNT(...) > 1` to find multi-project employees. Only employees with 2+ projects make the cut.\n\n---\n\n### Q8 — Employees Not Assigned to Any Project\n\n```sql\nSELECT e.employee_name, ep.project_id\nFROM employees e\nLEFT JOIN employee_projects ep ON e.employee_id = ep.employee_id\nWHERE ep.project_id IS NULL;\n```\n\n**🔍 Explanation:**\nMirror of Q5 but for projects. `LEFT JOIN` keeps every employee; when `employee_projects` has no matching row, `ep.project_id` is `NULL`. The `WHERE` clause filters to only those unassigned employees. A quick way to spot resource allocation gaps.\n\n---\n\n### Q9 — Projects with No Employees Assigned\n\n```sql\nSELECT p.project_id,\n       p.project_name\nFROM projects p\nLEFT JOIN employee_projects ep ON p.project_id = ep.project_id\nWHERE ep.project_id IS NULL;\n```\n\n**🔍 Explanation:**\nFlip side of Q8 — now the **project is the \"left\" table**. `LEFT JOIN` ensures all projects appear even without matching entries in `employee_projects`. The `IS NULL` filter isolates projects with zero assigned staff — useful for identifying unmanned or stalled projects.\n\n---\n\n### Q10 — Clients with Total Number of Orders\n\n```sql\nSELECT c.client_name,\n       COUNT(c.client_id) AS total_number_Orders\nFROM clients c\nLEFT JOIN orders_data o ON c.client_id = o.client_id\nGROUP BY c.client_id;\n```\n\n**🔍 Explanation:**\n`LEFT JOIN` ensures **all clients appear** even if they've placed zero orders. `COUNT(c.client_id)` counts the number of rows grouped per client — clients with no orders will show `0` (since `c.client_id` is never NULL, unlike `o.client_id`). A `RIGHT JOIN` or `INNER JOIN` here would silently drop clients with no orders.\n\n> 💡 **Tip:** Use `COUNT(o.order_id)` instead of `COUNT(c.client_id)` if you want to strictly count order records and get `0` for clients with no orders, rather than counting the client row itself.\n\n---\n\n## 🧠 Quick Decision Guide\n\n```\nDo I want only matched rows?          → INNER JOIN\nDo I want all rows from left table?   → LEFT JOIN\nDo I want all rows from right table?  → RIGHT JOIN\nIs the table referencing itself?      → SELF JOIN (alias the table twice)\nDo I want unmatched rows only?        → LEFT JOIN + WHERE right.key IS NULL\n```\n\n---\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "📌 What is a JOIN?",
+        "id": "-what-is-a-join"
+      },
+      {
+        "level": 2,
+        "text": "🗺️ Types of JOINs — Visual Reference",
+        "id": "-types-of-joins-visual-reference"
+      },
+      {
+        "level": 2,
+        "text": "🧱 Database Schema (Context)",
+        "id": "-database-schema-context"
+      },
+      {
+        "level": 2,
+        "text": "📋 Queries",
+        "id": "-queries"
+      },
+      {
+        "level": 3,
+        "text": "Q1 — Employee Name, Bonus Amount & Bonus Date",
+        "id": "q1-employee-name-bonus-amount-bonus-date"
+      },
+      {
+        "level": 3,
+        "text": "Q2 — Employee Name, Project Name & Role",
+        "id": "q2-employee-name-project-name-role"
+      },
+      {
+        "level": 3,
+        "text": "Q3 — Employees with Bonus Greater than ₹10,000",
+        "id": "q3-employees-with-bonus-greater-than-10000"
+      },
+      {
+        "level": 3,
+        "text": "Q4 — Employees On Leave with Their Manager Names",
+        "id": "q4-employees-on-leave-with-their-manager-names"
+      },
+      {
+        "level": 3,
+        "text": "Q5 — Employees Who Never Received a Bonus",
+        "id": "q5-employees-who-never-received-a-bonus"
+      },
+      {
+        "level": 3,
+        "text": "Q6 — All Managers with Their Direct Reports (Including Managers with No Reports)",
+        "id": "q6-all-managers-with-their-direct-reports-including-managers-with-no-reports"
+      },
+      {
+        "level": 3,
+        "text": "Q7 — Employees Working on More Than One Project",
+        "id": "q7-employees-working-on-more-than-one-project"
+      },
+      {
+        "level": 3,
+        "text": "Q8 — Employees Not Assigned to Any Project",
+        "id": "q8-employees-not-assigned-to-any-project"
+      },
+      {
+        "level": 3,
+        "text": "Q9 — Projects with No Employees Assigned",
+        "id": "q9-projects-with-no-employees-assigned"
+      },
+      {
+        "level": 3,
+        "text": "Q10 — Clients with Total Number of Orders",
+        "id": "q10-clients-with-total-number-of-orders"
+      },
+      {
+        "level": 2,
+        "text": "🧠 Quick Decision Guide",
+        "id": "-quick-decision-guide"
+      }
+    ]
+  },
+  "lesson-04-subqueries": {
+    "id": "lesson-04-subqueries",
+    "slug": "04-subqueries",
+    "title": "Subqueries in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-04-subqueries",
+    "order": 4,
+    "content": "# Part 4: Subqueries in MySQL\n\n## What Is a Subquery?\n\nA **subquery** is a query written **inside another query**. The inner query runs first, and its result is passed to the outer query.\n\n```sql\nSELECT * FROM employees\nWHERE salary > (SELECT AVG(salary) FROM employees);\n--              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n--              This inner query runs first\n```\n\n---\n\n## JOIN vs Subquery — When to Use Which?\n\n| Situation | Use |\n|-----------|-----|\n| You want to **combine columns** from multiple tables | `JOIN` |\n| You want the **result of one query** to act as input to another | `Subquery` |\n| You want to check **existence** of a related row | `EXISTS` subquery |\n| You want to filter against a **list of values** from another table | `IN` subquery |\n\n> **Rule of thumb:** If you need data *from* another table in your SELECT columns → use JOIN. If you only need data *from* another table to *filter* your main table → a subquery often reads more naturally.\n\n---\n\n## Types of Subqueries\n\n| Type | Returns | Common Operators |\n|------|---------|-----------------|\n| **Single Row** | Exactly one row, one column | `=`, `>`, `<`, `>=`, `<=` |\n| **Multi Row** | Multiple rows, one column | `IN`, `NOT IN`, `ANY`, `ALL` |\n| **Correlated** | Depends on the outer query (reruns per row) | `=`, `>`, `EXISTS` |\n\n---\n\n## Questions & Solutions\n\n### Q1. Find employees whose salary is greater than the average salary of the company\n\n**Concept:** Single Row Subquery — the inner query returns one value (`AVG`), so we compare with `>`.\n\n```sql\nSELECT *\nFROM employees\nWHERE salary > (\n    SELECT AVG(salary) AS average_salary\n    FROM employees\n);\n```\n\n> **Why subquery here?** You can't use `WHERE salary > AVG(salary)` directly — aggregate functions aren't allowed in `WHERE`. The subquery solves this by computing the average first.\n\n---\n\n### Q2. Find employees earning the highest salary in the company\n\n**Concept:** Single Row Subquery — `MAX()` returns exactly one value.\n\n```sql\nSELECT *\nFROM employees\nWHERE salary = (\n    SELECT MAX(salary) AS highest_salary\n    FROM employees\n);\n```\n\n> **Why not `ORDER BY salary DESC LIMIT 1`?** That returns only one employee. This approach correctly returns *all* employees tied for the highest salary.\n\n---\n\n### Q3. Find employees who work in the same department as 'Aarav Sharma'\n\n**Concept:** Multi Row Subquery with `IN` — used because `Aarav Sharma` could theoretically belong to more than one department (e.g., if there are multiple employees with the same name).\n\n```sql\nSELECT *\nFROM employees\nWHERE department IN (\n    SELECT department\n    FROM employees\n    WHERE employee_name = 'Aarav Sharma'\n);\n```\n\n> **Why `IN` instead of `=`?** If the inner query returns more than one row, `=` will throw an error. `IN` safely handles one or many values.\n\n---\n\n### Q4. Find employees whose salary is greater than all employees in the Support department\n\n**Concept:** Multi Row Subquery with `ALL` — the employee's salary must be greater than *every* salary in the Support department.\n\n```sql\nSELECT *\nFROM employees\nWHERE salary > ALL (\n    SELECT salary\n    FROM employees\n    WHERE department = 'Support'\n);\n```\n\n> **`> ALL` vs `> MAX()`?** They are logically equivalent here. `> ALL(subquery)` is often more readable when the intent is \"beat everyone in this group.\"\n\n---\n\n### Q5. Find employees working in departments where at least one employee is currently on leave\n\n**Concept:** Multi Row Subquery with `IN` — get the list of departments that have at least one person on leave, then find all employees in those departments.\n\n```sql\nSELECT *\nFROM employees\nWHERE department IN (\n    SELECT DISTINCT department\n    FROM employees\n    WHERE employment_status = 'On Leave'\n);\n```\n\n> **Why `DISTINCT`?** Without it, if 5 people in the Sales department are on leave, \"Sales\" appears 5 times in the subquery result. `DISTINCT` keeps the list clean — though `IN` handles duplicates fine, it's good practice for clarity and performance.\n\n---\n\n### Q6. Find employees who have received bonuses\n\n**Concept:** Three valid approaches — choose based on what you need in your output.\n\n**Method 1 — JOIN** *(use when you need bonus details in the output)*\n```sql\nSELECT e.employee_name, b.bonus_amount\nFROM employees e\nINNER JOIN bonuses b ON e.employee_id = b.employee_id;\n```\n\n**Method 2 — IN Subquery** *(use when you only need employee details)*\n```sql\nSELECT *\nFROM employees\nWHERE employee_id IN (\n    SELECT DISTINCT employee_id\n    FROM bonuses\n);\n```\n\n**Method 3 — EXISTS** *(most semantically clear: \"does at least one bonus row exist for this employee?\")*\n```sql\nSELECT *\nFROM employees e\nWHERE EXISTS (\n    SELECT 1\n    FROM bonuses b\n    WHERE b.employee_id = e.employee_id\n);\n```\n\n> **Why `SELECT 1` in EXISTS?** EXISTS only cares whether *any* row is returned — not what columns are in it. Writing `SELECT 1` makes this intent explicit and avoids unnecessary column scanning.\n\n---\n\n### Q7. Find employees who never received any bonus\n\n**Concept:** Two valid approaches using exclusion logic.\n\n**Method 1 — LEFT JOIN with NULL check**\n```sql\nSELECT e.employee_name, b.bonus_id\nFROM employees e\nLEFT JOIN bonuses b ON e.employee_id = b.employee_id\nWHERE b.bonus_id IS NULL;\n```\n\n**Method 2 — NOT EXISTS** *(most readable: \"no bonus row exists for this employee\")*\n```sql\nSELECT *\nFROM employees e\nWHERE NOT EXISTS (\n    SELECT 1\n    FROM bonuses b\n    WHERE b.employee_id = e.employee_id\n);\n```\n\n> **Why prefer `NOT EXISTS` over `NOT IN`?** `NOT IN` behaves unexpectedly when the subquery contains `NULL` values — it returns no rows at all. `NOT EXISTS` handles NULLs safely. **Always prefer `NOT EXISTS` over `NOT IN` for exclusion checks.**\n\n---\n\n### Q8. Find employees whose salary is greater than the average salary of their own department\n\n**Concept:** Correlated Subquery — the inner query references the outer query (`e.department`), so it re-executes *for each row* of the outer query.\n\n```sql\nSELECT *\nFROM employees e\nWHERE salary > (\n    SELECT AVG(salary) AS average_salary\n    FROM employees e1\n    WHERE e1.department = e.department  -- reference to outer query\n);\n```\n\n> **Why is this correlated?** The subquery can't run independently — it depends on `e.department` from the outer row being evaluated. MySQL runs this inner query once per employee row, substituting that employee's department each time.\n>\n> **Performance note:** Correlated subqueries can be slow on large tables since they execute N times (once per row). Consider rewriting with a JOIN + GROUP BY for better performance at scale.\n\n---\n\n### Q9. Find employees who are assigned to at least one project\n\n**Concept:** EXISTS subquery — checks for the *presence* of a matching row in `employee_projects`.\n\n**Method 1 — EXISTS**\n```sql\nSELECT *\nFROM employees e\nWHERE EXISTS (\n    SELECT 1\n    FROM employee_projects ep\n    WHERE ep.employee_id = e.employee_id\n);\n```\n\n**Method 2 — INNER JOIN**\n```sql\nSELECT e.employee_name, ep.project_id\nFROM employees e\nINNER JOIN employee_projects ep ON e.employee_id = ep.employee_id;\n```\n\n> **JOIN vs EXISTS here?** If an employee has 3 projects, JOIN returns 3 rows for that employee. EXISTS returns them only once. Use EXISTS when you just want to know *if* they're assigned, without duplicating rows.\n\n---\n\n### Q10. Find employees who earn more than their manager\n\n**Concept:** Correlated Subquery — for each employee, the subquery looks up *that employee's* manager's salary using `e.manager_id`.\n\n```sql\nSELECT *\nFROM employees e\nWHERE salary > (\n    SELECT m.salary\n    FROM employees m\n    WHERE m.employee_id = e.manager_id\n);\n```\n\n> **Why a self-referencing subquery?** Managers live in the same `employees` table (via `manager_id`). The correlated subquery lets us look up the manager's salary dynamically for each employee row.\n>\n> This can also be written as a self-join: `JOIN employees m ON e.manager_id = m.employee_id WHERE e.salary > m.salary` — both approaches work; the subquery version often reads more naturally.\n\n---\n\n## EXISTS vs IN — Key Differences\n\n| | `IN` | `EXISTS` |\n|--|------|----------|\n| **What it does** | Compares a value against a **list of values** | Checks whether a subquery **returns at least one row** |\n| **How it works** | Runs the subquery once, builds a list, then checks membership | Runs the subquery once per outer row, stops as soon as one match is found |\n| **NULLs** | ⚠️ Dangerous — `NOT IN` with NULLs returns no rows | ✅ Safe — NULLs don't affect the result |\n| **Best for** | Filtering against a **known, small list** | Checking **existence** of a related row |\n| **Performance** | Faster when the subquery result set is small | Faster when the subquery result set is large (short-circuits early) |\n\n```sql\n-- IN: did this employee_id appear in the bonuses table?\nWHERE employee_id IN (SELECT employee_id FROM bonuses)\n\n-- EXISTS: does at least one bonus row exist for this employee?\nWHERE EXISTS (SELECT 1 FROM bonuses b WHERE b.employee_id = e.employee_id)\n```\n\n> **Practical advice:** Use `IN` when your subquery returns a simple list of IDs or values. Use `EXISTS` when you're checking for the *presence* of a related record — especially in correlated scenarios. **Always use `NOT EXISTS` instead of `NOT IN`** to avoid NULL-related bugs.\n\n---\n\n## SQL Execution Order Reference\n\n```\nFROM → WHERE (subquery runs here) → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT\n```\n\nSubqueries in the `WHERE` clause run **before** the outer query filters its rows — this is why they work as dynamic filters.\n\n---\n\n## Quick Reference — Which Subquery Type to Use?\n\n| Scenario | Subquery Type | Operator |\n|----------|--------------|----------|\n| Compare against one computed value (AVG, MAX) | Single Row | `=`, `>`, `<` |\n| Compare against values from another table | Multi Row | `IN`, `NOT IN` |\n| Must beat every value in a group | Multi Row | `ALL` |\n| Must beat at least one value in a group | Multi Row | `ANY` |\n| Check if a related row exists | Correlated | `EXISTS` |\n| Check if no related row exists | Correlated | `NOT EXISTS` |\n| Filter per-row based on the outer query | Correlated | any |\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "What Is a Subquery?",
+        "id": "what-is-a-subquery"
+      },
+      {
+        "level": 2,
+        "text": "JOIN vs Subquery — When to Use Which?",
+        "id": "join-vs-subquery-when-to-use-which"
+      },
+      {
+        "level": 2,
+        "text": "Types of Subqueries",
+        "id": "types-of-subqueries"
+      },
+      {
+        "level": 2,
+        "text": "Questions & Solutions",
+        "id": "questions-solutions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Find employees whose salary is greater than the average salary of the company",
+        "id": "q1-find-employees-whose-salary-is-greater-than-the-average-salary-of-the-company"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Find employees earning the highest salary in the company",
+        "id": "q2-find-employees-earning-the-highest-salary-in-the-company"
+      },
+      {
+        "level": 3,
+        "text": "Q3. Find employees who work in the same department as 'Aarav Sharma'",
+        "id": "q3-find-employees-who-work-in-the-same-department-as-aarav-sharma"
+      },
+      {
+        "level": 3,
+        "text": "Q4. Find employees whose salary is greater than all employees in the Support department",
+        "id": "q4-find-employees-whose-salary-is-greater-than-all-employees-in-the-support-department"
+      },
+      {
+        "level": 3,
+        "text": "Q5. Find employees working in departments where at least one employee is currently on leave",
+        "id": "q5-find-employees-working-in-departments-where-at-least-one-employee-is-currently-on-leave"
+      },
+      {
+        "level": 3,
+        "text": "Q6. Find employees who have received bonuses",
+        "id": "q6-find-employees-who-have-received-bonuses"
+      },
+      {
+        "level": 3,
+        "text": "Q7. Find employees who never received any bonus",
+        "id": "q7-find-employees-who-never-received-any-bonus"
+      },
+      {
+        "level": 3,
+        "text": "Q8. Find employees whose salary is greater than the average salary of their own department",
+        "id": "q8-find-employees-whose-salary-is-greater-than-the-average-salary-of-their-own-department"
+      },
+      {
+        "level": 3,
+        "text": "Q9. Find employees who are assigned to at least one project",
+        "id": "q9-find-employees-who-are-assigned-to-at-least-one-project"
+      },
+      {
+        "level": 3,
+        "text": "Q10. Find employees who earn more than their manager",
+        "id": "q10-find-employees-who-earn-more-than-their-manager"
+      },
+      {
+        "level": 2,
+        "text": "EXISTS vs IN — Key Differences",
+        "id": "exists-vs-in-key-differences"
+      },
+      {
+        "level": 2,
+        "text": "SQL Execution Order Reference",
+        "id": "sql-execution-order-reference"
+      },
+      {
+        "level": 2,
+        "text": "Quick Reference — Which Subquery Type to Use?",
+        "id": "quick-reference-which-subquery-type-to-use"
+      }
+    ]
+  },
+  "lesson-05-window-functions": {
+    "id": "lesson-05-window-functions",
+    "slug": "05-window-functions",
+    "title": "🪟 Part 5: Window Functions in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-05-window-functions",
+    "order": 5,
+    "content": "# 🪟 Part 5: Window Functions in MySQL\n\n> **Master MySQL Window Functions** — ROW_NUMBER, RANK, DENSE_RANK, LAG, LEAD, PARTITION BY and more with real-world practice questions using the `employer_database`.\n\n---\n\n## 📋 Table of Contents\n\n- [What is a Window Function?](#what-is-a-window-function)\n- [When to Use Window Functions](#-when-to-use-window-functions)\n- [Key Concepts](#-key-concepts)\n- [ROW\\_NUMBER vs RANK vs DENSE\\_RANK](#-row_number-vs-rank-vs-dense_rank)\n- [GROUP BY vs PARTITION BY](#-group-by-vs-partition-by)\n- [LAG vs LEAD](#-lag-vs-lead)\n- [Practice Questions & Solutions](#-practice-questions--solutions)\n- [Cheatsheet](#-window-functions-cheatsheet)\n\n---\n\n## What is a Window Function?\n\nA **Window Function** performs a calculation across a set of rows **related to the current row** — without collapsing the result into a single row like `GROUP BY` does.\n\n```sql\n-- Syntax\nfunction_name() OVER (\n    PARTITION BY column    -- optional: divide into groups\n    ORDER BY column        -- optional: define row order\n)\n```\n\n> 💡 **Why \"Window\"?** The function looks through a \"window\" of rows to compute each result. Every row keeps its identity while gaining calculated context from surrounding rows.\n\n---\n\n## ⏰ When to Use Window Functions\n\n| Use Case | Example |\n|---|---|\n| Rank rows within a group | Top earner per department |\n| Compare current row with previous/next row | Salary change vs last employee |\n| Calculate running totals | Cumulative salary by department |\n| Find the Nth highest/lowest value | 2nd highest salary |\n| Display aggregate values alongside each row | Dept total salary next to each employee |\n| Group-wise analysis while keeping all rows | Avg dept salary per employee row |\n| Avoid subqueries for row-level calculations | Running sums, rankings |\n\n---\n\n## 🔑 Key Concepts\n\n### `OVER()` — The Heart of Every Window Function\n\n`OVER()` defines the **window** (set of rows) the function operates on.\n\n```sql\nSELECT *,\n    ROW_NUMBER() OVER(ORDER BY salary DESC) AS row_num\nFROM employees;\n```\n\nWithout `OVER()`, you'd just have an aggregate. With `OVER()`, every row gets its own computed value.\n\n---\n\n### `PARTITION BY` — Divide and Conquer\n\nSplits rows into **independent groups** so the window function restarts for each group.\n\n```sql\nSELECT *,\n    RANK() OVER(PARTITION BY department ORDER BY salary DESC) AS dept_rank\nFROM employees;\n```\n\n> Think of `PARTITION BY` as `GROUP BY` but without collapsing rows.\n\n---\n\n## 📊 ROW_NUMBER vs RANK vs DENSE_RANK\n\nThis is one of the most commonly asked interview topics. Here's the key distinction:\n\n| Function | Handles Ties | Gaps in Ranking? | Use When |\n|---|---|---|---|\n| `ROW_NUMBER()` | Assigns unique numbers even to ties | No gaps | You need strictly unique row labels |\n| `RANK()` | Same rank for ties | **Leaves gaps** | Standard competition ranking (1, 2, 2, 4) |\n| `DENSE_RANK()` | Same rank for ties | **No gaps** | You want sequential ranks despite ties (1, 2, 2, 3) |\n\n### Visual Example\n\nAssume three employees earn 90k, 90k, and 70k:\n\n| Salary | ROW_NUMBER | RANK | DENSE_RANK |\n|---|---|---|---|\n| 90,000 | 1 | 1 | 1 |\n| 90,000 | 2 | 1 | 1 |\n| 70,000 | 3 | 3 | 2 |\n\n> ⚠️ **Interview Tip:** `RANK()` skips rank 2 above. `DENSE_RANK()` does not. When a question asks for the \"Nth highest salary,\" always prefer `DENSE_RANK()` — it handles duplicates correctly.\n\n---\n\n## 🔄 GROUP BY vs PARTITION BY\n\n| Feature | `GROUP BY` | `PARTITION BY` |\n|---|---|---|\n| Output rows | **Collapses** rows into one per group | **Keeps all rows** |\n| Used with | Aggregate functions (`SUM`, `COUNT`, etc.) | Window functions (`RANK`, `LAG`, etc.) |\n| Can display individual row data? | ❌ No | ✅ Yes |\n| Typical use | Summary reports | Row-level analysis with group context |\n\n```sql\n-- GROUP BY: collapses rows — you only get one row per department\nSELECT department\nFROM employees\nGROUP BY department;\n\n-- PARTITION BY: keeps all rows — every employee row is preserved\nSELECT *,\n    RANK() OVER(PARTITION BY department ORDER BY salary DESC) AS ranking\nFROM employees;\n```\n\n> 💡 **Why does this matter?** Use `GROUP BY` when you want a summary. Use `PARTITION BY` when you want each row to carry group-level context (e.g., \"what is this employee's rank within their department?\").\n\n---\n\n## ↔️ LAG vs LEAD\n\nBoth functions let you **peek at other rows** from the current row's perspective — without a self-join.\n\n| Function | Looks At | Returns |\n|---|---|---|\n| `LAG(col)` | The **previous** row | Value from the row before the current one |\n| `LEAD(col)` | The **next** row | Value from the row after the current one |\n\n```sql\nSELECT *,\n    LAG(salary)  OVER(ORDER BY employee_id) AS previous_salary,\n    LEAD(salary) OVER(ORDER BY employee_id) AS next_salary\nFROM employees;\n```\n\n**Sample Output:**\n\n| employee_id | salary | previous_salary | next_salary |\n|---|---|---|---|\n| 1 | 50,000 | NULL | 60,000 |\n| 2 | 60,000 | 50,000 | 45,000 |\n| 3 | 45,000 | 60,000 | NULL |\n\n> 💡 **Why NULL?** The first row has no previous row (`LAG` → NULL). The last row has no next row (`LEAD` → NULL). Always account for NULLs when filtering on these columns.\n\n---\n\n## 💼 Practice Questions & Solutions\n\n### Q1. Assign a unique row number to each employee based on salary\n\n```sql\nSELECT *,\n    ROW_NUMBER() OVER(ORDER BY salary DESC) AS unique_row_number\nFROM employees;\n```\n\n> **Why `ROW_NUMBER()`?** We want a unique label for each row — even if two employees earn the same salary. `ROW_NUMBER()` never repeats a number, making it ideal for pagination or picking exactly one row.\n\n---\n\n### Q2. Rank employees based on salary using `RANK()`\n\n```sql\nSELECT *,\n    RANK() OVER(ORDER BY salary DESC) AS ranking\nFROM employees;\n```\n\n> **Why `RANK()`?** Employees with equal salaries get the same rank, but the next rank skips a number (like 1, 2, 2, 4). This mirrors real-world competition rankings.\n\n---\n\n### Q3. Rank employees based on salary using `DENSE_RANK()`\n\n```sql\nSELECT *,\n    DENSE_RANK() OVER(ORDER BY salary DESC) AS ranking\nFROM employees;\n```\n\n> **Why `DENSE_RANK()`?** Unlike `RANK()`, no numbers are skipped (1, 2, 2, 3). Use this when you want to find the \"Nth highest salary\" — gaps in `RANK()` would make that logic unreliable.\n\n---\n\n### Q4. Compare ROW_NUMBER vs RANK vs DENSE_RANK side by side\n\n```sql\nSELECT *,\n    ROW_NUMBER() OVER(ORDER BY salary DESC) AS row_number_ranking,\n    RANK()       OVER(ORDER BY salary DESC) AS rank_ranking,\n    DENSE_RANK() OVER(ORDER BY salary DESC) AS dense_rank_ranking\nFROM employees;\n```\n\n> **Why all three together?** This is the clearest way to see how they differ when duplicate salaries exist. Run this query on your dataset and observe which column skips numbers — that's `RANK()`.\n\n---\n\n### Q5. Find the employee with the 2nd highest salary\n\n**Approach 1 — Simple `LIMIT` + `OFFSET`** *(works only when there are no duplicates)*\n\n```sql\nSELECT *\nFROM employees\nORDER BY salary DESC\nLIMIT 1 OFFSET 1;\n```\n\n**Approach 2 — `DENSE_RANK()` subquery** *(handles duplicates correctly)*\n\n```sql\nSELECT *\nFROM (\n    SELECT *,\n        DENSE_RANK() OVER(ORDER BY salary DESC) AS ranking\n    FROM employees\n) t\nWHERE ranking = 2;\n```\n\n> **Why prefer Approach 2?** If two employees share the highest salary, `OFFSET 1` would return the second person at that same salary — not the true 2nd highest. `DENSE_RANK()` correctly identifies distinct salary levels, making it the robust production-ready solution.\n\n---\n\n### Q6. Display each employee's rank within their department based on salary\n\n```sql\nSELECT *,\n    RANK() OVER(PARTITION BY department ORDER BY salary DESC) AS ranking\nFROM employees\nWHERE department IS NOT NULL;\n```\n\n> **Why `PARTITION BY department`?** Without it, `RANK()` would rank all employees globally. `PARTITION BY` resets the rank counter for each department — so the highest earner in every department gets rank 1.\n\n---\n\n### Q7. Find the highest-paid employee from each department\n\n**Approach 1 — Subquery**\n\n```sql\nSELECT *\nFROM (\n    SELECT *,\n        DENSE_RANK() OVER(PARTITION BY department ORDER BY salary DESC) AS ranking\n    FROM employees\n    WHERE department IS NOT NULL\n) t\nWHERE ranking = 1;\n```\n\n**Approach 2 — CTE (cleaner & more readable)**\n\n```sql\nWITH ranked AS (\n    SELECT *,\n        DENSE_RANK() OVER(PARTITION BY department ORDER BY salary DESC) AS ranking\n    FROM employees\n    WHERE department IS NOT NULL\n)\nSELECT *\nFROM ranked\nWHERE ranking = 1;\n```\n\n> **Why `DENSE_RANK()` and not `MAX()`?** `MAX()` gives the salary value, but not the full employee row. `DENSE_RANK()` lets you retrieve the entire record. Using `ranking = 1` also handles ties — if two employees share the top salary in a department, both are returned.\n\n---\n\n### Q8. Find employees earning more than the previous employee\n\n```sql\nSELECT *\nFROM (\n    SELECT *,\n        LAG(salary) OVER(ORDER BY employee_id) AS previous_salary\n    FROM employees\n) t\nWHERE salary > previous_salary;\n```\n\n> **Why `LAG()`?** It fetches the salary of the row before the current one (ordered by `employee_id`), all without a self-join. The outer `WHERE` then filters only those who out-earn their predecessor.\n\n---\n\n### Q9. Find employees earning less than the next employee\n\n```sql\nSELECT *\nFROM (\n    SELECT *,\n        LEAD(salary) OVER(ORDER BY employee_id) AS next_salary\n    FROM employees\n) t\nWHERE salary < next_salary;\n```\n\n> **Why `LEAD()`?** It looks at the row *after* the current one. Employees where the next person earns more are identified in the outer `WHERE`. Note: the last employee always returns NULL for `next_salary` and is automatically excluded by the comparison.\n\n---\n\n### Q10. Display the salary difference between each employee and the previous employee\n\n```sql\nSELECT *,\n    salary - LAG(salary) OVER(ORDER BY employee_id) AS salary_difference\nFROM employees;\n```\n\n> **Why subtract `LAG()`?** This creates a derived column showing how much each employee's salary has changed relative to the one before them. Positive = higher than previous; negative = lower; NULL = first employee (no previous row exists).\n\n---\n\n### Q11. LAG vs LEAD — side-by-side comparison\n\n```sql\nSELECT *,\n    LAG(salary)  OVER(ORDER BY employee_id) AS previous_salary,\n    LEAD(salary) OVER(ORDER BY employee_id) AS next_salary\nFROM employees;\n```\n\n> **Why show both together?** Running this query makes the difference immediately clear: `LAG` shifts values down (previous row's salary appears on the current row), while `LEAD` shifts values up (next row's salary appears on the current row). The first row has NULL for `LAG`; the last row has NULL for `LEAD`.\n\n---\n\n### Q12. GROUP BY vs PARTITION BY — side-by-side comparison\n\n```sql\n-- GROUP BY: collapses all rows — result has one row per department\nSELECT department\nFROM employees\nGROUP BY department;\n\n-- PARTITION BY: keeps all rows — every employee appears with their dept rank\nSELECT *,\n    RANK() OVER(PARTITION BY department ORDER BY salary DESC) AS ranking\nFROM employees;\n```\n\n> **Key insight:** `GROUP BY` answers \"what are the departments?\" (summary). `PARTITION BY` answers \"what is each employee's rank within their department?\" (row-level + group context). You cannot get both an individual employee row and a group summary in the same `GROUP BY` query — but `PARTITION BY` handles this effortlessly.\n\n---\n\n### Q13. Find departments where multiple employees share the same salary rank\n\n```sql\nWITH ranked AS (\n    SELECT *,\n        RANK() OVER(PARTITION BY department ORDER BY salary) AS ranking\n    FROM employees\n    WHERE department IS NOT NULL\n)\nSELECT department, ranking, COUNT(*) AS total_employee\nFROM ranked\nGROUP BY department, ranking\nHAVING COUNT(*) > 1;\n```\n\n> **Why combine window functions with `GROUP BY`?** First, `RANK()` assigns ranks within each department (window function layer). Then, `GROUP BY` + `HAVING` finds which department-rank combinations have more than one employee (aggregation layer). This two-step pattern — window first, then aggregate — is a powerful and commonly tested interview technique.\n\n---\n\n### Q14. Display each employee along with the total salary expense of their department\n\n```sql\nSELECT *,\n    SUM(salary) OVER(PARTITION BY department) AS total_salary_expense\nFROM employees;\n```\n\n> **Why not `GROUP BY`?** A `GROUP BY` with `SUM()` would collapse rows — you'd lose individual employee data. Here, every employee row is preserved while also showing what their entire department costs. This is the classic \"aggregate alongside detail\" use case for window functions.\n\n---\n\n### Q15. Display a running total of salaries within each department\n\n```sql\nSELECT *,\n    SUM(salary) OVER(PARTITION BY department ORDER BY employee_id) AS running_total\nFROM employees;\n```\n\n> **Why add `ORDER BY` inside `OVER()`?** When you add `ORDER BY` to a `SUM()` window function, MySQL computes a **cumulative sum** — adding each row's salary to all previous rows within that partition. Without `ORDER BY`, you'd get the total for the entire partition on every row (as in Q14). The `ORDER BY` is what makes it a \"running\" total.\n\n---\n\n### Q16. Find employees earning more than the average salary of their department\n\n```sql\nSELECT *\nFROM (\n    SELECT *,\n        AVG(salary) OVER(PARTITION BY department) AS average_salary\n    FROM employees\n) t\nWHERE salary > average_salary;\n```\n\n> **Why not a correlated subquery?** A correlated subquery would compute the avg for every row — expensive on large tables. `AVG() OVER(PARTITION BY department)` computes it once per partition and attaches it to every row efficiently. The outer `WHERE` then filters high earners cleanly.\n\n---\n\n## 📌 Window Functions Cheatsheet\n\n```sql\n-- ROW_NUMBER: unique sequential number (no ties)\nROW_NUMBER() OVER(ORDER BY salary DESC)\n\n-- RANK: same rank for ties, gaps after ties\nRANK() OVER(ORDER BY salary DESC)\n\n-- DENSE_RANK: same rank for ties, NO gaps\nDENSE_RANK() OVER(ORDER BY salary DESC)\n\n-- LAG: value from the PREVIOUS row\nLAG(salary) OVER(ORDER BY employee_id)\n\n-- LEAD: value from the NEXT row\nLEAD(salary) OVER(ORDER BY employee_id)\n\n-- SUM as running total (ORDER BY creates cumulative)\nSUM(salary) OVER(PARTITION BY department ORDER BY employee_id)\n\n-- SUM as partition total (no ORDER BY = full group total)\nSUM(salary) OVER(PARTITION BY department)\n\n-- AVG per partition (group average on every row)\nAVG(salary) OVER(PARTITION BY department)\n```\n\n### Quick Decision Guide\n\n```\nNeed unique row labels?                  → ROW_NUMBER()\nNeed ranks with gaps for ties?           → RANK()\nNeed ranks without gaps for ties?        → DENSE_RANK()\nNeed Nth highest/lowest value?           → DENSE_RANK() + WHERE ranking = N\nNeed previous row's value?               → LAG()\nNeed next row's value?                   → LEAD()\nNeed running total?                      → SUM() OVER(ORDER BY ...)\nNeed group total per row?                → SUM() OVER(PARTITION BY ...)\nNeed group avg per row?                  → AVG() OVER(PARTITION BY ...)\nNeed rank within a group?                → RANK/DENSE_RANK() OVER(PARTITION BY ...)\n```\n\n---\n\n## 🗂️ Dataset Reference\n\nAll queries in this series use the `employer_database` with the `employees` table as the core entity.\n\n```sql\nUSE employer_database;\n```\n\n| Column | Type | Notes |\n|---|---|---|\n| `employee_id` | INT | Primary key, sequential 1–52 |\n| `first_name` | VARCHAR | — |\n| `last_name` | VARCHAR | — |\n| `department` | VARCHAR | Plain text, nullable |\n| `salary` | DECIMAL | Used in all window function examples |\n| `manager_id` | INT | Self-referencing FK |\n\n---\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "📋 Table of Contents",
+        "id": "-table-of-contents"
+      },
+      {
+        "level": 2,
+        "text": "What is a Window Function?",
+        "id": "what-is-a-window-function"
+      },
+      {
+        "level": 2,
+        "text": "⏰ When to Use Window Functions",
+        "id": "-when-to-use-window-functions"
+      },
+      {
+        "level": 2,
+        "text": "🔑 Key Concepts",
+        "id": "-key-concepts"
+      },
+      {
+        "level": 3,
+        "text": "OVER() — The Heart of Every Window Function",
+        "id": "over-the-heart-of-every-window-function"
+      },
+      {
+        "level": 3,
+        "text": "PARTITION BY — Divide and Conquer",
+        "id": "partition-by-divide-and-conquer"
+      },
+      {
+        "level": 2,
+        "text": "📊 ROWNUMBER vs RANK vs DENSERANK",
+        "id": "-rownumber-vs-rank-vs-denserank"
+      },
+      {
+        "level": 3,
+        "text": "Visual Example",
+        "id": "visual-example"
+      },
+      {
+        "level": 2,
+        "text": "🔄 GROUP BY vs PARTITION BY",
+        "id": "-group-by-vs-partition-by"
+      },
+      {
+        "level": 2,
+        "text": "↔️ LAG vs LEAD",
+        "id": "-lag-vs-lead"
+      },
+      {
+        "level": 2,
+        "text": "💼 Practice Questions & Solutions",
+        "id": "-practice-questions-solutions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Assign a unique row number to each employee based on salary",
+        "id": "q1-assign-a-unique-row-number-to-each-employee-based-on-salary"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Rank employees based on salary using RANK()",
+        "id": "q2-rank-employees-based-on-salary-using-rank"
+      },
+      {
+        "level": 3,
+        "text": "Q3. Rank employees based on salary using DENSERANK()",
+        "id": "q3-rank-employees-based-on-salary-using-denserank"
+      },
+      {
+        "level": 3,
+        "text": "Q4. Compare ROWNUMBER vs RANK vs DENSERANK side by side",
+        "id": "q4-compare-rownumber-vs-rank-vs-denserank-side-by-side"
+      },
+      {
+        "level": 3,
+        "text": "Q5. Find the employee with the 2nd highest salary",
+        "id": "q5-find-the-employee-with-the-2nd-highest-salary"
+      },
+      {
+        "level": 3,
+        "text": "Q6. Display each employee's rank within their department based on salary",
+        "id": "q6-display-each-employees-rank-within-their-department-based-on-salary"
+      },
+      {
+        "level": 3,
+        "text": "Q7. Find the highest-paid employee from each department",
+        "id": "q7-find-the-highest-paid-employee-from-each-department"
+      },
+      {
+        "level": 3,
+        "text": "Q8. Find employees earning more than the previous employee",
+        "id": "q8-find-employees-earning-more-than-the-previous-employee"
+      },
+      {
+        "level": 3,
+        "text": "Q9. Find employees earning less than the next employee",
+        "id": "q9-find-employees-earning-less-than-the-next-employee"
+      },
+      {
+        "level": 3,
+        "text": "Q10. Display the salary difference between each employee and the previous employee",
+        "id": "q10-display-the-salary-difference-between-each-employee-and-the-previous-employee"
+      },
+      {
+        "level": 3,
+        "text": "Q11. LAG vs LEAD — side-by-side comparison",
+        "id": "q11-lag-vs-lead-side-by-side-comparison"
+      },
+      {
+        "level": 3,
+        "text": "Q12. GROUP BY vs PARTITION BY — side-by-side comparison",
+        "id": "q12-group-by-vs-partition-by-side-by-side-comparison"
+      },
+      {
+        "level": 3,
+        "text": "Q13. Find departments where multiple employees share the same salary rank",
+        "id": "q13-find-departments-where-multiple-employees-share-the-same-salary-rank"
+      },
+      {
+        "level": 3,
+        "text": "Q14. Display each employee along with the total salary expense of their department",
+        "id": "q14-display-each-employee-along-with-the-total-salary-expense-of-their-department"
+      },
+      {
+        "level": 3,
+        "text": "Q15. Display a running total of salaries within each department",
+        "id": "q15-display-a-running-total-of-salaries-within-each-department"
+      },
+      {
+        "level": 3,
+        "text": "Q16. Find employees earning more than the average salary of their department",
+        "id": "q16-find-employees-earning-more-than-the-average-salary-of-their-department"
+      },
+      {
+        "level": 2,
+        "text": "📌 Window Functions Cheatsheet",
+        "id": "-window-functions-cheatsheet"
+      },
+      {
+        "level": 3,
+        "text": "Quick Decision Guide",
+        "id": "quick-decision-guide"
+      },
+      {
+        "level": 2,
+        "text": "🗂️ Dataset Reference",
+        "id": "-dataset-reference"
+      }
+    ]
+  },
+  "lesson-06-common-table-expressions": {
+    "id": "lesson-06-common-table-expressions",
+    "slug": "06-common-table-expressions",
+    "title": "Common Table Expressions (CTEs) in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-06-common-table-expressions",
+    "order": 6,
+    "content": "# Part 6: Common Table Expressions (CTEs) in MySQL\n\nA **CTE (Common Table Expression)** is a temporary, named result set that exists only for the duration of a single query. Think of it as giving a subquery a name and a \"scratchpad\" — you write it once at the top, then reference it like a regular table in the rest of your query.\n\nCTEs don't make a query do anything fundamentally different from a subquery — they make it **easier for a human to read, debug, and reuse**.\n\n---\n\n## Syntax\n\n```sql\nWITH cte_name AS (\n    SELECT ...\n)\nSELECT *\nFROM cte_name;\n```\n\nYou define the CTE with `WITH ... AS (...)`, then immediately use it in the `SELECT` that follows — almost like declaring a variable before using it.\n\n---\n\n## CTE vs Subquery — Same Logic, Different Readability\n\nBoth queries below return the **exact same result**: employees whose salary increased compared to the previous employee (ordered by `employee_id`).\n\n**Subquery version:**\n```sql\nSELECT *\nFROM (\n    SELECT *, LAG(salary) OVER (ORDER BY employee_id) AS previous_salary\n    FROM employees\n) t\nWHERE salary > previous_salary;\n```\n\n**CTE version:**\n```sql\nWITH previous_employee_salary AS (\n    SELECT *, LAG(salary) OVER (ORDER BY employee_id) AS previous_salary\n    FROM employees\n)\nSELECT *\nFROM previous_employee_salary\nWHERE salary > previous_salary;\n```\n\n> 💡 **Teaching Tip:** Notice the subquery is nested *inside* the `FROM` clause, forcing you to read inside-out. The CTE pulls that same logic *above* the main query and gives it a name (`previous_employee_salary`), so you read it top-to-bottom like a story: \"first calculate this, then filter on it.\" As queries grow more complex, this difference in readability becomes huge.\n\n**Rule of thumb:**\n- **Subquery** → better for simple, one-off queries.\n- **CTE** → better for complex queries because it improves readability and reusability.\n\n---\n\n## Practice Questions\n\n### Q1. Using a CTE, find departments having more than 5 employees.\n\n**Without CTE (plain GROUP BY + HAVING):**\n```sql\nSELECT department, COUNT(*) AS total_employee\nFROM employees\nGROUP BY department\nHAVING COUNT(*) > 5;\n```\n\n**With CTE:**\n```sql\nWITH department_count AS (\n    SELECT department, COUNT(*) AS total_employee\n    FROM employees\n    GROUP BY department\n)\nSELECT *\nFROM department_count\nWHERE total_employee > 5;\n```\n\n> 💡 **Teaching Tip:** You might wonder — why use a CTE here when `HAVING` already does the job in one step? Because `HAVING` filters at *aggregation time*, while wrapping it in a CTE lets you treat `total_employee` as a regular column afterward — for further joins, additional filters, or reuse later in the same query. For this simple case `HAVING` alone is perfectly fine; the CTE version exists to demonstrate the pattern you'll need once queries get more layered (see Q2 onward).\n\n---\n\n### Q2. Using Multiple CTEs, find departments whose average salary is greater than the company average salary.\n\n```sql\nWITH department_average AS (\n    SELECT department, AVG(salary) AS average_salary\n    FROM employees\n    WHERE department IS NOT NULL\n    GROUP BY department\n),\ncompany_average AS (\n    SELECT AVG(salary) AS average_salary\n    FROM employees\n)\nSELECT d.*, c.*\nFROM department_average d\nCROSS JOIN company_average c\nWHERE d.average_salary > c.average_salary;\n```\n\n> 💡 **Teaching Tip:** This is where CTEs really start to shine. We need **two separate aggregations** — one grouped by department, one across the whole company — and then we need to compare them side by side. Doing this with nested subqueries would mean writing the company-average calculation inline and repeating it; with CTEs, each calculation gets its own clear name (`department_average`, `company_average`) and we simply `CROSS JOIN` them together. A `CROSS JOIN` is safe and correct here specifically because `company_average` returns exactly **one row** — every department row gets paired with that single company-wide number.\n\n---\n\n### Q3. Using a CTE, find employees who have received more than one bonus.\n\n**First pass (filter after the join):**\n```sql\nWITH employee_bonus AS (\n    SELECT employee_id, COUNT(*) AS total_bonus_received\n    FROM bonuses\n    GROUP BY employee_id\n)\nSELECT e.employee_name, b.total_bonus_received\nFROM employees e\nINNER JOIN employee_bonus b\n    ON e.employee_id = b.employee_id\nWHERE total_bonus_received > 1;\n```\n\n**Better version (filter inside the CTE):**\n```sql\nWITH employee_bonus AS (\n    SELECT employee_id, COUNT(*) AS total_bonus_received\n    FROM bonuses\n    GROUP BY employee_id\n    HAVING COUNT(*) > 1\n)\nSELECT e.employee_name, b.total_bonus_received\nFROM employees e\nINNER JOIN employee_bonus b\n    ON e.employee_id = b.employee_id;\n```\n\n> 💡 **Teaching Tip:** Both versions return the same result, but the second is the better habit to build. Filtering with `HAVING COUNT(*) > 1` *inside* the CTE means MySQL only joins employees who already qualify — the CTE itself is smaller before it ever touches the `employees` table. Filtering with `WHERE total_bonus_received > 1` *after* the join means every employee with at least one bonus gets joined first, and the unwanted rows are discarded afterward. As a general principle: **filter as early as possible** in your CTE so later steps work with the smallest, most relevant data set.\n\n---\n\n### Q4. Using a CTE, find the top 2 highest-paid employees from each department.\n\n**Subquery version:**\n```sql\nSELECT *\nFROM (\n    SELECT *, RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS ranking\n    FROM employees\n    WHERE department IS NOT NULL\n) t\nWHERE ranking <= 2;\n```\n\n**CTE version:**\n```sql\nWITH ranked AS (\n    SELECT *, RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS ranking\n    FROM employees\n    WHERE department IS NOT NULL\n)\nSELECT *\nFROM ranked\nWHERE ranking <= 2;\n```\n\n> 💡 **Teaching Tip:** This is the single most common reason CTEs and window functions are taught together: **you can't filter directly on a window function's output in the same `SELECT` it's defined in** (you can't write `WHERE ranking <= 2` next to `RANK() OVER (...)` — MySQL evaluates `WHERE` before window functions are calculated). Wrapping the window function in a CTE (or subquery) solves this by calculating the ranking first, then filtering on it as a regular column in the outer query.\n\n---\n\n### Q5. Using Multiple CTEs, find employees whose salary is greater than the average salary of their department, and display their department rank.\n\n```sql\nWITH department_average AS (\n    SELECT *, AVG(salary) OVER (PARTITION BY department) AS average_salary\n    FROM employees\n    WHERE department IS NOT NULL\n),\ndepartment_ranking AS (\n    SELECT *, RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS ranking\n    FROM department_average\n)\nSELECT *\nFROM department_ranking\nWHERE salary > average_salary;\n```\n\n> 💡 **Teaching Tip:** This is **chained CTEs** — each CTE builds on the one before it. `department_average` adds an `average_salary` column using a window function (note: `AVG(...) OVER (PARTITION BY department)` keeps every row instead of collapsing rows like `GROUP BY` would). `department_ranking` then takes that *already-enriched* result and adds a `ranking` column on top of it. By the time we reach the final `SELECT`, both `average_salary` and `ranking` already exist as plain columns, so the final filter is a simple, readable comparison. This step-by-step layering — each CTE adding one clear piece of logic — is exactly why CTEs are preferred for complex, multi-stage queries.\n\n---\n\n## CTE vs Subquery — Quick Reference\n\n| CTE                                  | Subquery                          |\n|---------------------------------------|------------------------------------|\n| More readable                         | Can become difficult to read       |\n| Reusable within the query             | Not easily reusable                |\n| Better for complex queries            | Better for simple queries          |\n| Commonly used with Window Functions   | Mostly used for simple filtering   |\n\n---\n\n## When to Use a CTE\n\n1. **To simplify complex queries** — break a tangled nested subquery into a clear, named step.\n2. **To improve query readability** — read top-to-bottom instead of inside-out.\n3. **To break a query into smaller steps** — each CTE handles one piece of logic.\n4. **To reuse intermediate results** — reference the same CTE more than once in the outer query.\n5. **To work with Window Functions more efficiently** — calculate the window function in a CTE, then filter/aggregate on it afterward (since you can't filter on a window function directly in the same `SELECT`).\n\n---\n\n## Cheatsheet\n\n```sql\n-- Single CTE\nWITH cte_name AS (\n    SELECT column1, column2\n    FROM table_name\n    WHERE condition\n)\nSELECT *\nFROM cte_name;\n\n-- Multiple CTEs (comma-separated)\nWITH cte_one AS (\n    SELECT ...\n),\ncte_two AS (\n    SELECT ...\n)\nSELECT *\nFROM cte_one\nJOIN cte_two ON ...;\n\n-- Chained CTEs (each builds on the previous one)\nWITH step_one AS (\n    SELECT ...\n),\nstep_two AS (\n    SELECT * FROM step_one ...\n)\nSELECT * FROM step_two;\n```\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "Syntax",
+        "id": "syntax"
+      },
+      {
+        "level": 2,
+        "text": "CTE vs Subquery — Same Logic, Different Readability",
+        "id": "cte-vs-subquery-same-logic-different-readability"
+      },
+      {
+        "level": 2,
+        "text": "Practice Questions",
+        "id": "practice-questions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Using a CTE, find departments having more than 5 employees.",
+        "id": "q1-using-a-cte-find-departments-having-more-than-5-employees"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Using Multiple CTEs, find departments whose average salary is greater than the company average salary.",
+        "id": "q2-using-multiple-ctes-find-departments-whose-average-salary-is-greater-than-the-company-average-salary"
+      },
+      {
+        "level": 3,
+        "text": "Q3. Using a CTE, find employees who have received more than one bonus.",
+        "id": "q3-using-a-cte-find-employees-who-have-received-more-than-one-bonus"
+      },
+      {
+        "level": 3,
+        "text": "Q4. Using a CTE, find the top 2 highest-paid employees from each department.",
+        "id": "q4-using-a-cte-find-the-top-2-highest-paid-employees-from-each-department"
+      },
+      {
+        "level": 3,
+        "text": "Q5. Using Multiple CTEs, find employees whose salary is greater than the average salary of their department, and display their department rank.",
+        "id": "q5-using-multiple-ctes-find-employees-whose-salary-is-greater-than-the-average-salary-of-their-department-and-display-their-department-rank"
+      },
+      {
+        "level": 2,
+        "text": "CTE vs Subquery — Quick Reference",
+        "id": "cte-vs-subquery-quick-reference"
+      },
+      {
+        "level": 2,
+        "text": "When to Use a CTE",
+        "id": "when-to-use-a-cte"
+      },
+      {
+        "level": 2,
+        "text": "Cheatsheet",
+        "id": "cheatsheet"
+      }
+    ]
+  },
+  "lesson-07-string-date-and-case-functions": {
+    "id": "lesson-07-string-date-and-case-functions",
+    "slug": "07-string-date-and-case-functions",
+    "title": "String + Date + CASE Functions in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-07-string-date-and-case-functions",
+    "order": 7,
+    "content": "# Part 7: String + Date + CASE Functions in MySQL\n\nWelcome to **Part 7** of the MySQL Course! In this section, we move from *filtering and aggregating* data to *transforming and presenting* it — using **String Functions**, **Date Functions**, and the **CASE Statement**.\n\nBy the end of this part, you'll be able to:\n- Clean, format, and extract pieces of text data\n- Perform date math (differences, formatting, extracting parts)\n- Build conditional logic directly inside your SQL queries\n\nWe'll continue using our shared `employer_database` dataset (`employees`, `bonuses`, `projects`).\n\n---\n\n## Table of Contents\n- [1. String Functions](#1-string-functions)\n- [2. Date Functions](#2-date-functions)\n- [3. CASE Statement](#3-case-statement)\n- [4. Practice Questions](#4-practice-questions)\n- [5. Cheatsheet](#5-cheatsheet)\n\n---\n\n## 1. String Functions\n\nString functions let you **manipulate and format text data** — cleaning up messy inputs, extracting parts of a string, or combining multiple columns into one readable output.\n\n### 1.1 `UPPER()` / `LOWER()`\nConverts text to all uppercase or all lowercase.\n\n```sql\nSELECT UPPER(employee_name), LOWER(employee_name)\nFROM employees;\n```\n\n> **Why?**\n> Case-insensitive comparisons and clean display formatting both rely on this. For example, `WHERE UPPER(city) = 'MUMBAI'` guards against a user typing `mumbai`, `Mumbai`, or `MUMBAI` — they'll all match.\n\n### 1.2 `LENGTH()`\nReturns the number of **characters** (technically bytes) in a string.\n\n```sql\nSELECT employee_name, LENGTH(employee_name) AS name_length\nFROM employees;\n```\n\n> **Why?**\n> Useful for validation — e.g., flagging names that are suspiciously short, or checking if a phone number has the expected number of digits.\n\n### 1.3 `CONCAT()`\nJoins two or more strings into one.\n\n```sql\nSELECT CONCAT(employee_name, ' works in ', city) AS summary\nFROM employees;\n```\n\n> **Why?**\n> Raw tables store data in separate columns for good reason (normalization), but humans read *sentences*, not columns. `CONCAT()` is how you turn structured data back into a readable message — for reports, emails, or labels.\n\n### 1.4 `SUBSTRING()`\nExtracts a portion of a string, given a starting position and length.\n\n```sql\nSUBSTRING(string, start_position, length)\n\nSELECT SUBSTRING('MySQL Course', 1, 5); -- 'MySQL'\n```\n\n> **Why?**\n> Position-based extraction is essential when data follows a fixed pattern — like pulling the first 4 digits of a product code, or the area code from a phone number.\n\n### 1.5 `LEFT()` / `RIGHT()`\nGrabs a fixed number of characters from the **start** or **end** of a string.\n\n```sql\nSELECT LEFT('Raj Sharma', 3);  -- 'Raj'\nSELECT RIGHT('Raj Sharma', 6); -- 'Sharma'\n```\n\n> **Why?**\n> `LEFT()`/`RIGHT()` are simpler versions of `SUBSTRING()` for the common case of \"just give me the first/last N characters\" — no need to specify a starting position.\n\n### 1.6 `REPLACE()`\nFinds and replaces all occurrences of a substring.\n\n```sql\nSELECT REPLACE('raj.sharma@oldcompany.com', 'oldcompany', 'newcompany');\n```\n\n> **Why?**\n> Extremely common in data cleaning — fixing typos across a column, standardizing formats (e.g., replacing `-` with `/` in dates stored as text), or masking sensitive substrings.\n\n### 1.7 `TRIM()`\nRemoves leading and trailing spaces (whitespace) from a string.\n\n```sql\nSELECT TRIM('   Raj Sharma   ');  -- 'Raj Sharma'\n```\n\n> **Why?**\n> Data entered manually (via forms, spreadsheets, imports) often has stray spaces. Untrimmed strings silently break comparisons — `' Raj' = 'Raj'` is `FALSE` in SQL, even though they look identical to the human eye.\n\n### 1.8 `SUBSTRING_INDEX()`\nExtracts a portion of a string **before or after** a specified occurrence of a delimiter.\n\n```sql\nSUBSTRING_INDEX(string, delimiter, occurrence)\n\nSELECT SUBSTRING_INDEX('raj.sharma@company.com', '@', 1); -- 'raj.sharma'\nSELECT SUBSTRING_INDEX('raj.sharma@company.com', '@', -1); -- 'company.com'\n```\n\n> **Why?**\n> This is the go-to function for splitting delimited data (emails, full names, file paths) **without regex**. A **positive** occurrence counts from the left; a **negative** occurrence counts from the right. This distinction matters a lot — `1` gives you everything *before* the first delimiter, while `-1` gives you everything *after* the last one.\n\n---\n\n## 2. Date Functions\n\nDate functions let you **calculate durations, extract parts of a date, and reformat how dates are displayed.**\n\n### 2.1 `CURDATE()`\nReturns today's date.\n\n```sql\nSELECT CURDATE();\n```\n\n> **Why?**\n> Almost every \"how recent\" or \"how old\" calculation starts by anchoring to today's date. It's the reference point for relative queries like \"employees who joined this year.\"\n\n### 2.2 `DATEDIFF()`\nReturns the difference between two dates **in days**.\n\n```sql\nSELECT DATEDIFF(CURDATE(), hire_date) AS days_employed\nFROM employees;\n```\n\n> **Why?**\n> `DATEDIFF()` always returns days — it doesn't know about months or years. If you need the difference in a different unit (months, years, hours), you need `TIMESTAMPDIFF()` instead (see below).\n\n### 2.3 `DATE_FORMAT()`\nFormats a date into a custom, human-readable string.\n\n```sql\nSELECT DATE_FORMAT(hire_date, '%d-%b-%Y') AS formatted_date\nFROM employees;\n```\n\n**Common format specifiers:**\n\n| Specifier | Meaning              | Example |\n|-----------|----------------------|---------|\n| `%d`      | Day (01–31)          | 07      |\n| `%m`      | Month number (01–12) | 03      |\n| `%b`      | Short month name     | Jan     |\n| `%M`      | Full month name      | January |\n| `%Y`      | 4-digit year         | 2025    |\n| `%y`      | 2-digit year         | 25      |\n\n> **Why?**\n> Dates are stored internally in a fixed `YYYY-MM-DD` format for consistency and correct sorting — but that's rarely the format you want to *display* to a user. `DATE_FORMAT()` separates \"how it's stored\" from \"how it's shown.\"\n\n### 2.4 `YEAR()` / `MONTH()` / `MONTHNAME()` / `DAYNAME()`\nExtracts individual parts of a date.\n\n```sql\nSELECT\n    YEAR(hire_date)      AS hire_year,\n    MONTH(hire_date)     AS hire_month_number,\n    MONTHNAME(hire_date) AS hire_month_name,\n    DAYNAME(hire_date)   AS hire_day_name\nFROM employees;\n```\n\n> **Why?**\n> These are essential for **grouping and trend analysis** — e.g., \"how many employees joined each month\" (`GROUP BY MONTHNAME(hire_date)`), or checking if a business event happened on a weekend (`DAYNAME(order_date) IN ('Saturday','Sunday')`).\n\n### 2.5 `TIMESTAMPDIFF()`\nReturns the difference between two dates in a **unit you specify** — days, months, or years.\n\n```sql\nTIMESTAMPDIFF(unit, start_date, end_date)\n\nSELECT TIMESTAMPDIFF(YEAR, hire_date, CURDATE()) AS years_employed\nFROM employees;\n```\n\n> **Why?**\n> Unlike `DATEDIFF()`, which is locked to days, `TIMESTAMPDIFF()` calculates *calendar-aware* differences. `TIMESTAMPDIFF(YEAR, ...)` correctly accounts for whether the person has actually completed a full year, not just divided the day-count by 365 — this matters for accuracy in tenure or age calculations.\n\n### 2.6 `DATE_SUB()`\nSubtracts a specified time interval from a date.\n\n```sql\nSELECT DATE_SUB(CURDATE(), INTERVAL 30 DAY);\n```\n\n> **Why?**\n> `DATE_SUB()` and the shorthand `CURDATE() - INTERVAL 30 DAY` do the same thing — both are valid. `DATE_SUB()` reads more explicitly for beginners, while the shorthand is more common in real-world queries once you're comfortable.\n\n---\n\n## 3. CASE Statement\n\nThe `CASE` statement lets you build **conditional logic directly inside SQL** — similar to `if / else if / else` in programming languages.\n\n### Syntax\n\n```sql\nCASE\n    WHEN condition1 THEN result1\n    WHEN condition2 THEN result2\n    WHEN condition3 THEN result3\n    ELSE default_result\nEND\n```\n\n> **Why?**\n> Without `CASE`, you'd have to pull raw data into your application code and apply the logic there. `CASE` lets you **categorize, label, or transform** data at the database level — which is faster, keeps logic close to the data, and means every application reading from that query sees consistent categorization.\n\n**Key rules:**\n- Conditions are checked **top to bottom**, and the **first match wins** — later conditions are never checked once one is true.\n- `ELSE` is optional. If omitted and no condition matches, the result is `NULL`.\n- `CASE` can be used **anywhere an expression is allowed** — in `SELECT`, `WHERE`, `ORDER BY`, and even inside `SUM()`/`COUNT()`.\n\n---\n\n## 4. Practice Questions\n\nAll queries use the `employer_database` (`employees`, `bonuses`, `projects` tables).\n\n### Q1. Display employee name in uppercase along with the length of the employee name.\n\n```sql\nSELECT\n    UPPER(employee_name) AS employee_name,\n    LENGTH(employee_name) AS employee_length\nFROM employees;\n```\n\n---\n\n### Q2. Display employee details in the format: `Raj Sharma (raj.sharma@company.com) - Mumbai`\n\n```sql\nSELECT\n    CONCAT(employee_name, ' (', email, ') ', '- ', city) AS employee_name_format\nFROM employees;\n```\n\n---\n\n### Q3. Extract the username from employee email addresses.\n\n```sql\nSELECT\n    SUBSTRING_INDEX(email, '@', 1) AS userName,\n    email\nFROM employees;\n```\n\n> **Why?**\n> Occurrence `1` grabs everything to the *left* of the first `@` — the username portion.\n\n---\n\n### Q4. Find employees whose email domain is `gmail.com`.\n\n```sql\n-- Approach 1: Pattern matching\nSELECT * FROM employees\nWHERE email LIKE '%gmail.com';\n\n-- Approach 2: Exact domain extraction\nSELECT * FROM employees\nWHERE SUBSTRING_INDEX(email, '@', -1) = 'gmail.com';\n```\n\n> **Why two approaches?**\n> `LIKE '%gmail.com'` is quick to write but can false-positive on something like `notgmail.com` if data is messy. `SUBSTRING_INDEX(email, '@', -1)` isolates the **exact domain** after the `@`, so the comparison is precise. Prefer the second approach when accuracy matters more than brevity.\n\n---\n\n### Q5. Display employee initials. e.g., `Raj Sharma → RS`, `Priya Mehta → PM`\n\n```sql\nSELECT\n    CONCAT(\n        LEFT(TRIM(employee_name), 1),\n        LEFT(SUBSTRING_INDEX(TRIM(employee_name), ' ', -1), 1)\n    ) AS employee_initials\nFROM employees;\n```\n\n> **Why?**\n> This combines three functions, each solving one part of the problem:\n> - `TRIM()` — guards against stray leading/trailing spaces breaking the logic.\n> - `LEFT(..., 1)` — grabs the first letter of the *first* name.\n> - `SUBSTRING_INDEX(..., ' ', -1)` — isolates the *last* word (last name) by splitting on space and taking everything after the final space, then `LEFT(..., 1)` grabs its first letter.\n>\n> Breaking it down step-by-step (as shown in the original notes) is a great way to build and debug this kind of nested logic before combining it into one query.\n\n---\n\n### Q6. Find employees who joined in the last 30 days.\n\n```sql\n-- Approach 1: Shorthand interval subtraction\nSELECT * FROM employees\nWHERE hire_date >= CURDATE() - INTERVAL 30 DAY;\n\n-- Approach 2: Explicit DATE_SUB()\nSELECT * FROM employees\nWHERE hire_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY);\n```\n\n> **Why?**\n> Both compute the same cutoff date (today minus 30 days) and compare `hire_date` against it. Use whichever reads more clearly to you — many developers default to the shorthand once comfortable.\n\n---\n\n### Q7. Find employees who have completed more than 5 years in the company.\n\n```sql\nSELECT * FROM employees\nWHERE TIMESTAMPDIFF(YEAR, hire_date, CURDATE()) > 5;\n```\n\n---\n\n### Q8. Display employee name, joining year, joining month name, and total years of experience.\n\n```sql\nSELECT\n    employee_name,\n    YEAR(hire_date) AS joining_year,\n    MONTHNAME(hire_date) AS month_name,\n    TIMESTAMPDIFF(YEAR, hire_date, CURDATE()) AS total_years_experience\nFROM employees;\n```\n\n---\n\n### Q9. Display bonus details along with the day name on which the bonus was awarded.\n\n```sql\nSELECT\n    *,\n    DAYNAME(bonus_date) AS bonus_day\nFROM bonuses;\n```\n\n---\n\n### Q10. Display all projects along with their start date in the format: `01-Jan-2025`\n\n```sql\nSELECT\n    *,\n    DATE_FORMAT(start_date, '%d-%b-%Y') AS start_format_date\nFROM projects;\n```\n\n---\n\n### Q11. Categorize employees based on salary.\n\n| Condition                        | Category      |\n|-----------------------------------|---------------|\n| Salary >= 100000                  | High Salary   |\n| Salary BETWEEN 60000 AND 99999    | Medium Salary |\n| Else                               | Low Salary    |\n\n```sql\nSELECT\n    employee_name,\n    salary,\n    CASE\n        WHEN salary >= 100000 THEN 'High Salary'\n        WHEN salary BETWEEN 60000 AND 99999 THEN 'Medium Salary'\n        ELSE 'Low Salary'\n    END AS employee_salary_ranking\nFROM employees;\n```\n\n---\n\n### Q12. Categorize employees based on experience.\n\n| Condition        | Category  |\n|-------------------|-----------|\n| 0–2 Years          | Junior    |\n| 3–5 Years          | Mid Level |\n| More than 5 Years  | Senior    |\n\n```sql\nSELECT\n    employee_name,\n    TIMESTAMPDIFF(YEAR, hire_date, CURDATE()) AS years_of_experience,\n    CASE\n        WHEN TIMESTAMPDIFF(YEAR, hire_date, CURDATE()) <= 2 THEN 'Junior'\n        WHEN TIMESTAMPDIFF(YEAR, hire_date, CURDATE()) BETWEEN 3 AND 5 THEN 'Mid Level'\n        ELSE 'Senior'\n    END AS employee_experience_ranking\nFROM employees;\n```\n\n> **Why?**\n> Notice the experience calculation is repeated across the `SELECT` column and each `WHEN`. This works fine, but as queries grow, repeating logic like this becomes error-prone. A cleaner alternative (once you learn CTEs — see Part 6) is to calculate `years_of_experience` once in a CTE, then reference that column throughout the CASE statement.\n\n---\n\n### Q13. Find the total number of Active employees using CASE.\n\n```sql\n-- Approach 1: Simple COUNT with WHERE\nSELECT COUNT(*) AS total_employees\nFROM employees\nWHERE employment_status = 'Active';\n\n-- Approach 2: CASE inside SUM()\nSELECT\n    SUM(\n        CASE\n            WHEN employment_status = 'Active' THEN 1\n            ELSE 0\n        END\n    ) AS total_employees\nFROM employees;\n```\n\n> **Why learn the CASE + SUM() approach if WHERE already works?**\n> This pattern becomes essential when you need **multiple conditional counts in a single row** — e.g., counting Active *and* Inactive *and* On Leave employees side-by-side without running three separate queries:\n> ```sql\n> SELECT\n>     SUM(CASE WHEN employment_status = 'Active' THEN 1 ELSE 0 END) AS active_count,\n>     SUM(CASE WHEN employment_status = 'Inactive' THEN 1 ELSE 0 END) AS inactive_count\n> FROM employees;\n> ```\n> This is a foundational pattern for building **pivot-style summary reports** directly in SQL.\n\n---\n\n### Q14. Display project status with business-friendly labels.\n\n| Raw Status  | Business Label         |\n|-------------|--------------------------|\n| Ongoing     | In Progress              |\n| Completed   | Successfully Delivered   |\n| On Hold     | Awaiting Approval        |\n\n```sql\nSELECT\n    project_name,\n    status,\n    CASE\n        WHEN status = 'Ongoing' THEN 'In Progress'\n        WHEN status = 'Completed' THEN 'Successfully Delivered'\n        WHEN status = 'On Hold' THEN 'Awaiting Approval'\n    END AS project_status\nFROM projects;\n```\n\n> **Why?**\n> No `ELSE` here — deliberately. If a `status` value doesn't match any of the three listed, it returns `NULL`, which acts as a visible signal that an *unexpected* status value exists in the data (rather than silently mislabeling it). This is a useful debugging habit: only add `ELSE` when you genuinely have a sensible default for \"everything else.\"\n\n---\n\n### Q15. Display employee names along with a custom message.\n\n| Condition                                       | Message           |\n|--------------------------------------------------|--------------------|\n| Active AND salary > 100000                        | Star Employee      |\n| Active                                             | Active Employee    |\n| Else                                               | Needs Attention    |\n\n```sql\nSELECT\n    employee_name,\n    salary,\n    employment_status,\n    CASE\n        WHEN employment_status = 'Active' AND salary > 100000 THEN 'Star Employee'\n        WHEN employment_status = 'Active' THEN 'Active Employee'\n        ELSE 'Needs Attention'\n    END AS employee_label\nFROM employees;\n```\n\n> **Why does order matter here?**\n> This is the clearest example of \"first match wins.\" If the more specific condition (`Active AND salary > 100000`) were placed *after* the general one (`Active`), it would **never be reached** — every Active + high-salary employee would already be caught by the broader `Active` condition first. **Always order CASE conditions from most specific to least specific.**\n\n---\n\n## 5. Cheatsheet\n\n### String Functions\n\n| Function              | Purpose                                   | Example                                      |\n|------------------------|--------------------------------------------|-----------------------------------------------|\n| `UPPER(str)`           | Convert to uppercase                       | `UPPER('raj')` → `RAJ`                        |\n| `LOWER(str)`           | Convert to lowercase                       | `LOWER('RAJ')` → `raj`                        |\n| `LENGTH(str)`          | Character count                            | `LENGTH('Raj')` → `3`                         |\n| `CONCAT(a, b, ...)`    | Join strings                               | `CONCAT('Raj',' ','Sharma')` → `Raj Sharma`   |\n| `SUBSTRING(str, s, l)` | Extract substring by position              | `SUBSTRING('MySQL',1,2)` → `My`               |\n| `LEFT(str, n)`         | First n characters                         | `LEFT('Sharma',3)` → `Sha`                    |\n| `RIGHT(str, n)`        | Last n characters                          | `RIGHT('Sharma',3)` → `rma`                   |\n| `REPLACE(str, a, b)`   | Replace all occurrences                    | `REPLACE('a-b','-','/')` → `a/b`              |\n| `TRIM(str)`            | Remove leading/trailing spaces             | `TRIM('  Raj  ')` → `Raj`                     |\n| `SUBSTRING_INDEX(s,d,n)` | Split on delimiter, take before/after n  | `SUBSTRING_INDEX('a@b.com','@',1)` → `a`      |\n\n### Date Functions\n\n| Function                  | Purpose                                  |\n|-----------------------------|--------------------------------------------|\n| `CURDATE()`                 | Today's date                               |\n| `DATEDIFF(d1, d2)`          | Difference in days                         |\n| `DATE_FORMAT(date, fmt)`    | Custom formatted date                      |\n| `YEAR(date)`                | Extract year                               |\n| `MONTH(date)`               | Extract month number                       |\n| `MONTHNAME(date)`           | Full month name                            |\n| `DAYNAME(date)`             | Weekday name                               |\n| `TIMESTAMPDIFF(unit, d1, d2)` | Difference in specified unit (YEAR/MONTH/DAY) |\n| `DATE_SUB(date, INTERVAL n unit)` | Subtract interval from a date        |\n\n### CASE Statement\n\n```sql\nCASE\n    WHEN condition1 THEN result1\n    WHEN condition2 THEN result2\n    ELSE default_result\nEND\n```\n\n**Rules to remember:**\n1. Conditions evaluate top-to-bottom — first match wins.\n2. Order conditions from **most specific → least specific**.\n3. `ELSE` is optional; omitting it returns `NULL` for unmatched rows (useful for catching unexpected data).\n4. `CASE` works anywhere an expression works — `SELECT`, `WHERE`, `ORDER BY`, and inside aggregate functions like `SUM()`/`COUNT()`.\n\n---\n\n## Key Takeaways\n\n- **String functions** clean and reshape text — critical for presentation and for extracting structured pieces (like usernames or initials) from a single field.\n- **Date functions** split into two families: ones that *extract parts* (`YEAR`, `MONTH`, `DAYNAME`) and ones that *calculate differences* (`DATEDIFF`, `TIMESTAMPDIFF`). Know which one you need — days-only vs. calendar-aware units.\n- **CASE** turns raw data into business-readable categories directly in SQL, and combined with aggregate functions like `SUM()`, becomes a powerful tool for building conditional summaries and pivot-style reports.\n\n---\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "Table of Contents",
+        "id": "table-of-contents"
+      },
+      {
+        "level": 2,
+        "text": "1. String Functions",
+        "id": "1-string-functions"
+      },
+      {
+        "level": 3,
+        "text": "1.1 UPPER() / LOWER()",
+        "id": "11-upper-lower"
+      },
+      {
+        "level": 3,
+        "text": "1.2 LENGTH()",
+        "id": "12-length"
+      },
+      {
+        "level": 3,
+        "text": "1.3 CONCAT()",
+        "id": "13-concat"
+      },
+      {
+        "level": 3,
+        "text": "1.4 SUBSTRING()",
+        "id": "14-substring"
+      },
+      {
+        "level": 3,
+        "text": "1.5 LEFT() / RIGHT()",
+        "id": "15-left-right"
+      },
+      {
+        "level": 3,
+        "text": "1.6 REPLACE()",
+        "id": "16-replace"
+      },
+      {
+        "level": 3,
+        "text": "1.7 TRIM()",
+        "id": "17-trim"
+      },
+      {
+        "level": 3,
+        "text": "1.8 SUBSTRINGINDEX()",
+        "id": "18-substringindex"
+      },
+      {
+        "level": 2,
+        "text": "2. Date Functions",
+        "id": "2-date-functions"
+      },
+      {
+        "level": 3,
+        "text": "2.1 CURDATE()",
+        "id": "21-curdate"
+      },
+      {
+        "level": 3,
+        "text": "2.2 DATEDIFF()",
+        "id": "22-datediff"
+      },
+      {
+        "level": 3,
+        "text": "2.3 DATEFORMAT()",
+        "id": "23-dateformat"
+      },
+      {
+        "level": 3,
+        "text": "2.4 YEAR() / MONTH() / MONTHNAME() / DAYNAME()",
+        "id": "24-year-month-monthname-dayname"
+      },
+      {
+        "level": 3,
+        "text": "2.5 TIMESTAMPDIFF()",
+        "id": "25-timestampdiff"
+      },
+      {
+        "level": 3,
+        "text": "2.6 DATESUB()",
+        "id": "26-datesub"
+      },
+      {
+        "level": 2,
+        "text": "3. CASE Statement",
+        "id": "3-case-statement"
+      },
+      {
+        "level": 3,
+        "text": "Syntax",
+        "id": "syntax"
+      },
+      {
+        "level": 2,
+        "text": "4. Practice Questions",
+        "id": "4-practice-questions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Display employee name in uppercase along with the length of the employee name.",
+        "id": "q1-display-employee-name-in-uppercase-along-with-the-length-of-the-employee-name"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Display employee details in the format: Raj Sharma (raj.sharma@company.com) - Mumbai",
+        "id": "q2-display-employee-details-in-the-format-raj-sharma-rajsharmacompanycom---mumbai"
+      },
+      {
+        "level": 3,
+        "text": "Q3. Extract the username from employee email addresses.",
+        "id": "q3-extract-the-username-from-employee-email-addresses"
+      },
+      {
+        "level": 3,
+        "text": "Q4. Find employees whose email domain is gmail.com.",
+        "id": "q4-find-employees-whose-email-domain-is-gmailcom"
+      },
+      {
+        "level": 3,
+        "text": "Q5. Display employee initials. e.g., Raj Sharma → RS, Priya Mehta → PM",
+        "id": "q5-display-employee-initials-eg-raj-sharma-rs-priya-mehta-pm"
+      },
+      {
+        "level": 3,
+        "text": "Q6. Find employees who joined in the last 30 days.",
+        "id": "q6-find-employees-who-joined-in-the-last-30-days"
+      },
+      {
+        "level": 3,
+        "text": "Q7. Find employees who have completed more than 5 years in the company.",
+        "id": "q7-find-employees-who-have-completed-more-than-5-years-in-the-company"
+      },
+      {
+        "level": 3,
+        "text": "Q8. Display employee name, joining year, joining month name, and total years of experience.",
+        "id": "q8-display-employee-name-joining-year-joining-month-name-and-total-years-of-experience"
+      },
+      {
+        "level": 3,
+        "text": "Q9. Display bonus details along with the day name on which the bonus was awarded.",
+        "id": "q9-display-bonus-details-along-with-the-day-name-on-which-the-bonus-was-awarded"
+      },
+      {
+        "level": 3,
+        "text": "Q10. Display all projects along with their start date in the format: 01-Jan-2025",
+        "id": "q10-display-all-projects-along-with-their-start-date-in-the-format-01-jan-2025"
+      },
+      {
+        "level": 3,
+        "text": "Q11. Categorize employees based on salary.",
+        "id": "q11-categorize-employees-based-on-salary"
+      },
+      {
+        "level": 3,
+        "text": "Q12. Categorize employees based on experience.",
+        "id": "q12-categorize-employees-based-on-experience"
+      },
+      {
+        "level": 3,
+        "text": "Q13. Find the total number of Active employees using CASE.",
+        "id": "q13-find-the-total-number-of-active-employees-using-case"
+      },
+      {
+        "level": 3,
+        "text": "Q14. Display project status with business-friendly labels.",
+        "id": "q14-display-project-status-with-business-friendly-labels"
+      },
+      {
+        "level": 3,
+        "text": "Q15. Display employee names along with a custom message.",
+        "id": "q15-display-employee-names-along-with-a-custom-message"
+      },
+      {
+        "level": 2,
+        "text": "5. Cheatsheet",
+        "id": "5-cheatsheet"
+      },
+      {
+        "level": 3,
+        "text": "String Functions",
+        "id": "string-functions"
+      },
+      {
+        "level": 3,
+        "text": "Date Functions",
+        "id": "date-functions"
+      },
+      {
+        "level": 3,
+        "text": "CASE Statement",
+        "id": "case-statement"
+      },
+      {
+        "level": 2,
+        "text": "Key Takeaways",
+        "id": "key-takeaways"
+      }
+    ]
+  },
+  "lesson-08-views": {
+    "id": "lesson-08-views",
+    "slug": "08-views",
+    "title": "Views in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-08-views",
+    "order": 8,
+    "content": "# Part 8: Views in MySQL\n\nA **View** is a virtual table created from the result of a SQL query. You give a `SELECT` statement a name, and from then on you can query that name exactly like a real table.\n\nThe key word is **virtual**. A view does **not** store any data of its own. What it stores is the **query definition**. Every time you run `SELECT * FROM view_name`, MySQL re-runs the underlying query behind the scenes and hands you the **latest data** from the base tables.\n\nThink of a view as a **saved query with a name** — write the complex logic once, then reuse it everywhere with a simple `SELECT`.\n\n---\n\n## Why Are Views Needed?\n\nWithout views, any complex query has to be **rewritten (or copy-pasted) every time** you need it — in every report, every dashboard, every script. That's error-prone and hard to maintain: fix a bug in the logic and you have to fix it in ten places.\n\nA view solves this by giving that logic **one home**. Write it once, reference it by name everywhere, and if the logic changes you update it in a single place.\n\nViews also give you **security and abstraction**. You can expose a view that shows only a few safe columns (say, name and department) while keeping the underlying table — with salaries, personal data, etc. — hidden from the user.\n\n---\n\n## When to Use Views?\n\n| ✅ Use a view to… | Why it helps |\n|---|---|\n| **Hide complex queries** | Turn a 30-line join into `SELECT * FROM view_name`. |\n| **Restrict column access** | Expose only safe columns; hide sensitive ones like `salary`. |\n| **Reuse frequent queries** | Define the logic once, use it in many places. |\n| **Simplify reporting** | Analysts query a clean, ready-made view instead of raw tables. |\n| **Improve readability** | Business-friendly names instead of tangled SQL. |\n\n---\n\n## Syntax\n\n```sql\nCREATE VIEW view_name AS\nSELECT column1, column2, ...\nFROM table_name\nWHERE condition;\n```\n\nOnce created, you query it just like a table:\n\n```sql\nSELECT *\nFROM view_name;\n```\n\n> 💡 **Note:** The `SELECT` after `AS` is the **definition** — it is what MySQL stores. It does *not* run when you create the view; it runs each time you query the view. That's why a view always reflects the current data in its base table: it's re-executed on every read.\n\n---\n\n## Practice Questions\n\n### Q1. Create a view to display all Active employees.\n\n```sql\nCREATE VIEW employee_active_status AS\nSELECT *\nFROM employees\nWHERE employment_status = 'Active';\n```\n\nNow query it like any table:\n\n```sql\nSELECT *\nFROM employee_active_status;\n```\n\n> 💡 **Note:** Anyone who needs active employees can now just `SELECT * FROM employee_active_status` — they never have to remember the `WHERE employment_status = 'Active'` filter. And if a new employee is set to Active tomorrow, they'll appear automatically, because the view re-runs its query on every read.\n\n---\n\n### Q2. Create a view to display employee name, department, and salary of employees earning more than ₹70,000.\n\n```sql\nCREATE VIEW employee_record AS\nSELECT employee_name, department, salary\nFROM employees\nWHERE salary > 70000;\n```\n\n```sql\nSELECT *\nFROM employee_record;\n```\n\n> 💡 **Note:** Notice this view exposes **only three columns**. This is the classic use of views for **security**: a reporting user can be given access to `employee_record` without ever seeing other columns in the `employees` table. The view acts as a controlled window onto the data.\n\n---\n\n### Q3. Create a view to display each employee along with their manager's name.\n\n```sql\nCREATE VIEW employee_with_manager AS\nSELECT e.employee_name AS employee_name,\n       m.employee_name AS manager_name\nFROM employees e\nINNER JOIN employees m\n    ON e.manager_id = m.employee_id;\n```\n\n```sql\nSELECT *\nFROM employee_with_manager;\n```\n\n> 💡 **Note:** This is a **self-join** (the `employees` table joined to itself) — genuinely tricky logic that's easy to get wrong. Wrapping it in a view means you solve it **once**. From now on, \"employee and their manager\" is just `SELECT * FROM employee_with_manager` — the join complexity is hidden behind a friendly name.\n\n---\n\n### Q4. Create a view to display the total number of employees in each department.\n\n```sql\nCREATE VIEW department_count AS\nSELECT department, COUNT(*) AS total_count\nFROM employees\nGROUP BY department;\n```\n\n```sql\nSELECT *\nFROM department_count;\n```\n\n> 💡 **Note:** This view uses an aggregate (`COUNT(*)`) and `GROUP BY`. That makes it perfect for **reporting** — but keep it in mind for later: a view built on `GROUP BY` and aggregates is **read-only** (you can't `INSERT`/`UPDATE` through it). See [When Is a View Updatable?](#when-is-a-view-updatable) below.\n\n---\n\n### Q5. Create a view to display the highest-paid employee from each department.\n\n```sql\nCREATE VIEW highest_paid_employee AS\nSELECT *\nFROM (\n    SELECT *,\n           RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS ranking\n    FROM employees\n    WHERE department IS NOT NULL\n) t\nWHERE ranking = 1;\n```\n\n```sql\nSELECT *\nFROM highest_paid_employee;\n```\n\n> 💡 **Note:** This is the payoff. A window function *inside* a subquery, then filtered on `ranking = 1` — the kind of query that's hard to write and even harder to remember. Save it as a view once, and \"top earner per department\" becomes a single, trivial `SELECT`. This is exactly the scenario views were built for: **hide hard queries behind simple names.**\n\n---\n\n## Managing Views\n\n### See all views in the database\n\n```sql\nSHOW FULL TABLES\nWHERE Table_type = 'VIEW';\n```\n\n### See the SQL used to create a view\n\n```sql\nSHOW CREATE VIEW view_name;\n```\n\n> 💡 **Note:** Handy when you inherit a database and need to understand what a view actually does under the hood — it prints back the full stored `SELECT` definition.\n\n### Modify a view\n\n```sql\nALTER VIEW view_name AS\nSELECT ...\nFROM ...;\n```\n\nExample — redefine `department_count` to count by city instead:\n\n```sql\nALTER VIEW department_count AS\nSELECT city, COUNT(*) AS total_city_count\nFROM employees\nGROUP BY city;\n```\n\n> 💡 **Note:** `ALTER VIEW` replaces the stored definition. Any query that reads the view immediately starts using the new logic — this is the single-point-of-change benefit in action. (`CREATE OR REPLACE VIEW ...` does the same job in one step and also works if the view doesn't exist yet.)\n\n### Delete a view\n\n```sql\nDROP VIEW view_name;\n```\n\nDeleting a view only removes the **saved query** — it never touches the data in the underlying tables.\n\n---\n\n## When Is a View Updatable?\n\nBecause a view is just a stored query, in some cases you can `INSERT`, `UPDATE`, or `DELETE` through it and the change flows down to the base table. But this only works when MySQL can **unambiguously map each view row back to exactly one base-table row**.\n\nA view is generally **updatable** when it:\n\n- Is based on a **single table**\n- Does **not** use `GROUP BY`\n- Does **not** use aggregate functions (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, …)\n- Does **not** use `DISTINCT`\n- Does **not** use `UNION`\n- Does **not** use window functions (`RANK`, `ROW_NUMBER`, …)\n\n> 💡 **Note:** The rule behind all of these is the same: **one view row must trace back to one real row.** The moment a view *summarizes* or *combines* rows — a `COUNT` collapses many rows into one, a `UNION` merges two sources, a window function ranks across a set — MySQL can no longer tell which base row your update should hit, so the view becomes **read-only**. From the examples above: `employee_active_status` (Q1) and `employee_record` (Q2) are updatable; `department_count` (Q4) and `highest_paid_employee` (Q5) are read-only.\n\n---\n\n## View vs Table — Quick Reference\n\n| View | Table |\n|---|---|\n| Stores a **query**, not data | Stores actual **data** |\n| Virtual — computed on each read | Physical — persisted on disk |\n| Always reflects the latest base data | Holds its own rows until modified |\n| Great for hiding complexity & restricting access | The source of truth the view reads from |\n| Sometimes updatable (see rules above) | Always writable |\n\n---\n\n## When to Use a View\n\n1. **To hide complex queries** — turn joins, subqueries, and window functions into a single simple `SELECT`.\n2. **To restrict access** — expose only safe columns and hide sensitive ones like `salary`.\n3. **To reuse frequent queries** — define logic once, reference it everywhere.\n4. **To simplify reporting** — give analysts clean, ready-made virtual tables.\n5. **To improve readability & maintainability** — fix the logic in one place instead of in every copy.\n\n---\n\n## Cheatsheet\n\n```sql\n-- Create a view\nCREATE VIEW view_name AS\nSELECT column1, column2\nFROM table_name\nWHERE condition;\n\n-- Query a view (just like a table)\nSELECT * FROM view_name;\n\n-- See all views\nSHOW FULL TABLES WHERE Table_type = 'VIEW';\n\n-- See a view's definition\nSHOW CREATE VIEW view_name;\n\n-- Modify a view\nALTER VIEW view_name AS\nSELECT ...;\n-- (or) CREATE OR REPLACE VIEW view_name AS SELECT ...;\n\n-- Delete a view (data in base tables is untouched)\nDROP VIEW view_name;\n```\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "Why Are Views Needed?",
+        "id": "why-are-views-needed"
+      },
+      {
+        "level": 2,
+        "text": "When to Use Views?",
+        "id": "when-to-use-views"
+      },
+      {
+        "level": 2,
+        "text": "Syntax",
+        "id": "syntax"
+      },
+      {
+        "level": 2,
+        "text": "Practice Questions",
+        "id": "practice-questions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Create a view to display all Active employees.",
+        "id": "q1-create-a-view-to-display-all-active-employees"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Create a view to display employee name, department, and salary of employees earning more than ₹70,000.",
+        "id": "q2-create-a-view-to-display-employee-name-department-and-salary-of-employees-earning-more-than-70000"
+      },
+      {
+        "level": 3,
+        "text": "Q3. Create a view to display each employee along with their manager's name.",
+        "id": "q3-create-a-view-to-display-each-employee-along-with-their-managers-name"
+      },
+      {
+        "level": 3,
+        "text": "Q4. Create a view to display the total number of employees in each department.",
+        "id": "q4-create-a-view-to-display-the-total-number-of-employees-in-each-department"
+      },
+      {
+        "level": 3,
+        "text": "Q5. Create a view to display the highest-paid employee from each department.",
+        "id": "q5-create-a-view-to-display-the-highest-paid-employee-from-each-department"
+      },
+      {
+        "level": 2,
+        "text": "Managing Views",
+        "id": "managing-views"
+      },
+      {
+        "level": 3,
+        "text": "See all views in the database",
+        "id": "see-all-views-in-the-database"
+      },
+      {
+        "level": 3,
+        "text": "See the SQL used to create a view",
+        "id": "see-the-sql-used-to-create-a-view"
+      },
+      {
+        "level": 3,
+        "text": "Modify a view",
+        "id": "modify-a-view"
+      },
+      {
+        "level": 3,
+        "text": "Delete a view",
+        "id": "delete-a-view"
+      },
+      {
+        "level": 2,
+        "text": "When Is a View Updatable?",
+        "id": "when-is-a-view-updatable"
+      },
+      {
+        "level": 2,
+        "text": "View vs Table — Quick Reference",
+        "id": "view-vs-table-quick-reference"
+      },
+      {
+        "level": 2,
+        "text": "When to Use a View",
+        "id": "when-to-use-a-view"
+      },
+      {
+        "level": 2,
+        "text": "Cheatsheet",
+        "id": "cheatsheet"
+      }
+    ]
+  },
+  "lesson-09-stored-procedures": {
+    "id": "lesson-09-stored-procedures",
+    "slug": "09-stored-procedures",
+    "title": "Stored Procedures in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-09-stored-procedures",
+    "order": 9,
+    "content": "# Part 9: Stored Procedures in MySQL\n\nA **Stored Procedure** is a named block of one or more SQL statements that is saved *inside the database* and run on demand by calling its name.\n\nWhere a **view** is a saved `SELECT`, a stored procedure is a saved **program**. It can run several statements in sequence, accept input parameters, return values, hold variables, and use procedural logic like `IF` and `LOOP`. You write the logic once, store it in the database, and every application, script, or user runs it the same way: `CALL procedure_name(...)`.\n\nThink of it as a **reusable function that lives in your database.**\n\n---\n\n## Why Are Stored Procedures Needed?\n\nWithout procedures, the same business logic gets rewritten in every app and every script that talks to the database. Change the rule and you have to hunt down every copy. A stored procedure gives that logic **one home inside the database** — update it once and every caller instantly uses the new version.\n\nThey also let you bundle **multiple steps into a single call**. Instead of an application sending an `UPDATE` and then a `SELECT` over the network as two round-trips, it makes one `CALL` and the database runs both together — less network chatter and consistent behavior for everyone.\n\n---\n\n## When to Use Stored Procedures?\n\n| ✅ Use a stored procedure to… | Why it helps |\n|---|---|\n| **Reuse frequent SQL logic** | Write it once, `CALL` it everywhere. |\n| **Run multiple statements in one call** | Bundle `UPDATE` + `SELECT` (etc.) into a single trip. |\n| **Reduce duplicate SQL** | One definition instead of copies scattered across apps. |\n| **Improve maintainability** | Fix the logic in one place. |\n| **Accept parameters** | Pass values in (`IN`) for dynamic, reusable queries. |\n\n---\n\n## View vs Stored Procedure\n\n| View | Stored Procedure |\n|---|---|\n| Stores a `SELECT` query | Stores one or more SQL statements |\n| Returns a virtual table | Performs operations and returns results if needed |\n| Mainly used for data **retrieval** | Used for **business logic and automation** |\n| Cannot contain procedural logic (`IF`, `LOOP`) | Can contain `IF`, `LOOP`, variables, etc. |\n| Invoked using `SELECT` | Invoked using `CALL` |\n\n---\n\n## Syntax\n\n```sql\nDELIMITER $$\n\nCREATE PROCEDURE procedure_name()\nBEGIN\n    -- SQL statements;\nEND $$\n\nDELIMITER ;\n```\n\n> 💡 **Note — what is `DELIMITER` and why do we need it?**\n> Normally MySQL treats `;` as \"end of statement.\" But a procedure *body* contains its own `;` after each inner statement — so MySQL would think the procedure ends at the first inner `;`. To avoid this, we temporarily change the statement terminator to something else (`$$` or `//`) with `DELIMITER $$`. Now the inner `;` are just part of the body, and the whole `CREATE PROCEDURE ... END $$` is treated as one statement. Afterwards we run `DELIMITER ;` to switch the terminator back to normal. The `$$` vs `//` choice is purely stylistic — both work.\n\n---\n\n## Practice Questions\n\n### Q1. Create a Stored Procedure to display all Active employees.\n\n```sql\nDELIMITER $$\n\nCREATE PROCEDURE activeEmployees()\nBEGIN\n    SELECT *\n    FROM employees\n    WHERE employment_status = 'Active';\nEND $$\n\nDELIMITER ;\n```\n\nRun it:\n\n```sql\nCALL activeEmployees();\n```\n\nView its definition:\n\n```sql\nSHOW CREATE PROCEDURE activeEmployees;\n```\n\n> 💡 **Note:** This procedure takes no parameters — `activeEmployees()` — so it's essentially a saved query, similar to a view. The difference shows up next: a procedure can accept inputs and do far more than a `SELECT`.\n\n---\n\n### Q2. Create a Stored Procedure that accepts a department name and displays employees of that department.\n\n```sql\nDELIMITER $$\n\nCREATE PROCEDURE displayDepartment(IN dept_name VARCHAR(100))\nBEGIN\n    SELECT *\n    FROM employees\n    WHERE department = dept_name;\nEND $$\n\nDELIMITER ;\n```\n\nRun it with an argument:\n\n```sql\nCALL displayDepartment('IT');\n```\n\n> 💡 **Note:** `IN dept_name VARCHAR(100)` declares an **input parameter** — a value the caller passes in. Inside the body, `dept_name` behaves like a variable holding whatever you sent (`'IT'`). This is what makes a procedure *dynamic*: one definition serves every department instead of hard-coding one. Note the parameter type (`VARCHAR(100)`) should be compatible with the column you compare it against.\n\n---\n\n### Q3. Create a Stored Procedure to add ₹1,000 to the salary of all employees in a department, then display the updated rows.\n\n```sql\nDELIMITER //\n\nCREATE PROCEDURE displayAndIncrementSalary(IN dept_name VARCHAR(100))\nBEGIN\n    UPDATE employees\n    SET salary = salary + 1000\n    WHERE department = dept_name;\n\n    SELECT *\n    FROM employees\n    WHERE department = dept_name;\nEND //\n\nDELIMITER ;\n```\n\n```sql\nCALL displayAndIncrementSalary('IT');\n```\n\n> 💡 **Note:** This is the real strength of procedures — **multiple statements in one call.** First the `UPDATE` changes the data, then the `SELECT` returns the updated rows, all in a single `CALL`. An application would otherwise need two separate database trips. Because it writes data, run it deliberately: each call adds another ₹1,000, so calling it twice adds ₹2,000.\n\n---\n\n### Q4. Create a Stored Procedure to return the total number of employees.\n\n```sql\nDELIMITER //\n\nCREATE PROCEDURE numberOfEmployees(OUT totalCount INT)\nBEGIN\n    SELECT COUNT(*) INTO totalCount\n    FROM employees;\nEND //\n\nDELIMITER ;\n```\n\nCall it and read the result:\n\n```sql\nCALL numberOfEmployees(@totalCount);\nSELECT @totalCount;\n```\n\n> 💡 **Note:** Here we use an **`OUT` parameter** to *return a value*. `SELECT COUNT(*) INTO totalCount` stores the count into the `totalCount` variable instead of displaying it. We pass a **session variable** `@totalCount` into the call — MySQL fills it with the result — and then we read it with `SELECT @totalCount`. This is how a procedure hands a single value back to the caller.\n\n---\n\n## IN vs OUT Parameters\n\n| Keyword | Direction | Purpose |\n|---|---|---|\n| `IN` | Caller → Procedure | Pass a value **into** the procedure (e.g. a department name). Default if not specified. |\n| `OUT` | Procedure → Caller | Return a value **out** of the procedure (e.g. a computed count). |\n\n> 💡 **Note:** There's also `INOUT`, which does both — the caller passes a value in, the procedure modifies it, and the updated value comes back out through the same parameter.\n\n---\n\n## Managing Stored Procedures\n\n### See all stored procedures in the current database\n\n```sql\nSHOW PROCEDURE STATUS\nWHERE Db = DATABASE();\n```\n\n### View a procedure's code\n\n```sql\nSHOW CREATE PROCEDURE procedure_name;\n```\n\n### Modify a stored procedure\n\nMySQL does **not** let you change a procedure's body with `ALTER PROCEDURE`. To change the logic, drop it and recreate it:\n\n```sql\nDROP PROCEDURE procedure_name;\n\n-- then CREATE PROCEDURE ... again with the new body\n```\n\n> 💡 **Note:** `ALTER PROCEDURE` exists but only edits *characteristics* (like comments or security settings) — never the actual SQL inside. So the standard workflow to update logic is **drop → recreate**. Use `DROP PROCEDURE IF EXISTS procedure_name;` to avoid an error when the procedure might not exist yet.\n\n### Delete a stored procedure\n\n```sql\nDROP PROCEDURE procedure_name;\n```\n\n---\n\n## When to Use a Stored Procedure\n\n1. **To reuse frequent SQL logic** — save it once, `CALL` it from anywhere.\n2. **To run multiple statements in one call** — bundle related steps into a single database trip.\n3. **To reduce duplicate SQL** — one definition instead of copies across many apps.\n4. **To accept parameters** — make queries dynamic with `IN`, and return results with `OUT`.\n5. **To centralize business logic** — keep the rules in the database so every caller behaves consistently.\n\n---\n\n## Cheatsheet\n\n```sql\n-- Create a procedure (no parameters)\nDELIMITER $$\nCREATE PROCEDURE procedure_name()\nBEGIN\n    SELECT ...;\nEND $$\nDELIMITER ;\n\n-- With an IN parameter\nDELIMITER $$\nCREATE PROCEDURE procedure_name(IN param_name VARCHAR(100))\nBEGIN\n    SELECT ... WHERE column = param_name;\nEND $$\nDELIMITER ;\n\n-- With an OUT parameter\nDELIMITER $$\nCREATE PROCEDURE procedure_name(OUT result INT)\nBEGIN\n    SELECT COUNT(*) INTO result FROM table_name;\nEND $$\nDELIMITER ;\n\n-- Run a procedure\nCALL procedure_name();\nCALL procedure_name('IT');\nCALL procedure_name(@out_var);\nSELECT @out_var;\n\n-- Inspect\nSHOW PROCEDURE STATUS WHERE Db = DATABASE();\nSHOW CREATE PROCEDURE procedure_name;\n\n-- Change logic (no ALTER for the body) → drop and recreate\nDROP PROCEDURE IF EXISTS procedure_name;\n\n-- Delete\nDROP PROCEDURE procedure_name;\n```\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "Why Are Stored Procedures Needed?",
+        "id": "why-are-stored-procedures-needed"
+      },
+      {
+        "level": 2,
+        "text": "When to Use Stored Procedures?",
+        "id": "when-to-use-stored-procedures"
+      },
+      {
+        "level": 2,
+        "text": "View vs Stored Procedure",
+        "id": "view-vs-stored-procedure"
+      },
+      {
+        "level": 2,
+        "text": "Syntax",
+        "id": "syntax"
+      },
+      {
+        "level": 2,
+        "text": "Practice Questions",
+        "id": "practice-questions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Create a Stored Procedure to display all Active employees.",
+        "id": "q1-create-a-stored-procedure-to-display-all-active-employees"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Create a Stored Procedure that accepts a department name and displays employees of that department.",
+        "id": "q2-create-a-stored-procedure-that-accepts-a-department-name-and-displays-employees-of-that-department"
+      },
+      {
+        "level": 3,
+        "text": "Q3. Create a Stored Procedure to add ₹1,000 to the salary of all employees in a department, then display the updated rows.",
+        "id": "q3-create-a-stored-procedure-to-add-1000-to-the-salary-of-all-employees-in-a-department-then-display-the-updated-rows"
+      },
+      {
+        "level": 3,
+        "text": "Q4. Create a Stored Procedure to return the total number of employees.",
+        "id": "q4-create-a-stored-procedure-to-return-the-total-number-of-employees"
+      },
+      {
+        "level": 2,
+        "text": "IN vs OUT Parameters",
+        "id": "in-vs-out-parameters"
+      },
+      {
+        "level": 2,
+        "text": "Managing Stored Procedures",
+        "id": "managing-stored-procedures"
+      },
+      {
+        "level": 3,
+        "text": "See all stored procedures in the current database",
+        "id": "see-all-stored-procedures-in-the-current-database"
+      },
+      {
+        "level": 3,
+        "text": "View a procedure's code",
+        "id": "view-a-procedures-code"
+      },
+      {
+        "level": 3,
+        "text": "Modify a stored procedure",
+        "id": "modify-a-stored-procedure"
+      },
+      {
+        "level": 3,
+        "text": "Delete a stored procedure",
+        "id": "delete-a-stored-procedure"
+      },
+      {
+        "level": 2,
+        "text": "When to Use a Stored Procedure",
+        "id": "when-to-use-a-stored-procedure"
+      },
+      {
+        "level": 2,
+        "text": "Cheatsheet",
+        "id": "cheatsheet"
+      }
+    ]
+  },
+  "lesson-10-triggers": {
+    "id": "lesson-10-triggers",
+    "slug": "10-triggers",
+    "title": "Triggers in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-10-triggers",
+    "order": 10,
+    "content": "# Part 10: Triggers in MySQL\n\nA **Trigger** is a database object that **automatically executes** a set of SQL statements when a specific event — `INSERT`, `UPDATE`, or `DELETE` — happens on a table.\n\nWhere a **stored procedure** runs only when you explicitly `CALL` it, a trigger runs **on its own**, the moment the event fires. You attach it to a table once, and from then on the database silently does the work for you — logging a change, validating a value, or updating a related table — with no application code and no one having to remember to run anything.\n\nThink of it as a **rule the database enforces automatically, every single time.**\n\n---\n\n## Why Are Triggers Needed?\n\nSome rules have to run **every time** the data changes — no exceptions. If you rely on application code to log every salary change, one forgotten line or one script that writes directly to the table and the log is incomplete. A trigger closes that gap: it lives *inside* the database, so it fires no matter who or what makes the change.\n\nThey're also the natural home for **automatic side effects** — keeping an audit trail, stamping a timestamp, syncing a summary table — work that should happen alongside the change without the caller having to ask for it.\n\n---\n\n## When to Use Triggers?\n\n| ✅ Use a trigger to… | Why it helps |\n|---|---|\n| **Maintain audit logs** | Record every change automatically, no matter the source. |\n| **Track data changes** | Capture old vs new values as they happen. |\n| **Enforce business rules** | Guarantee a rule runs on every insert/update/delete. |\n| **Synchronize related tables** | Keep a summary or history table in step. |\n| **Validate or modify data** | Clean or check a value *before* it's stored. |\n\n---\n\n## Trigger vs Stored Procedure\n\n| Trigger | Stored Procedure |\n|---|---|\n| Executes **automatically** when an event occurs | Executes only when explicitly called with `CALL` |\n| **Cannot** be called manually | Can be called whenever needed |\n| Used for **automatic actions** (logging, syncing) | Used for **reusable business logic** |\n| Tied to a specific table and event | Independent — called from anywhere |\n\n---\n\n## Types of Triggers\n\nA trigger fires either **`BEFORE`** or **`AFTER`** an event, for each of the three data-changing events. That gives six combinations:\n\n| Timing | `INSERT` | `UPDATE` | `DELETE` |\n|---|---|---|---|\n| **`BEFORE`** | `BEFORE INSERT` | `BEFORE UPDATE` | `BEFORE DELETE` |\n| **`AFTER`** | `AFTER INSERT` | `AFTER UPDATE` | `AFTER DELETE` |\n\n- **`BEFORE`** runs *before* the row change is written — use it to **validate or modify** the incoming data.\n- **`AFTER`** runs *after* the change is committed — use it to **react** to the change, e.g. write to a log or history table.\n\n---\n\n## `OLD` and `NEW`\n\nInside a trigger, MySQL gives you two special row references:\n\n| Keyword | Meaning | Available in |\n|---|---|---|\n| `OLD` | The row **before** the change | `UPDATE`, `DELETE` |\n| `NEW` | The row **after** the change | `INSERT`, `UPDATE` |\n\n- On **`INSERT`** there's no previous row → only `NEW` exists.\n- On **`DELETE`** there's no resulting row → only `OLD` exists.\n- On **`UPDATE`** both exist → `OLD.salary` is the value before, `NEW.salary` is the value after.\n\n---\n\n## Syntax\n\n```sql\nDELIMITER $$\n\nCREATE TRIGGER trigger_name\n{ BEFORE | AFTER } { INSERT | UPDATE | DELETE }\nON table_name\nFOR EACH ROW\nBEGIN\n    -- SQL statements;\nEND $$\n\nDELIMITER ;\n```\n\n> 💡 **Note — why `DELIMITER` and what is `FOR EACH ROW`?**\n> As with stored procedures, the trigger body contains its own `;` after each inner statement, so we temporarily switch the terminator to `$$` (or `//`) with `DELIMITER $$`, then switch it back with `DELIMITER ;` afterwards. `FOR EACH ROW` means the trigger runs **once per affected row** — if an `UPDATE` touches 10 rows, the trigger fires 10 times, once for each row, with `OLD`/`NEW` pointing at that specific row.\n\n---\n\n## Practice Question\n\n### Q. Whenever an employee's salary is updated, automatically store the employee ID, old salary, new salary, increment date, and increment percentage in a `salary_history` table.\n\nFirst, a table to hold the history:\n\n```sql\nCREATE TABLE salary_history (\n    id            INT AUTO_INCREMENT PRIMARY KEY,\n    employee_id   INT,\n    old_salary    DECIMAL(10, 2),\n    new_salary    DECIMAL(10, 2),\n    increment_date DATE,\n    increment_pct DECIMAL(5, 2)\n);\n```\n\nNow the trigger — it fires **after** an employee row is updated and logs the change:\n\n```sql\nDELIMITER //\n\nCREATE TRIGGER updateSalaryAndInsert\nAFTER UPDATE ON employees\nFOR EACH ROW\nBEGIN\n    IF OLD.salary <> NEW.salary THEN\n        INSERT INTO salary_history (\n            employee_id,\n            old_salary,\n            new_salary,\n            increment_date,\n            increment_pct\n        )\n        VALUES (\n            OLD.employee_id,\n            OLD.salary,\n            NEW.salary,\n            CURDATE(),\n            ROUND(((NEW.salary - OLD.salary) / OLD.salary) * 100, 2)\n        );\n    END IF;\nEND //\n\nDELIMITER ;\n```\n\nTest it:\n\n```sql\nUPDATE employees\nSET salary = salary + 5000\nWHERE employee_id = 45;\n\nSELECT * FROM salary_history;\n```\n\n> 💡 **Note:** The `IF OLD.salary <> NEW.salary THEN ... END IF;` guard is the key detail. `AFTER UPDATE` fires on **every** update to the `employees` table — even one that only changes a name or address. Without the guard, every such edit would insert a \"salary change\" row where the old and new salary are identical (a 0% increment). The `IF` makes sure we only log a row when the salary **actually changed**.\n\n---\n\n### What happens without the salary check?\n\nIf we drop the `IF` guard, the trigger logs a row on *every* update — including ones that don't touch the salary:\n\n```sql\nDELIMITER //\n\nCREATE TRIGGER withoutSalaryCheck\nAFTER UPDATE ON employees\nFOR EACH ROW\nBEGIN\n    INSERT INTO salary_history (\n        employee_id,\n        old_salary,\n        new_salary,\n        increment_date,\n        increment_pct\n    )\n    VALUES (\n        OLD.employee_id,\n        OLD.salary,\n        NEW.salary,\n        CURDATE(),\n        ROUND(((NEW.salary - OLD.salary) / OLD.salary) * 100, 2)\n    );\nEND //\n\nDELIMITER ;\n```\n\n```sql\n-- This update doesn't change the salary at all...\nUPDATE employees\nSET employee_name = 'Vivek Pandey'\nWHERE employee_id = 45;\n\nSELECT * FROM salary_history;   -- ...yet a row is still logged (old = new, 0% increment)\n```\n\n> 💡 **Note:** This is exactly the noise the `IF` guard prevents. A change to `employee_name` has nothing to do with salary, but this version still writes a `salary_history` row with `old_salary = new_salary` and a `0.00` increment. Always guard `AFTER UPDATE` triggers so they only act on the columns you actually care about.\n\n---\n\n## Managing Triggers\n\n### Show all triggers\n\n```sql\nSHOW TRIGGERS;\n```\n\n### Show triggers for a specific table (current database)\n\n```sql\nSHOW TRIGGERS\nWHERE `Table` = 'employees';\n```\n\n> 💡 **Note:** `Table` is wrapped in backticks because it's a reserved word in MySQL — the backticks tell MySQL to treat it as a column name, not a keyword.\n\n### View the SQL used to create a trigger\n\n```sql\nSHOW CREATE TRIGGER trigger_name;\n```\n\n### Delete a trigger\n\n```sql\nDROP TRIGGER trigger_name;\n```\n\n> 💡 **Note:** MySQL has no `ALTER TRIGGER` for the body — to change a trigger's logic you **drop and recreate** it, just like a stored procedure. Use `DROP TRIGGER IF EXISTS trigger_name;` to avoid an error when it might not exist yet.\n\n---\n\n## When to Use a Trigger\n\n1. **To maintain audit logs** — record who/what changed automatically, from any source.\n2. **To track data changes** — capture `OLD` vs `NEW` values as they happen.\n3. **To enforce business rules** — guarantee a rule runs on every insert/update/delete.\n4. **To synchronize related tables** — keep history or summary tables in step.\n5. **To validate or modify data** — clean or check a value with a `BEFORE` trigger before it's stored.\n\n---\n\n## Cheatsheet\n\n```sql\n-- Create a trigger\nDELIMITER $$\nCREATE TRIGGER trigger_name\n{ BEFORE | AFTER } { INSERT | UPDATE | DELETE }\nON table_name\nFOR EACH ROW\nBEGIN\n    -- use OLD.column / NEW.column here\n    -- SQL statements;\nEND $$\nDELIMITER ;\n\n-- OLD  → row value BEFORE the change  (UPDATE, DELETE)\n-- NEW  → row value AFTER  the change  (INSERT, UPDATE)\n\n-- Inspect\nSHOW TRIGGERS;\nSHOW TRIGGERS WHERE `Table` = 'employees';\nSHOW CREATE TRIGGER trigger_name;\n\n-- Change logic (no ALTER for the body) → drop and recreate\nDROP TRIGGER IF EXISTS trigger_name;\n\n-- Delete\nDROP TRIGGER trigger_name;\n```\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "Why Are Triggers Needed?",
+        "id": "why-are-triggers-needed"
+      },
+      {
+        "level": 2,
+        "text": "When to Use Triggers?",
+        "id": "when-to-use-triggers"
+      },
+      {
+        "level": 2,
+        "text": "Trigger vs Stored Procedure",
+        "id": "trigger-vs-stored-procedure"
+      },
+      {
+        "level": 2,
+        "text": "Types of Triggers",
+        "id": "types-of-triggers"
+      },
+      {
+        "level": 2,
+        "text": "OLD and NEW",
+        "id": "old-and-new"
+      },
+      {
+        "level": 2,
+        "text": "Syntax",
+        "id": "syntax"
+      },
+      {
+        "level": 2,
+        "text": "Practice Question",
+        "id": "practice-question"
+      },
+      {
+        "level": 3,
+        "text": "Q. Whenever an employee's salary is updated, automatically store the employee ID, old salary, new salary, increment date, and increment percentage in a salaryhistory table.",
+        "id": "q-whenever-an-employees-salary-is-updated-automatically-store-the-employee-id-old-salary-new-salary-increment-date-and-increment-percentage-in-a-salaryhistory-table"
+      },
+      {
+        "level": 3,
+        "text": "What happens without the salary check?",
+        "id": "what-happens-without-the-salary-check"
+      },
+      {
+        "level": 2,
+        "text": "Managing Triggers",
+        "id": "managing-triggers"
+      },
+      {
+        "level": 3,
+        "text": "Show all triggers",
+        "id": "show-all-triggers"
+      },
+      {
+        "level": 3,
+        "text": "Show triggers for a specific table (current database)",
+        "id": "show-triggers-for-a-specific-table-current-database"
+      },
+      {
+        "level": 3,
+        "text": "View the SQL used to create a trigger",
+        "id": "view-the-sql-used-to-create-a-trigger"
+      },
+      {
+        "level": 3,
+        "text": "Delete a trigger",
+        "id": "delete-a-trigger"
+      },
+      {
+        "level": 2,
+        "text": "When to Use a Trigger",
+        "id": "when-to-use-a-trigger"
+      },
+      {
+        "level": 2,
+        "text": "Cheatsheet",
+        "id": "cheatsheet"
+      }
+    ]
+  },
+  "lesson-11-union-and-union-all": {
+    "id": "lesson-11-union-and-union-all",
+    "slug": "11-union-and-union-all",
+    "title": "UNION & UNION ALL in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-11-union-and-union-all",
+    "order": 11,
+    "content": "# Part 11: UNION & UNION ALL in MySQL\n\n`UNION` and `UNION ALL` **stack the rows of two or more `SELECT` queries on top of each other** into a single result set. Where a `JOIN` combines tables **side by side** (adding columns), a `UNION` combines them **head to tail** (adding rows).\n\nReach for them whenever the data you need lives in **separate places but has the same shape** — e.g. employee IDs that appear in a bonuses table *and* a leaves table, or names coming from both an `employees` and a `clients` table.\n\n---\n\n## What is `UNION`?\n\n`UNION` combines the results of two or more `SELECT` queries and **removes duplicate rows** — the final output contains only distinct rows.\n\n## What is `UNION ALL`?\n\n`UNION ALL` combines the results of two or more `SELECT` queries and **keeps all rows, including duplicates** — nothing is filtered out.\n\n---\n\n## `UNION` vs `UNION ALL`\n\n| `UNION` | `UNION ALL` |\n| ------- | ----------- |\n| Removes duplicate rows. | Keeps duplicate rows. |\n| Slightly **slower** — must sort/hash to detect duplicates. | **Faster** — no duplicate check. |\n| Returns unique records. | Returns all records. |\n\n### See the difference\n\nGiven two queries that each return these `id` values:\n\n```\nQuery A → 9, 10, 11\nQuery B → 10, 11, 12\n```\n\n| `UNION` (distinct) | `UNION ALL` (everything) |\n|--------------------|--------------------------|\n| 9, 10, 11, 12 | 9, 10, 11, 10, 11, 12 |\n\n`UNION` collapsed the repeated `10` and `11` into one each; `UNION ALL` kept both copies.\n\n> 💡 **Rule of thumb:** default to `UNION ALL`. Only use `UNION` when you actually need duplicates removed — otherwise you pay for a de-duplication step (a hidden sort) you didn't need.\n\n---\n\n## The Rules Every `UNION` Must Follow\n\nFor MySQL to stack two result sets, they must line up:\n\n1. **Same number of columns** in every `SELECT`.\n2. **Compatible data types**, column by column, in the same order (MySQL matches by *position*, not by name).\n3. **Column names come from the first `SELECT`** — aliases in later queries are ignored for the final headers.\n4. **`ORDER BY` goes once, at the very end** — it sorts the combined result, not the individual queries.\n\n---\n\n## Practice Questions\n\n### Q1. Display all employee IDs who have received either a bonus or taken a leave.\n\nAn employee ID can appear in **both** the `bonuses` and `leaves_data` tables. We want the set of IDs that show up in *either* one.\n\n**Solution — `UNION` (each ID once):**\n\n```sql\nSELECT employee_id AS id\nFROM bonuses\n\nUNION\n\nSELECT employee_id\nFROM leaves_data;\n```\n\n**Compare — `UNION ALL` (every appearance):**\n\n```sql\nSELECT employee_id AS id\nFROM bonuses\n\nUNION ALL\n\nSELECT employee_id\nFROM leaves_data;\n```\n\n**🧠 Explanation**\n\n- Both tables share the same shape for this query — a single `employee_id` column — so they stack cleanly.\n- **`UNION`** returns the **distinct** list: an employee who both got a bonus *and* took a leave (or had two bonuses) appears **once**. This is the correct answer to \"who received *either* a bonus or a leave\" — it's a set of employees.\n- **`UNION ALL`** returns **one row per source row**: the same employee can appear multiple times (once per bonus, once per leave). Its row count equals `rows in bonuses + rows in leaves_data`, always ≥ the `UNION` count.\n- The final column is named **`id`** because that alias came from the **first** `SELECT`; the alias-less second query just contributes values.\n\n> 💡 To also *tag* where each ID came from, add a literal column: `SELECT employee_id, 'Bonus' AS source FROM bonuses UNION ALL SELECT employee_id, 'Leave' FROM leaves_data`. (Note: once you add the `source` column, `UNION` would no longer collapse an ID that appears in both, because the rows are no longer identical.)\n\n---\n\n### Q2. Display the names of all employees and all clients in a single result set.\n\nEmployees and clients live in **different tables** with **different column names** (`employee_name` vs `client_name`), but conceptually they're all \"people/entities with a name.\" We want one combined list, tagged by type.\n\n**Solution:**\n\n```sql\nSELECT employee_name AS name, 'Employee' AS type\nFROM employees\n\nUNION ALL\n\nSELECT client_name AS name, 'Client' AS type\nFROM clients;\n```\n\n**🧠 Explanation**\n\n- **Different column names are fine** — MySQL matches columns by **position**, not name. `employee_name` and `client_name` are both the *first* column, so they merge into a single `name` column.\n- **The literal `type` column** (`'Employee'` / `'Client'`) is a classic `UNION` trick: it labels each row with its origin, so you can tell employees from clients in the merged output.\n- **`UNION ALL` is the right choice here.** These are distinct real-world entities — even if an employee and a client happened to share a name, you'd want to keep both rows. `UNION` would wrongly merge two different people who share a name. (It would also do needless de-duplication work.)\n- The output headers are **`name`** and **`type`**, taken from the first `SELECT`. The total row count is `employees + clients`.\n\n---\n\n## Key Points\n\n- ✔ Every `SELECT` must have the **same number of columns**.\n- ✔ Columns must have **compatible data types**, matched **by position**.\n- ✔ The **final column names come from the first `SELECT`**.\n- ✔ Write **`ORDER BY` only once**, at the end (it sorts the whole combined result).\n- ✔ Use **`UNION`** when you need **unique** rows.\n- ✔ Use **`UNION ALL`** to keep **all** rows (including duplicates) — and as the faster default.\n\n---\n\n## Cheatsheet\n\n```sql\n-- UNION: distinct rows (removes duplicates)\nSELECT col1, col2 FROM table_a\nUNION\nSELECT col1, col2 FROM table_b;\n\n-- UNION ALL: all rows (keeps duplicates) — faster\nSELECT col1, col2 FROM table_a\nUNION ALL\nSELECT col1, col2 FROM table_b;\n\n-- Tag the source of each row\nSELECT id, 'A' AS source FROM table_a\nUNION ALL\nSELECT id, 'B'          FROM table_b;\n\n-- ORDER BY applies to the COMBINED result — write it once, at the end\nSELECT col1 FROM table_a\nUNION ALL\nSELECT col1 FROM table_b\nORDER BY col1;\n```\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "What is UNION?",
+        "id": "what-is-union"
+      },
+      {
+        "level": 2,
+        "text": "What is UNION ALL?",
+        "id": "what-is-union-all"
+      },
+      {
+        "level": 2,
+        "text": "UNION vs UNION ALL",
+        "id": "union-vs-union-all"
+      },
+      {
+        "level": 3,
+        "text": "See the difference",
+        "id": "see-the-difference"
+      },
+      {
+        "level": 2,
+        "text": "The Rules Every UNION Must Follow",
+        "id": "the-rules-every-union-must-follow"
+      },
+      {
+        "level": 2,
+        "text": "Practice Questions",
+        "id": "practice-questions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Display all employee IDs who have received either a bonus or taken a leave.",
+        "id": "q1-display-all-employee-ids-who-have-received-either-a-bonus-or-taken-a-leave"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Display the names of all employees and all clients in a single result set.",
+        "id": "q2-display-the-names-of-all-employees-and-all-clients-in-a-single-result-set"
+      },
+      {
+        "level": 2,
+        "text": "Key Points",
+        "id": "key-points"
+      },
+      {
+        "level": 2,
+        "text": "Cheatsheet",
+        "id": "cheatsheet"
+      }
+    ]
+  },
+  "lesson-12-recursive-cte": {
+    "id": "lesson-12-recursive-cte",
+    "slug": "12-recursive-cte",
+    "title": "Recursive CTE in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-12-recursive-cte",
+    "order": 12,
+    "content": "# Part 12: Recursive CTE in MySQL\n\nA **Recursive CTE** is a CTE that **references itself repeatedly** until a termination condition is met.\n\n\"Recursive\" simply means: **repeat the same task again and again until a condition is met.**\n\nIt's the tool you reach for whenever data is **self-referencing** — rows that point to other rows in the *same* table. Classic examples: an employee whose `manager_id` points to another employee, a category whose `parent_id` points to another category, or a folder nested inside another folder. A normal `JOIN` can only walk **one level** of that chain; a recursive CTE walks **as many levels as exist**.\n\n---\n\n## Syntax\n\n```sql\nWITH RECURSIVE cte_name AS\n(\n    -- Anchor Query\n\n    UNION ALL\n\n    -- Recursive Query\n)\nSELECT *\nFROM cte_name;\n```\n\n| Part | Role |\n| ---- | ---- |\n| **Anchor Query** | The **starting point** — runs once and seeds the result. |\n| **Recursive Query** | Runs **repeatedly**, each pass feeding on the *previous* pass's rows. |\n| **`UNION ALL`** | **Combines** the previous rows with the newly produced rows. |\n| **Termination Condition** | **Stops** the recursion when the recursive query returns **no new rows**. |\n\n> ⚠️ **The `RECURSIVE` keyword is required.** Unlike a normal CTE, you must write `WITH RECURSIVE`. And the recursive part must reference the CTE **by name** — that self-reference is what makes it loop.\n\n---\n\n## How the loop actually runs\n\nReading `WITH RECURSIVE` top-to-bottom hides the loop. Here's what MySQL does under the hood:\n\n1. Run the **anchor query** once → these are the first rows.\n2. Run the **recursive query**, but only against the rows produced by the **previous step** (not the whole accumulated set).\n3. `UNION ALL` those new rows into the result.\n4. Repeat step 2–3, each time using only the *latest* batch of rows.\n5. **Stop** when a pass produces **zero rows** — the `WHERE` in the recursive query is what eventually makes that happen.\n\n> ⚠️ **A missing or wrong termination condition = infinite loop.** MySQL protects you with `cte_max_recursion_depth` (default **1000**) — hit that ceiling and the query errors out instead of hanging forever. You can raise it with `SET SESSION cte_max_recursion_depth = 5000;` when a legitimately deep hierarchy needs it.\n\n---\n\n## Dataset for This Part\n\nThe examples below use a self-referencing `organization` table — each employee's `manager_id` points to another employee's `employee_id` in the **same table** (the CEO has `NULL`, since they report to no one).\n\n```sql\nCREATE TABLE organization (\n    employee_id   INT PRIMARY KEY,\n    employee_name VARCHAR(1000),\n    designation   VARCHAR(50),\n    manager_id    INT\n);\n\nINSERT INTO organization VALUES\n(1, 'Raj Sharma',    'CEO',                 NULL),\n(2, 'Sneha Kapoor',  'CTO',                 1),\n(3, 'Amit Patel',    'HR Head',             1),\n(4, 'Aarav Sharma',  'Engineering Manager', 2),\n(5, 'Priya Mehta',   'Senior Developer',    4),\n(6, 'Rohit Jain',    'Developer',           5),\n(7, 'Anjali Verma',  'HR Executive',        3);\n```\n\nThe reporting chain this encodes:\n\n```\nRaj Sharma (CEO)\n├── Sneha Kapoor (CTO)\n│   └── Aarav Sharma (Engineering Manager)\n│       └── Priya Mehta (Senior Developer)\n│           └── Rohit Jain (Developer)\n└── Amit Patel (HR Head)\n    └── Anjali Verma (HR Executive)\n```\n\n---\n\n## Practice Questions\n\n### Q1. Generate the numbers 1 to 10 using a Recursive CTE.\n\n```sql\nWITH RECURSIVE numbers AS\n(\n    SELECT 1 AS num              -- Anchor: start at 1\n\n    UNION ALL\n\n    SELECT num + 1               -- Recursive: add 1 to the previous number\n    FROM numbers\n    WHERE num < 10               -- Termination: stop once we reach 10\n)\nSELECT *\nFROM numbers;\n```\n\n**🧠 Explanation**\n\n- The **anchor** produces a single row: `num = 1`.\n- The **recursive query** takes the previous value and adds 1 → `2`, then `3`, then `4`… each pass working off the row before it.\n- The **`WHERE num < 10`** is the termination condition. When `num` becomes `10`, the recursive query's `WHERE` filters it out, the next pass produces **no rows**, and the loop stops.\n- Final output: `1, 2, 3, 4, 5, 6, 7, 8, 9, 10`.\n\n> 💡 **Teaching Tip:** This \"number series\" pattern is the *hello world* of recursion — but it's genuinely useful. Generate a run of dates, fill gaps in a report, or produce a row per day/hour for a calendar table, all without a physical numbers table. Change `WHERE num < 10` to `WHERE num < 100` and you instantly have 1–100.\n\n---\n\n### Q2. Display the complete employee hierarchy.\n\nWalk the reporting chain from the top (`manager_id IS NULL`) all the way down, tracking each person's **level** in the org and the full **path** from the CEO to them.\n\n```sql\nWITH RECURSIVE organization_hierarchy AS\n(\n    -- Anchor: the top of the tree (the person with no manager)\n    SELECT\n        employee_id,\n        employee_name,\n        designation,\n        1 AS level,\n        employee_name AS hierarchy_path\n    FROM organization\n    WHERE manager_id IS NULL\n\n    UNION ALL\n\n    -- Recursive: attach each employee to the manager already in the result\n    SELECT\n        o.employee_id,\n        o.employee_name,\n        o.designation,\n        oh.level + 1,\n        CONCAT(oh.hierarchy_path, ' -> ', o.employee_name)\n    FROM organization o\n    JOIN organization_hierarchy oh\n        ON o.manager_id = oh.employee_id\n)\nSELECT *\nFROM organization_hierarchy;\n```\n\n**Result:**\n\n| employee_id | employee_name | designation | level | hierarchy_path |\n|---|---|---|---|---|\n| 1 | Raj Sharma | CEO | 1 | Raj Sharma |\n| 2 | Sneha Kapoor | CTO | 2 | Raj Sharma -> Sneha Kapoor |\n| 3 | Amit Patel | HR Head | 2 | Raj Sharma -> Amit Patel |\n| 4 | Aarav Sharma | Engineering Manager | 3 | Raj Sharma -> Sneha Kapoor -> Aarav Sharma |\n| 7 | Anjali Verma | HR Executive | 3 | Raj Sharma -> Amit Patel -> Anjali Verma |\n| 5 | Priya Mehta | Senior Developer | 4 | Raj Sharma -> Sneha Kapoor -> Aarav Sharma -> Priya Mehta |\n| 6 | Rohit Jain | Developer | 5 | Raj Sharma -> Sneha Kapoor -> Aarav Sharma -> Priya Mehta -> Rohit Jain |\n\n**🧠 Explanation**\n\n- The **anchor** grabs the root — `WHERE manager_id IS NULL` finds Raj Sharma (the CEO). He's assigned `level = 1` and his `hierarchy_path` starts as just his own name.\n- The **recursive query** joins the `organization` table back onto the CTE: `o.manager_id = oh.employee_id` means *\"find every employee whose manager is already in our result.\"* On the first pass that's everyone reporting to the CEO (Sneha, Amit); on the next pass, everyone reporting to *them*; and so on down the tree.\n- **`oh.level + 1`** increments the depth counter each level down — 1 (CEO), 2 (their reports), 3, 4, 5.\n- **`CONCAT(oh.hierarchy_path, ' -> ', o.employee_name)`** builds a breadcrumb trail by appending each new name to the parent's path — so you can read the full chain of command in one column.\n- The loop **terminates naturally**: eventually it reaches employees who have no reports (Rohit, Anjali), the join finds nothing new, and recursion stops.\n\n> 💡 **Teaching Tip:** The direction of the join is the whole trick. `ON o.manager_id = oh.employee_id` walks **top-down** (manager → reports). Flip it to `ON o.employee_id = oh.manager_id` and start the anchor from a *leaf* employee, and you'd walk **bottom-up** instead (report → all their managers). Same table, same recursion — just reverse the link you follow.\n\n---\n\n## When to Use a Recursive CTE\n\n1. **Hierarchies** — org charts, employee → manager chains, category → subcategory trees.\n2. **Graph / tree traversal** — folder structures, bill-of-materials (part → sub-parts), threaded comments.\n3. **Sequence generation** — number series, date/calendar ranges, filling gaps in reports.\n4. **Path building** — producing a \"breadcrumb\" from a root node to any descendant.\n\n---\n\n## Key Points\n\n- ✔ Use **`WITH RECURSIVE`** — the keyword is mandatory.\n- ✔ Every recursive CTE needs an **anchor** (seed) and a **recursive** part joined by **`UNION ALL`**.\n- ✔ The recursive query must **reference the CTE by name** — that self-reference is the loop.\n- ✔ Always include a **termination condition** (a `WHERE` that eventually returns no rows).\n- ✔ MySQL caps recursion at **`cte_max_recursion_depth`** (default 1000) to stop runaway loops — raise it only when a genuinely deep tree needs it.\n- ✔ The **join direction** decides whether you walk top-down or bottom-up.\n\n---\n\n## Cheatsheet\n\n```sql\n-- Basic recursive CTE\nWITH RECURSIVE cte_name AS\n(\n    SELECT ...              -- Anchor (runs once)\n    UNION ALL\n    SELECT ...              -- Recursive (runs until no new rows)\n    FROM cte_name\n    WHERE termination_condition\n)\nSELECT * FROM cte_name;\n\n-- Number series 1..N\nWITH RECURSIVE numbers AS (\n    SELECT 1 AS num\n    UNION ALL\n    SELECT num + 1 FROM numbers WHERE num < 10\n)\nSELECT * FROM numbers;\n\n-- Top-down hierarchy walk (manager -> reports)\nWITH RECURSIVE tree AS (\n    SELECT id, name, 1 AS level, name AS path\n    FROM t WHERE parent_id IS NULL          -- anchor at the root\n    UNION ALL\n    SELECT c.id, c.name, p.level + 1, CONCAT(p.path, ' -> ', c.name)\n    FROM t c JOIN tree p ON c.parent_id = p.id\n)\nSELECT * FROM tree;\n\n-- Raise the recursion ceiling for a very deep tree\nSET SESSION cte_max_recursion_depth = 5000;\n```\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "Syntax",
+        "id": "syntax"
+      },
+      {
+        "level": 2,
+        "text": "How the loop actually runs",
+        "id": "how-the-loop-actually-runs"
+      },
+      {
+        "level": 2,
+        "text": "Dataset for This Part",
+        "id": "dataset-for-this-part"
+      },
+      {
+        "level": 2,
+        "text": "Practice Questions",
+        "id": "practice-questions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Generate the numbers 1 to 10 using a Recursive CTE.",
+        "id": "q1-generate-the-numbers-1-to-10-using-a-recursive-cte"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Display the complete employee hierarchy.",
+        "id": "q2-display-the-complete-employee-hierarchy"
+      },
+      {
+        "level": 2,
+        "text": "When to Use a Recursive CTE",
+        "id": "when-to-use-a-recursive-cte"
+      },
+      {
+        "level": 2,
+        "text": "Key Points",
+        "id": "key-points"
+      },
+      {
+        "level": 2,
+        "text": "Cheatsheet",
+        "id": "cheatsheet"
+      }
+    ]
+  },
+  "lesson-13-indexes": {
+    "id": "lesson-13-indexes",
+    "slug": "13-indexes",
+    "title": "Indexes in MySQL",
+    "trackId": "sql-fundamentals",
+    "moduleId": "mod-13-indexes",
+    "order": 13,
+    "content": "# Part 13: Indexes in MySQL\n\nAn **index** is a separate data structure that MySQL keeps *alongside* your table to make **looking up rows faster** — the same way the index at the back of a book lets you jump straight to a page instead of reading every page.\n\nWithout an index, a query like `WHERE email = 'x'` forces MySQL to scan **every row** in the table (a *full table scan*). With an index on `email`, MySQL walks a sorted B-Tree structure and lands on the matching rows in a handful of steps.\n\n> 💡 **The trade-off in one line:** an index makes **reads faster** but makes **writes slower** (every `INSERT`/`UPDATE`/`DELETE` must also update the index) and **costs extra storage**. You index for the queries you actually run, not \"just in case\".\n\n![Indexing in MySQL](../assets/Indexing.png)\n\n---\n\n## How an Index Works (the mental model)\n\nMySQL's default index is a **B-Tree** — a balanced, sorted tree. Because the values are kept **sorted**, MySQL can:\n\n- **Find** a value with a binary-search-style descent (a few hops instead of N rows).\n- **Range scan** efficiently (`BETWEEN`, `<`, `>`, `LIKE 'abc%'`) by walking the sorted leaves.\n- **Avoid sorting** for `ORDER BY` when the order matches the index.\n\n| Without an index | With an index |\n| --- | --- |\n| Full table scan — reads every row | Targeted lookup — reads only what matches |\n| Cost grows linearly with table size | Cost grows *logarithmically* |\n| Fine for tiny tables | Essential for large tables |\n\n---\n\n## When to Use an Index\n\nAdd an index when a column is **frequently used to find or order rows**:\n\n1. **`WHERE` filters** — columns you search on constantly (`email`, `status`, `user_id`).\n2. **`JOIN` keys** — foreign-key columns used to join tables.\n3. **`ORDER BY` / `GROUP BY`** — columns you sort or group on often.\n4. **Uniqueness rules** — enforce \"no duplicates\" with a `UNIQUE` index.\n\n### When *not* to index\n\n- Columns that are **rarely queried**.\n- Columns with **very few distinct values** (e.g. a `gender` or boolean flag) — the index barely narrows anything.\n- **Write-heavy** tables where the index-maintenance cost outweighs the read gain.\n- **Small tables** — a full scan is already cheap.\n\n---\n\n## Types of Index Covered Here\n\n| Type | Purpose |\n| --- | --- |\n| **Single-column** | Speeds up lookups on one column. |\n| **Composite** | One index across **multiple columns** (order matters). |\n| **Unique** | Speeds up lookups **and** forbids duplicate values. |\n| **Prefix** | Indexes only the **first N characters** of a long text column. |\n\n---\n\n## Practice Questions\n\n### Q1. Create a Single-Column Index\n\n```sql\nCREATE INDEX idx_employee_email\nON employees(email);\n```\n\n**🧠 Explanation**\n\n- Creates a B-Tree index on the single column `email`.\n- Any query that filters or sorts by `email` (`WHERE email = ...`, `ORDER BY email`) can now use it instead of scanning the whole table.\n- Naming convention: prefixing with `idx_` makes indexes easy to spot when you list them.\n\n---\n\n### Q2. Create a Composite Index\n\n```sql\nCREATE INDEX idx_employee_dept\nON employees(employee_name, department);\n```\n\n**🧠 Explanation**\n\n- A **composite** index covers **more than one column** in a single structure.\n- **Column order matters.** This index helps queries that filter on `employee_name` **alone**, or `employee_name` **and** `department` together — because it's sorted by `employee_name` *first*, then `department`.\n- It does **not** efficiently serve a query that filters on `department` alone (the second column). This is the **left-prefix rule**: an index on `(a, b)` works for `a` and `(a, b)`, but not `b` by itself.\n\n> 💡 **Rule of thumb:** put the **most selective** / most-often-filtered column **first** in a composite index.\n\n---\n\n### Q3. Create a UNIQUE Index\n\n```sql\nCREATE UNIQUE INDEX idx_project_unique\nON projects(project_name);\n```\n\nA unique index does two jobs at once: it **speeds up lookups** *and* **guarantees no two rows share the same value**.\n\n```sql\nSHOW INDEXES FROM projects;\n\nINSERT INTO projects(project_name) VALUES ('CRM System');\n```\n\n**🧠 Explanation**\n\n- The first `INSERT` succeeds. Run it **a second time** and MySQL rejects it with a **duplicate-key error** — that's the uniqueness constraint doing its job.\n- Use a unique index to enforce natural business rules: no two users with the same email, no two projects with the same name, etc.\n\n---\n\n### Q4. Create a Prefix Index\n\n```sql\nCREATE INDEX idx_email_prefix\nON employees(email(5));\n\nSHOW INDEXES FROM employees;\n```\n\nA **prefix index** indexes only the **first N characters** of a column — here, the first 5 characters of `email`.\n\n**When to use it**\n\n- **Large text columns** (`VARCHAR(1000)`, `TEXT`) where a full-column index would be huge.\n- **Saves storage** — the index only stores a slice of each value.\n- **Faster index creation and updates** — less data to maintain.\n\n**🧠 Explanation**\n\n- `email(5)` tells MySQL: *\"only index the first 5 characters.\"*\n- The trade-off is **selectivity**. If many emails share the same first 5 characters, the prefix can't distinguish them and MySQL still has to check the actual rows. Pick a prefix length long enough to keep values mostly distinct.\n- Example: if the emails `kunal.shah@...`, `kunal.jain@...`, `kunal.roy@...`, `kunal.dev@...` all start with `kunal`, a 5-char prefix collapses those **4 emails** into one bucket — so `WHERE email = 'kunal.shah@company.com'` still has to examine each `kunal*` row.\n\n```sql\nEXPLAIN ANALYZE\nSELECT *\nFROM employees\nWHERE email = 'kunal.shah@company.com';\n```\n\nRun this to *see* how many rows the prefix index actually narrows the search down to.\n\n---\n\n### Q5. Remove an Index\n\n```sql\nDROP INDEX idx_employee_email\nON employees;\n```\n\n**🧠 Explanation**\n\n- Drops the index by name from the specified table.\n- Drop indexes that aren't being used — they cost storage and slow every write for no read benefit.\n\n---\n\n### Q6. Check Existing Indexes\n\n```sql\nSHOW INDEXES FROM employees;\n```\n\n**🧠 Explanation**\n\n- Lists every index on the table, including the auto-created index behind the **primary key**.\n- Useful columns in the output: `Key_name` (index name), `Column_name`, `Non_unique` (`0` = unique), and `Seq_in_index` (position of a column within a composite index).\n\n---\n\n### Q7. Check Query Performance with `EXPLAIN`\n\n`EXPLAIN` shows how MySQL **plans** to execute a query — **without actually running it**.\n\n```sql\nEXPLAIN\nSELECT *\nFROM employees\nWHERE employee_name = 'Neha Joshi' AND department = 'Marketing';\n```\n\n**🧠 Explanation**\n\n- Reveals whether MySQL will use an **index** or fall back to a **full table scan**.\n- Key columns to read: `type` (`ALL` = full scan ⚠️, `ref`/`range` = using an index ✅), `key` (which index it picked), and `rows` (estimated rows examined).\n- This query is exactly what `idx_employee_dept` from Q2 was built for — `EXPLAIN` lets you confirm the optimizer actually uses it.\n\n---\n\n### Q8. Measure Real Performance with `EXPLAIN ANALYZE`\n\n`EXPLAIN ANALYZE` **actually executes** the query and reports what *really* happened:\n\n- the execution plan,\n- **actual** execution time,\n- **actual** rows processed,\n- timing for **each step**.\n\n```sql\nEXPLAIN ANALYZE\nSELECT *\nFROM employees\nWHERE employee_name = 'Neha Joshi' AND department = 'Marketing';\n```\n\n### `EXPLAIN` vs `EXPLAIN ANALYZE`\n\n| `EXPLAIN` | `EXPLAIN ANALYZE` |\n| --- | --- |\n| Doesn't execute the query | Executes the query |\n| Estimated execution plan | Actual execution plan |\n| Estimated rows | Actual rows |\n| Estimated cost | Actual execution time |\n\n> 💡 **Use `EXPLAIN` to plan, `EXPLAIN ANALYZE` to prove.** `EXPLAIN` is safe and instant (nothing runs), so reach for it first. When estimates and reality disagree, `EXPLAIN ANALYZE` shows you the truth — at the cost of actually running the query.\n\n---\n\n## Key Points\n\n- ✔ An index is a **sorted side structure** that turns full table scans into targeted lookups.\n- ✔ Indexes make **reads faster** but **writes slower** and use extra **storage** — index deliberately.\n- ✔ **Composite** indexes follow the **left-prefix rule**: `(a, b)` serves `a` and `(a, b)`, not `b` alone.\n- ✔ **Unique** indexes speed up lookups *and* forbid duplicate values.\n- ✔ **Prefix** indexes trade selectivity for smaller size on long text columns.\n- ✔ Use **`EXPLAIN`** to see the *planned* execution, **`EXPLAIN ANALYZE`** to see the *actual* one.\n- ✔ Don't index low-cardinality columns, rarely-queried columns, or tiny/write-heavy tables.\n\n---\n\n## Cheatsheet\n\n```sql\n-- Single-column index\nCREATE INDEX idx_name ON table_name(column);\n\n-- Composite index (order matters — most-filtered column first)\nCREATE INDEX idx_name ON table_name(col_a, col_b);\n\n-- Unique index (speeds lookups + blocks duplicates)\nCREATE UNIQUE INDEX idx_name ON table_name(column);\n\n-- Prefix index (first N chars of a long text column)\nCREATE INDEX idx_name ON table_name(column(N));\n\n-- Inspect indexes on a table\nSHOW INDEXES FROM table_name;\n\n-- Remove an index\nDROP INDEX idx_name ON table_name;\n\n-- Plan a query (does NOT run it)\nEXPLAIN SELECT ... ;\n\n-- Run a query and report actual timing + rows\nEXPLAIN ANALYZE SELECT ... ;\n```\n",
+    "toc": [
+      {
+        "level": 2,
+        "text": "How an Index Works (the mental model)",
+        "id": "how-an-index-works-the-mental-model"
+      },
+      {
+        "level": 2,
+        "text": "When to Use an Index",
+        "id": "when-to-use-an-index"
+      },
+      {
+        "level": 3,
+        "text": "When not to index",
+        "id": "when-not-to-index"
+      },
+      {
+        "level": 2,
+        "text": "Types of Index Covered Here",
+        "id": "types-of-index-covered-here"
+      },
+      {
+        "level": 2,
+        "text": "Practice Questions",
+        "id": "practice-questions"
+      },
+      {
+        "level": 3,
+        "text": "Q1. Create a Single-Column Index",
+        "id": "q1-create-a-single-column-index"
+      },
+      {
+        "level": 3,
+        "text": "Q2. Create a Composite Index",
+        "id": "q2-create-a-composite-index"
+      },
+      {
+        "level": 3,
+        "text": "Q3. Create a UNIQUE Index",
+        "id": "q3-create-a-unique-index"
+      },
+      {
+        "level": 3,
+        "text": "Q4. Create a Prefix Index",
+        "id": "q4-create-a-prefix-index"
+      },
+      {
+        "level": 3,
+        "text": "Q5. Remove an Index",
+        "id": "q5-remove-an-index"
+      },
+      {
+        "level": 3,
+        "text": "Q6. Check Existing Indexes",
+        "id": "q6-check-existing-indexes"
+      },
+      {
+        "level": 3,
+        "text": "Q7. Check Query Performance with EXPLAIN",
+        "id": "q7-check-query-performance-with-explain"
+      },
+      {
+        "level": 3,
+        "text": "Q8. Measure Real Performance with EXPLAIN ANALYZE",
+        "id": "q8-measure-real-performance-with-explain-analyze"
+      },
+      {
+        "level": 3,
+        "text": "EXPLAIN vs EXPLAIN ANALYZE",
+        "id": "explain-vs-explain-analyze"
+      },
+      {
+        "level": 2,
+        "text": "Key Points",
+        "id": "key-points"
+      },
+      {
+        "level": 2,
+        "text": "Cheatsheet",
+        "id": "cheatsheet"
+      }
+    ]
+  }
+}

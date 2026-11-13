@@ -1,0 +1,18 @@
+{
+  "name": "QueryForge — SQL & Data Practice Platform",
+  "short_name": "QueryForge",
+  "description": "100% free, client-side SQL and data practice platform with in-browser WebAssembly engines.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07090E",
+  "theme_color": "#06B6D4",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

@@ -1,0 +1,457 @@
+[
+  {
+    "id": "sql-fundamentals",
+    "title": "SQL Fundamentals & Deep Dives",
+    "order": 1,
+    "description": "Complete masterclass from basic SELECT queries to advanced Window Functions, CTEs, Views, and Indexing.",
+    "modules": [
+      {
+        "id": "mod-00-sample-database",
+        "title": "employer_database — MySQL Dataset",
+        "trackId": "sql-fundamentals",
+        "order": 0,
+        "description": "Complete guide and reference for employer_database — mysql dataset",
+        "lessonIds": [
+          "lesson-00-sample-database"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-01-filtering-data",
+        "title": "️ MySQL Data Filtering — Query Reference",
+        "trackId": "sql-fundamentals",
+        "order": 1,
+        "description": "Complete guide and reference for ️ mysql data filtering — query reference",
+        "lessonIds": [
+          "lesson-01-filtering-data"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-02-aggregate-functions-and-group-by",
+        "title": "Part 2 — Aggregate Functions + GROUP BY + HAVING",
+        "trackId": "sql-fundamentals",
+        "order": 2,
+        "description": "Complete guide and reference for part 2 — aggregate functions + group by + having",
+        "lessonIds": [
+          "lesson-02-aggregate-functions-and-group-by"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-03-joins",
+        "title": "JOINs in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 3,
+        "description": "Complete guide and reference for joins in mysql",
+        "lessonIds": [
+          "lesson-03-joins"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-04-subqueries",
+        "title": "Subqueries in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 4,
+        "description": "Complete guide and reference for subqueries in mysql",
+        "lessonIds": [
+          "lesson-04-subqueries"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-05-window-functions",
+        "title": "🪟 Part 5: Window Functions in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 5,
+        "description": "Complete guide and reference for 🪟 part 5: window functions in mysql",
+        "lessonIds": [
+          "lesson-05-window-functions"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-06-common-table-expressions",
+        "title": "Common Table Expressions (CTEs) in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 6,
+        "description": "Complete guide and reference for common table expressions (ctes) in mysql",
+        "lessonIds": [
+          "lesson-06-common-table-expressions"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-07-string-date-and-case-functions",
+        "title": "String + Date + CASE Functions in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 7,
+        "description": "Complete guide and reference for string + date + case functions in mysql",
+        "lessonIds": [
+          "lesson-07-string-date-and-case-functions"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-08-views",
+        "title": "Views in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 8,
+        "description": "Complete guide and reference for views in mysql",
+        "lessonIds": [
+          "lesson-08-views"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-09-stored-procedures",
+        "title": "Stored Procedures in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 9,
+        "description": "Complete guide and reference for stored procedures in mysql",
+        "lessonIds": [
+          "lesson-09-stored-procedures"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-10-triggers",
+        "title": "Triggers in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 10,
+        "description": "Complete guide and reference for triggers in mysql",
+        "lessonIds": [
+          "lesson-10-triggers"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-11-union-and-union-all",
+        "title": "UNION & UNION ALL in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 11,
+        "description": "Complete guide and reference for union & union all in mysql",
+        "lessonIds": [
+          "lesson-11-union-and-union-all"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-12-recursive-cte",
+        "title": "Recursive CTE in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 12,
+        "description": "Complete guide and reference for recursive cte in mysql",
+        "lessonIds": [
+          "lesson-12-recursive-cte"
+        ],
+        "problemIds": []
+      },
+      {
+        "id": "mod-13-indexes",
+        "title": "Indexes in MySQL",
+        "trackId": "sql-fundamentals",
+        "order": 13,
+        "description": "Complete guide and reference for indexes in mysql",
+        "lessonIds": [
+          "lesson-13-indexes"
+        ],
+        "problemIds": []
+      }
+    ],
+    "totalLessons": 14,
+    "totalProblems": 0
+  },
+  {
+    "id": "leetcode-sql-50",
+    "title": "LeetCode Top SQL 50",
+    "order": 2,
+    "description": "Full walkthroughs of the official LeetCode SQL 50 study plan with verified datasets, approaches, and test cases.",
+    "modules": [
+      {
+        "id": "leetcode-set-1",
+        "title": "Select & Basic Joins",
+        "trackId": "leetcode-sql-50",
+        "order": 0,
+        "description": "LeetCode SQL 50 study plan problems (Select & Basic Joins)",
+        "lessonIds": [],
+        "problemIds": [
+          "leetcode-sql-50-leetcode-set-1-q1",
+          "leetcode-sql-50-leetcode-set-1-q2",
+          "leetcode-sql-50-leetcode-set-1-q3",
+          "leetcode-sql-50-leetcode-set-1-q4",
+          "leetcode-sql-50-leetcode-set-1-q5",
+          "leetcode-sql-50-leetcode-set-1-q6",
+          "leetcode-sql-50-leetcode-set-1-q7",
+          "leetcode-sql-50-leetcode-set-1-q8",
+          "leetcode-sql-50-leetcode-set-1-q9",
+          "leetcode-sql-50-leetcode-set-1-q10"
+        ]
+      },
+      {
+        "id": "leetcode-set-2",
+        "title": "Basic Aggregate Functions",
+        "trackId": "leetcode-sql-50",
+        "order": 1,
+        "description": "LeetCode SQL 50 study plan problems (Basic Aggregate Functions)",
+        "lessonIds": [],
+        "problemIds": [
+          "leetcode-sql-50-leetcode-set-2-q1",
+          "leetcode-sql-50-leetcode-set-2-q2",
+          "leetcode-sql-50-leetcode-set-2-q3",
+          "leetcode-sql-50-leetcode-set-2-q4",
+          "leetcode-sql-50-leetcode-set-2-q5",
+          "leetcode-sql-50-leetcode-set-2-q6",
+          "leetcode-sql-50-leetcode-set-2-q7",
+          "leetcode-sql-50-leetcode-set-2-q8",
+          "leetcode-sql-50-leetcode-set-2-q9",
+          "leetcode-sql-50-leetcode-set-2-q10"
+        ]
+      },
+      {
+        "id": "leetcode-set-3",
+        "title": "Sorting and Grouping",
+        "trackId": "leetcode-sql-50",
+        "order": 2,
+        "description": "LeetCode SQL 50 study plan problems (Sorting and Grouping)",
+        "lessonIds": [],
+        "problemIds": [
+          "leetcode-sql-50-leetcode-set-3-q1",
+          "leetcode-sql-50-leetcode-set-3-q2",
+          "leetcode-sql-50-leetcode-set-3-q3",
+          "leetcode-sql-50-leetcode-set-3-q4",
+          "leetcode-sql-50-leetcode-set-3-q5",
+          "leetcode-sql-50-leetcode-set-3-q6",
+          "leetcode-sql-50-leetcode-set-3-q7",
+          "leetcode-sql-50-leetcode-set-3-q8",
+          "leetcode-sql-50-leetcode-set-3-q9",
+          "leetcode-sql-50-leetcode-set-3-q10"
+        ]
+      },
+      {
+        "id": "leetcode-set-4",
+        "title": "Advanced Select & Joins",
+        "trackId": "leetcode-sql-50",
+        "order": 3,
+        "description": "LeetCode SQL 50 study plan problems (Advanced Select & Joins)",
+        "lessonIds": [],
+        "problemIds": [
+          "leetcode-sql-50-leetcode-set-4-q1",
+          "leetcode-sql-50-leetcode-set-4-q2",
+          "leetcode-sql-50-leetcode-set-4-q3",
+          "leetcode-sql-50-leetcode-set-4-q4",
+          "leetcode-sql-50-leetcode-set-4-q5",
+          "leetcode-sql-50-leetcode-set-4-q6",
+          "leetcode-sql-50-leetcode-set-4-q7",
+          "leetcode-sql-50-leetcode-set-4-q8",
+          "leetcode-sql-50-leetcode-set-4-q9",
+          "leetcode-sql-50-leetcode-set-4-q10"
+        ]
+      },
+      {
+        "id": "leetcode-set-5",
+        "title": "Subqueries & Advanced Strings",
+        "trackId": "leetcode-sql-50",
+        "order": 4,
+        "description": "LeetCode SQL 50 study plan problems (Subqueries & Advanced Strings)",
+        "lessonIds": [],
+        "problemIds": [
+          "leetcode-sql-50-leetcode-set-5-q1",
+          "leetcode-sql-50-leetcode-set-5-q2",
+          "leetcode-sql-50-leetcode-set-5-q3",
+          "leetcode-sql-50-leetcode-set-5-q4",
+          "leetcode-sql-50-leetcode-set-5-q5",
+          "leetcode-sql-50-leetcode-set-5-q6",
+          "leetcode-sql-50-leetcode-set-5-q7",
+          "leetcode-sql-50-leetcode-set-5-q8",
+          "leetcode-sql-50-leetcode-set-5-q9",
+          "leetcode-sql-50-leetcode-set-5-q10"
+        ]
+      }
+    ],
+    "totalLessons": 0,
+    "totalProblems": 50
+  },
+  {
+    "id": "interview-questions",
+    "title": "Product Company SQL Interviews",
+    "order": 3,
+    "description": "Real-world queries inspired by product tech companies (food delivery, streaming, ride-hailing, fintech).",
+    "modules": [
+      {
+        "id": "interview-set-1",
+        "title": "Interview Set 1",
+        "trackId": "interview-questions",
+        "order": 0,
+        "description": "Curated interview questions covering anti-joins, running balances, and multi-table operations.",
+        "lessonIds": [],
+        "problemIds": [
+          "interview-questions-interview-set-1-q1",
+          "interview-questions-interview-set-1-q2",
+          "interview-questions-interview-set-1-q3",
+          "interview-questions-interview-set-1-q4",
+          "interview-questions-interview-set-1-q5"
+        ]
+      },
+      {
+        "id": "interview-set-2",
+        "title": "Interview Set 2",
+        "trackId": "interview-questions",
+        "order": 1,
+        "description": "Curated interview questions covering anti-joins, running balances, and multi-table operations.",
+        "lessonIds": [],
+        "problemIds": [
+          "interview-questions-interview-set-2-q1",
+          "interview-questions-interview-set-2-q2",
+          "interview-questions-interview-set-2-q3",
+          "interview-questions-interview-set-2-q4",
+          "interview-questions-interview-set-2-q5"
+        ]
+      },
+      {
+        "id": "interview-set-3",
+        "title": "Interview Set 3",
+        "trackId": "interview-questions",
+        "order": 2,
+        "description": "Curated interview questions covering anti-joins, running balances, and multi-table operations.",
+        "lessonIds": [],
+        "problemIds": [
+          "interview-questions-interview-set-3-q1",
+          "interview-questions-interview-set-3-q2",
+          "interview-questions-interview-set-3-q3",
+          "interview-questions-interview-set-3-q4",
+          "interview-questions-interview-set-3-q5",
+          "interview-questions-interview-set-3-q6"
+        ]
+      },
+      {
+        "id": "interview-set-4",
+        "title": "Interview Set 4",
+        "trackId": "interview-questions",
+        "order": 3,
+        "description": "Curated interview questions covering anti-joins, running balances, and multi-table operations.",
+        "lessonIds": [],
+        "problemIds": [
+          "interview-questions-interview-set-4-q1",
+          "interview-questions-interview-set-4-q2",
+          "interview-questions-interview-set-4-q3",
+          "interview-questions-interview-set-4-q4",
+          "interview-questions-interview-set-4-q5"
+        ]
+      },
+      {
+        "id": "interview-set-5",
+        "title": "Interview Set 5",
+        "trackId": "interview-questions",
+        "order": 4,
+        "description": "Curated interview questions covering anti-joins, running balances, and multi-table operations.",
+        "lessonIds": [],
+        "problemIds": [
+          "interview-questions-interview-set-5-q1",
+          "interview-questions-interview-set-5-q2",
+          "interview-questions-interview-set-5-q3",
+          "interview-questions-interview-set-5-q4",
+          "interview-questions-interview-set-5-q5"
+        ]
+      },
+      {
+        "id": "interview-set-6",
+        "title": "Interview Set 6",
+        "trackId": "interview-questions",
+        "order": 5,
+        "description": "Curated interview questions covering anti-joins, running balances, and multi-table operations.",
+        "lessonIds": [],
+        "problemIds": [
+          "interview-questions-interview-set-6-q1",
+          "interview-questions-interview-set-6-q2",
+          "interview-questions-interview-set-6-q3",
+          "interview-questions-interview-set-6-q4",
+          "interview-questions-interview-set-6-q5",
+          "interview-questions-interview-set-6-q6",
+          "interview-questions-interview-set-6-q7"
+        ]
+      }
+    ],
+    "totalLessons": 0,
+    "totalProblems": 33
+  },
+  {
+    "id": "company-questions",
+    "title": "Company-Specific Interview Questions",
+    "order": 4,
+    "description": "Real interview rounds from IT and consulting giants (Accenture, TCS, etc.).",
+    "modules": [
+      {
+        "id": "company-1",
+        "title": "Accenture Tech Interviews",
+        "trackId": "company-questions",
+        "order": 0,
+        "description": "Questions reported by candidates on AmbitionBox for Data Engineer & SQL roles at Accenture Tech Interviews.",
+        "lessonIds": [],
+        "problemIds": [
+          "company-questions-company-1-q1",
+          "company-questions-company-1-q2",
+          "company-questions-company-1-q3",
+          "company-questions-company-1-q4",
+          "company-questions-company-1-q5",
+          "company-questions-company-1-q6",
+          "company-questions-company-1-q7",
+          "company-questions-company-1-q8",
+          "company-questions-company-1-q9",
+          "company-questions-company-1-q10",
+          "company-questions-company-1-q11",
+          "company-questions-company-1-q12",
+          "company-questions-company-1-q13",
+          "company-questions-company-1-q14",
+          "company-questions-company-1-q15"
+        ]
+      },
+      {
+        "id": "company-2",
+        "title": "TCS Tech Interviews",
+        "trackId": "company-questions",
+        "order": 1,
+        "description": "Questions reported by candidates on AmbitionBox for Data Engineer & SQL roles at TCS Tech Interviews.",
+        "lessonIds": [],
+        "problemIds": [
+          "company-questions-company-2-q1",
+          "company-questions-company-2-q2",
+          "company-questions-company-2-q3",
+          "company-questions-company-2-q4",
+          "company-questions-company-2-q5",
+          "company-questions-company-2-q6",
+          "company-questions-company-2-q7",
+          "company-questions-company-2-q8",
+          "company-questions-company-2-q9",
+          "company-questions-company-2-q10"
+        ]
+      }
+    ],
+    "totalLessons": 0,
+    "totalProblems": 25
+  },
+  {
+    "id": "bonus-problems",
+    "title": "Advanced Analytics Patterns",
+    "order": 5,
+    "description": "Deep patterns skipped by standard platforms: date spines, rolling time windows, and gaps.",
+    "modules": [
+      {
+        "id": "bonus-set-1",
+        "title": "The Rolling Sum Pattern",
+        "trackId": "bonus-problems",
+        "order": 0,
+        "description": "Advanced analytics patterns: rolling sums, calendar date spines, ROWS vs RANGE.",
+        "lessonIds": [],
+        "problemIds": [
+          "bonus-problems-bonus-set-1-q1",
+          "bonus-problems-bonus-set-1-q2",
+          "bonus-problems-bonus-set-1-q3"
+        ]
+      }
+    ],
+    "totalLessons": 0,
+    "totalProblems": 3
+  }
+]

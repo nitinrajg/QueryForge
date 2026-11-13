@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Play, RotateCcw, Database, Code2, Sparkles, Terminal, Cpu, Layers } from 'lucide-react';
+import { Play, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { SqlEditor } from '@/components/editor/SqlEditor';
 import { ResultsPanel } from '@/components/editor/ResultsPanel';
 import { SchemaViewer } from '@/components/editor/SchemaViewer';
@@ -59,13 +58,14 @@ SELECT * FROM employees LIMIT 10;`,
 ];
 
 /**
- * Free SQL Playground.
+ * Free SQL Playground — Data Terminal Environment.
  * 
  * Logic & Approach:
  * - Unrestricted SQL sandbox running locally in browser WebAssembly.
- * - Preloaded with the full relational 'employer_database' dataset.
+ * - Preloaded with relational 'employer_database' dataset.
  * - Multi-engine switcher (SQLite, MySQL compatibility mode, PostgreSQL, pandas).
- * - Preset queries for instant discovery and experimentation.
+ * - Preset queries formatted as plain text tab buttons on a shared rule.
+ * - Schema viewer sidebar on the left, CodeMirror and results on the right.
  */
 export const Playground: React.FC = () => {
   const { engine, setEngine, sql, setSql } = useEditorStore();
@@ -140,32 +140,30 @@ export const Playground: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-[#07090E]">
+    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-[var(--ground)] text-[var(--ink)]">
       {/* Top Header Bar */}
-      <header className="h-12 border-b border-[#1C2438] bg-[#0C1019] px-4 flex items-center justify-between shrink-0 light:bg-white light:border-slate-200">
-        <div className="flex items-center gap-2.5">
-          <span className="font-mono text-xs text-[#06B6D4] bg-[#06B6D4]/10 px-2 py-0.5 rounded border border-[#06B6D4]/30 font-semibold uppercase">
+      <header className="h-12 border-b border-[var(--border)] bg-[var(--surface-app)] px-4 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-medium text-[var(--ink)]">
             Playground
           </span>
-          <span className="text-xs font-heading font-semibold text-[#F1F5F9] light:text-slate-800">
-            Client-Side Sandbox
-          </span>
-          <span className="text-[11px] text-[#64748B] font-mono hidden md:inline">
-            (Connected to: employer_database)
+          <span className="text-[11px] text-[var(--muted)] hidden md:inline">
+            (Connected: employer_database)
           </span>
         </div>
 
-        {/* Preset Selectors */}
-        <div className="hidden lg:flex items-center gap-1.5 bg-[#07090E] border border-[#1C2438] p-1 rounded-lg">
+        {/* Preset Selectors as Plain Text Buttons */}
+        <div className="hidden lg:flex items-center gap-4">
+          <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">Presets:</span>
           {QUERY_PRESETS.map((p) => (
             <button
               key={p.name}
               type="button"
               onClick={() => loadPreset(p.name, p.sql)}
-              className={`px-2 py-0.5 text-[11px] font-mono rounded transition-colors cursor-pointer ${
+              className={`text-xs transition-colors cursor-pointer relative py-1 ${
                 activePreset === p.name
-                  ? 'bg-[#161F30] text-[#22D3EE] border border-[#26354D]'
-                  : 'text-[#94A3B8] hover:text-[#F1F5F9]'
+                  ? 'text-[var(--ink)] font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
               }`}
             >
               {p.name}
@@ -173,20 +171,20 @@ export const Playground: React.FC = () => {
           ))}
         </div>
 
-        {/* Engine switcher + Controls */}
+        {/* Engine Switcher + Controls */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-[#07090E] border border-[#1C2438] rounded-lg px-2 py-1 text-xs">
-            <Cpu className="h-3 w-3 text-[#06B6D4]" />
+          <div className="flex items-center gap-1.5 border border-[var(--border)] bg-[var(--ground)] px-2 py-1 text-xs">
+            <span className="text-[10px] text-[var(--muted)] uppercase">Engine:</span>
             <select
               value={engine}
               onChange={(e) => handleEngineChange(e.target.value as SupportedEngine)}
               aria-label="Execution engine"
-              className="bg-transparent text-xs font-mono text-[#F1F5F9] focus:outline-none cursor-pointer light:text-slate-900"
+              className="bg-transparent text-xs text-[var(--ink)] focus:outline-none cursor-pointer"
             >
-              <option value="sqlite" className="bg-[#0C1019] text-[#F1F5F9]">SQLite (WASM)</option>
-              <option value="mysql" className="bg-[#0C1019] text-[#F1F5F9]">MySQL (compat)</option>
-              <option value="pglite" className="bg-[#0C1019] text-[#F1F5F9]">PostgreSQL</option>
-              <option value="pandas" className="bg-[#0C1019] text-[#F1F5F9]">pandas (Python)</option>
+              <option value="sqlite" className="bg-[var(--surface-app)] text-[var(--ink)]">SQLite (WASM)</option>
+              <option value="mysql" className="bg-[var(--surface-app)] text-[var(--ink)]">MySQL (compat)</option>
+              <option value="pglite" className="bg-[var(--surface-app)] text-[var(--ink)]">PostgreSQL</option>
+              <option value="pandas" className="bg-[var(--surface-app)] text-[var(--ink)]">pandas (Python)</option>
             </select>
           </div>
 
@@ -194,7 +192,7 @@ export const Playground: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={handleReset}
-            className="text-xs font-mono gap-1 text-[#94A3B8] hover:text-[#F1F5F9]"
+            className="text-xs gap-1 text-[var(--muted)] hover:text-[var(--ink)] rounded-none"
             title="Reset dataset to initial state"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -206,9 +204,9 @@ export const Playground: React.FC = () => {
             size="sm"
             onClick={handleRun}
             disabled={isRunning}
-            className="gap-1.5 text-xs font-mono bg-[#06B6D4] hover:bg-[#0891B2] text-[#07090E] font-semibold"
+            className="gap-1.5 text-xs rounded-none font-medium"
           >
-            <Play className="h-3.5 w-3.5 text-[#07090E] fill-[#07090E]" />
+            <Play className="h-3.5 w-3.5 fill-current" />
             <span>Run Query</span>
           </Button>
         </div>
@@ -217,12 +215,12 @@ export const Playground: React.FC = () => {
       {/* Main Grid: Schema Sidebar (Left) + Editor & Results (Right) */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
         {/* Schema Sidebar */}
-        <aside className="lg:col-span-3 border-r border-[#1C2438] bg-[#0C1019] p-4 overflow-y-auto light:bg-slate-50 light:border-slate-200">
+        <aside className="lg:col-span-3 border-r border-[var(--border)] bg-[var(--surface-app)] p-4 overflow-y-auto">
           <SchemaViewer schema={schema} />
         </aside>
 
         {/* Editor + Results */}
-        <div className="lg:col-span-9 flex flex-col h-full bg-[#07090E] overflow-hidden">
+        <div className="lg:col-span-9 flex flex-col h-full bg-[var(--ground)] overflow-hidden">
           {/* Top Half: CodeMirror Editor */}
           <div className="flex-1 p-3 overflow-hidden min-h-[220px]">
             <SqlEditor
@@ -239,7 +237,7 @@ export const Playground: React.FC = () => {
           </div>
 
           {/* Bottom Half: Results Table */}
-          <div className="h-[280px] border-t border-[#1C2438] bg-[#0C1019] p-3 overflow-hidden flex flex-col shrink-0 light:bg-white light:border-slate-200">
+          <div className="h-[280px] border-t border-[var(--border)] bg-[var(--surface-app)] p-3 overflow-hidden flex flex-col shrink-0">
             <ResultsPanel
               result={queryResult}
               isLoading={isRunning}

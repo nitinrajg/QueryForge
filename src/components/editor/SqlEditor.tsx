@@ -93,33 +93,33 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
         height: '100%',
         fontSize: `${fontSize}px`,
         fontFamily: "'JetBrains Mono', monospace",
-        backgroundColor: theme === 'dark' ? '#0B1020' : '#FFFFFF',
+        backgroundColor: theme === 'dark' ? '#131217' : '#FFFFFF',
       },
       '.cm-scroller': {
         overflow: 'auto',
         minHeight,
       },
       '.cm-content': {
-        caretColor: '#6366F1',
+        caretColor: '#ff4a1f',
       },
       '&.cm-focused .cm-cursor': {
-        borderLeftColor: '#6366F1',
+        borderLeftColor: '#ff4a1f',
       },
       '&.cm-focused .cm-selectionBackground, ::selection': {
-        backgroundColor: theme === 'dark' ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.2)',
+        backgroundColor: theme === 'dark' ? 'rgba(255, 74, 31, 0.25)' : 'rgba(255, 74, 31, 0.15)',
       },
       '.cm-gutters': {
-        backgroundColor: theme === 'dark' ? '#080C18' : '#F8FAFC',
-        color: theme === 'dark' ? '#4A5578' : '#94A3B8',
+        backgroundColor: theme === 'dark' ? '#171719' : '#eff0f1',
+        color: theme === 'dark' ? '#8a8c92' : '#6b6d72',
         border: 'none',
-        borderRight: theme === 'dark' ? '1px solid #172044' : '1px solid #E2E8F0',
+        borderRight: theme === 'dark' ? '1px solid #1b1a1f' : '1px solid #d4d7dc',
       },
       '.cm-activeLine': {
-        backgroundColor: theme === 'dark' ? 'rgba(23, 32, 68, 0.4)' : 'rgba(241, 245, 249, 0.6)',
+        backgroundColor: theme === 'dark' ? 'rgba(33, 32, 35, 0.6)' : 'rgba(226, 228, 231, 0.5)',
       },
       '.cm-activeLineGutter': {
-        backgroundColor: theme === 'dark' ? 'rgba(23, 32, 68, 0.7)' : 'rgba(226, 232, 240, 0.6)',
-        color: '#6366F1',
+        backgroundColor: theme === 'dark' ? '#212023' : '#e2e4e7',
+        color: '#ff4a1f',
       },
     });
 

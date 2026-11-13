@@ -9,18 +9,11 @@ import {
   ArrowLeft, 
   ArrowRight, 
   CheckCircle2, 
-  HelpCircle, 
-  Code2, 
-  Database, 
-  FileText,
   Lock,
   Unlock,
-  ExternalLink,
-  Cpu,
-  Layers
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { SqlEditor } from '@/components/editor/SqlEditor';
 import { ResultsPanel } from '@/components/editor/ResultsPanel';
 import { SchemaViewer } from '@/components/editor/SchemaViewer';
@@ -32,14 +25,14 @@ import { useEditorStore } from '@/store/useEditorStore';
 import problemsData from '@/content/problems.json';
 
 /**
- * Problem Practice Workspace.
+ * Problem Practice Workspace — Data Terminal Split Layout.
  * 
  * Logic & Approach:
- * - Loads problem metadata, seed dataset SQL, and expected test case output.
- * - Seeds the selected in-browser WebAssembly SQL engine with dataset schema and rows.
- * - Manages user query execution (Run) and automatic test-case grading (Submit).
- * - Implements progressive hints reveal and solution unlocking safeguards.
- * - Auto-persists drafts to IndexedDB so learner code is never lost on refresh.
+ * - Top toolbar: unpadded problem identifier, plain sentence-case difficulty, engine switcher, prev/next.
+ * - Left pane: full-width underline tabs (Question, Schema, Hints, Solution) with 1px accent selection indicator.
+ * - Progressive hint reveal with count tracker, solution locked until passed or explicitly revealed.
+ * - Right pane: CodeMirror 6 workspace with Run (secondary) and Submit (primary safety orange).
+ * - Client-side verification and schema-aware autocomplete via Dexie and SQLite WASM.
  */
 export const PracticeWorkspace: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -71,7 +64,6 @@ export const PracticeWorkspace: React.FC = () => {
   useEffect(() => {
     if (!problem) return;
 
-    // Load saved draft or boilerplate
     const initialCode = problemProgress?.lastCode || '-- Write your SQL query here\n';
     setCode(initialCode);
     setQueryResult(null);
@@ -79,7 +71,6 @@ export const PracticeWorkspace: React.FC = () => {
     setRevealedHints(0);
     setIsSolutionUnlocked(isSolved);
 
-    // Initialize Engine with Problem Dataset
     const setupDataset = async () => {
       try {
         await engineManager.loadDataset(problem.datasetSql);
@@ -108,7 +99,7 @@ export const PracticeWorkspace: React.FC = () => {
     try {
       const res = await engineManager.run(code);
       setQueryResult(res);
-      setCheckResult(null); // Clear previous check on raw test run
+      setCheckResult(null);
     } catch (err: any) {
       setQueryResult({
         columns: [],
@@ -134,7 +125,6 @@ export const PracticeWorkspace: React.FC = () => {
       const evaluation = compareResults(res, problem.expectedOutput);
       setCheckResult(evaluation);
 
-      // Persist status in IndexedDB
       await markProblem(
         problem.id,
         evaluation.passed ? 'solved' : 'attempted',
@@ -180,9 +170,9 @@ export const PracticeWorkspace: React.FC = () => {
 
   if (!problem) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#07090E]">
-        <h2 className="text-2xl font-bold font-heading text-[#F1F5F9] mb-2">Problem Not Found</h2>
-        <p className="text-xs text-[#94A3B8] font-mono mb-6">The requested problem identifier does not exist in content index.</p>
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[var(--bg)] text-[var(--ink)]">
+        <h2 className="text-2xl font-normal font-display mb-2">Problem Not Located</h2>
+        <p className="text-xs text-[var(--muted)] mb-6">The requested problem identifier does not exist in the catalog.</p>
         <Link to="/practice">
           <Button variant="default">Back to Problem Catalog</Button>
         </Link>
@@ -191,62 +181,71 @@ export const PracticeWorkspace: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-[#07090E]">
-      {/* Top Cockpit Header Bar */}
-      <header className="h-12 border-b border-[#1C2438] bg-[#0C1019] px-4 flex items-center justify-between shrink-0 light:bg-white light:border-slate-200">
+    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-[var(--ground)] text-[var(--ink)]">
+      {/* Top Data Terminal Header Bar */}
+      <header className="h-12 border-b border-[var(--border)] bg-[var(--surface-app)] px-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <Link 
             to="/practice" 
-            className="text-xs font-mono text-[#94A3B8] hover:text-[#06B6D4] transition-colors flex items-center gap-1.5 shrink-0"
+            className="text-xs text-[var(--muted)] hover:text-[var(--ink)] transition-colors flex items-center gap-1.5 shrink-0"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Catalog</span>
           </Link>
-          <span className="text-[#334155] select-none">/</span>
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="font-mono text-xs text-[#06B6D4] bg-[#06B6D4]/10 px-1.5 py-0.5 rounded border border-[#06B6D4]/30 shrink-0">
-              #{String(problem.number).padStart(3, '0')}
+          <span className="text-[var(--rule)] select-none">/</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="text-xs tabular-nums text-[var(--muted)] shrink-0 font-medium">
+              {problem.number}.
             </span>
-            <span className="font-heading font-semibold text-xs text-[#F1F5F9] truncate light:text-slate-800">
+            <span className="font-medium text-xs text-[var(--ink)] truncate">
               {problem.title}
             </span>
-            <Badge variant={problem.difficulty as any} className="text-[10px] uppercase font-mono shrink-0">
+
+            {/* Plain Difficulty Word */}
+            <span className={`text-xs capitalize shrink-0 ${
+              problem.difficulty === 'easy'
+                ? 'text-[var(--positive)]'
+                : problem.difficulty === 'medium'
+                ? 'text-[var(--warning)]'
+                : 'text-[var(--negative)]'
+            }`}>
               {problem.difficulty}
-            </Badge>
+            </span>
+
             {isSolved && (
-              <Badge variant="easy" className="gap-1 text-[10px] font-mono shrink-0">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium bg-[var(--pill-positive-bg)] text-[var(--positive)] rounded-none shrink-0">
                 <CheckCircle2 className="h-3 w-3" />
-                Solved
-              </Badge>
+                <span>Solved</span>
+              </span>
             )}
           </div>
         </div>
 
         {/* Engine Switcher & Problem Pagination */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 bg-[#07090E] border border-[#1C2438] rounded-lg px-2 py-1 text-xs">
-            <Cpu className="h-3 w-3 text-[#06B6D4]" />
+          <div className="flex items-center gap-1.5 border border-[var(--border)] bg-[var(--ground)] px-2 py-1 text-xs">
+            <span className="text-[10px] text-[var(--muted)] uppercase">Engine:</span>
             <select
               value={engine}
               onChange={(e) => handleEngineChange(e.target.value as SupportedEngine)}
               aria-label="Execution engine"
-              className="bg-transparent text-xs font-mono text-[#F1F5F9] focus:outline-none cursor-pointer light:text-slate-900"
+              className="bg-transparent text-xs text-[var(--ink)] focus:outline-none cursor-pointer"
             >
-              <option value="sqlite" className="bg-[#0C1019] text-[#F1F5F9]">SQLite (WASM)</option>
-              <option value="mysql" className="bg-[#0C1019] text-[#F1F5F9]">MySQL (compat)</option>
-              <option value="pglite" className="bg-[#0C1019] text-[#F1F5F9]">PostgreSQL</option>
-              <option value="pandas" className="bg-[#0C1019] text-[#F1F5F9]">pandas (Python)</option>
+              <option value="sqlite" className="bg-[var(--surface-app)] text-[var(--ink)]">SQLite (WASM)</option>
+              <option value="mysql" className="bg-[var(--surface-app)] text-[var(--ink)]">MySQL (compat)</option>
+              <option value="pglite" className="bg-[var(--surface-app)] text-[var(--ink)]">PostgreSQL</option>
+              <option value="pandas" className="bg-[var(--surface-app)] text-[var(--ink)]">pandas (Python)</option>
             </select>
           </div>
 
-          <div className="flex items-center gap-1 border-l border-[#1C2438] pl-2">
+          <div className="flex items-center gap-1 border-l border-[var(--border)] pl-2">
             {prevProblem && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigate(`/practice/${prevProblem.id}`)}
                 title={`Previous: #${prevProblem.number} ${prevProblem.title}`}
-                className="h-7 w-7 text-[#94A3B8] hover:text-[#F1F5F9]"
+                className="h-7 w-7 text-[var(--muted)] hover:text-[var(--ink)] rounded-none"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
               </Button>
@@ -257,7 +256,7 @@ export const PracticeWorkspace: React.FC = () => {
                 size="icon"
                 onClick={() => navigate(`/practice/${nextProblem.id}`)}
                 title={`Next: #${nextProblem.number} ${nextProblem.title}`}
-                className="h-7 w-7 text-[#94A3B8] hover:text-[#F1F5F9]"
+                className="h-7 w-7 text-[var(--muted)] hover:text-[var(--ink)] rounded-none"
               >
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
@@ -266,74 +265,69 @@ export const PracticeWorkspace: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Split: Left Tabs (Description, Schema, Hints, Solution) + Right Editor & Results */}
+      {/* Main Split: Left Tabs + Right Editor & Results */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
         {/* LEFT COLUMN: Problem Details */}
-        <div className="lg:col-span-5 border-r border-[#1C2438] flex flex-col bg-[#0C1019] overflow-hidden light:bg-slate-50 light:border-slate-200">
-          {/* Navigation Tabs */}
-          <div className="p-2 border-b border-[#1C2438] shrink-0 bg-[#07090E]">
-            <div className="grid grid-cols-4 gap-1 p-1 bg-[#0C1019] rounded-lg border border-[#1C2438] text-xs font-mono">
-              <button
-                type="button"
-                onClick={() => setLeftTab('description')}
-                className={`py-1.5 px-2 rounded font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-[11px] ${
-                  leftTab === 'description'
-                    ? 'bg-[#161F30] text-[#22D3EE] border border-[#26354D]'
-                    : 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                }`}
-              >
-                <FileText className="h-3 w-3" />
-                <span>Problem</span>
-              </button>
+        <div className="lg:col-span-5 border-r border-[var(--border)] flex flex-col bg-[var(--surface-app)] overflow-hidden">
+          {/* Underline Tabs */}
+          <div className="flex items-center gap-6 px-4 border-b border-[var(--border)] bg-[var(--ground)] shrink-0 overflow-x-auto -mb-px">
+            <button
+              type="button"
+              onClick={() => setLeftTab('description')}
+              className={`py-3 text-xs font-medium transition-colors relative cursor-pointer whitespace-nowrap ${
+                leftTab === 'description'
+                  ? 'text-[var(--ink)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
+              }`}
+            >
+              Question
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setLeftTab('schema')}
-                className={`py-1.5 px-2 rounded font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-[11px] ${
-                  leftTab === 'schema'
-                    ? 'bg-[#161F30] text-[#22D3EE] border border-[#26354D]'
-                    : 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                }`}
-              >
-                <Database className="h-3 w-3" />
-                <span>Schema</span>
-              </button>
+            <button
+              type="button"
+              onClick={() => setLeftTab('schema')}
+              className={`py-3 text-xs font-medium transition-colors relative cursor-pointer whitespace-nowrap ${
+                leftTab === 'schema'
+                  ? 'text-[var(--ink)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
+              }`}
+            >
+              Schema ({schema.length})
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setLeftTab('hints')}
-                className={`py-1.5 px-2 rounded font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-[11px] ${
-                  leftTab === 'hints'
-                    ? 'bg-[#161F30] text-[#22D3EE] border border-[#26354D]'
-                    : 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                }`}
-              >
-                <HelpCircle className="h-3 w-3" />
-                <span>Hints ({problem.hints?.length || 0})</span>
-              </button>
+            <button
+              type="button"
+              onClick={() => setLeftTab('hints')}
+              className={`py-3 text-xs font-medium transition-colors relative cursor-pointer whitespace-nowrap ${
+                leftTab === 'hints'
+                  ? 'text-[var(--ink)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
+              }`}
+            >
+              Hints ({problem.hints?.length || 0})
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setLeftTab('solution')}
-                className={`py-1.5 px-2 rounded font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-[11px] ${
-                  leftTab === 'solution'
-                    ? 'bg-[#161F30] text-[#22D3EE] border border-[#26354D]'
-                    : 'text-[#94A3B8] hover:text-[#F1F5F9]'
-                }`}
-              >
-                {isSolutionUnlocked ? <Unlock className="h-3 w-3 text-emerald-400" /> : <Lock className="h-3 w-3" />}
-                <span>Solution</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setLeftTab('solution')}
+              className={`py-3 text-xs font-medium transition-colors relative cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                leftTab === 'solution'
+                  ? 'text-[var(--ink)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
+              }`}
+            >
+              {isSolutionUnlocked ? <Unlock className="h-3 w-3 text-[var(--positive)]" /> : <Lock className="h-3 w-3" />}
+              <span>Solution</span>
+            </button>
           </div>
 
           {/* Tab Content Body */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
             {/* 1. Description */}
             {leftTab === 'description' && (
-              <div className="space-y-4 text-xs leading-relaxed text-[#CBD5E1] light:text-slate-700">
+              <div className="space-y-4 text-xs leading-relaxed text-[var(--ink)]">
                 <div className="space-y-1">
-                  <h2 className="text-base font-bold font-heading text-[#F1F5F9] light:text-slate-900">
+                  <h2 className="text-base font-normal font-display text-[var(--ink)]">
                     {problem.title}
                   </h2>
                   {problem.sourceUrl && (
@@ -341,19 +335,19 @@ export const PracticeWorkspace: React.FC = () => {
                       href={problem.sourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 font-mono text-[11px] text-[#06B6D4] hover:underline"
+                      className="inline-flex items-center gap-1 text-[11px] text-[var(--muted)] hover:text-[var(--ink)]"
                     >
-                      <span>LeetCode / Original Source Link</span>
+                      <span>External Problem Source</span>
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
                 </div>
 
-                <div className="p-4 rounded-xl border border-[#1C2438] bg-[#07090E] space-y-2 light:bg-white light:border-slate-200">
-                  <h4 className="font-mono font-semibold text-[#06B6D4] uppercase text-[10px] tracking-wider">
+                <div className="p-4 border border-[var(--border)] bg-[var(--ground)] space-y-2">
+                  <div className="font-mono text-[10px] uppercase text-[var(--muted)] tracking-wider">
                     Question Statement
-                  </h4>
-                  <p className="whitespace-pre-wrap leading-relaxed text-[#CBD5E1] font-sans text-xs">
+                  </div>
+                  <p className="whitespace-pre-wrap leading-relaxed text-[var(--ink)] text-xs">
                     {problem.description}
                   </p>
                 </div>
@@ -361,25 +355,25 @@ export const PracticeWorkspace: React.FC = () => {
                 {/* Expected Output Table Preview */}
                 {problem.expectedOutput?.columns?.length > 0 && (
                   <div className="space-y-2">
-                    <h4 className="font-mono font-semibold text-[#94A3B8] uppercase text-[10px] tracking-wider">
-                      Expected Output Structure
-                    </h4>
-                    <div className="border border-[#1C2438] rounded-xl overflow-x-auto bg-[#07090E] light:bg-white light:border-slate-200">
+                    <div className="font-mono text-[10px] uppercase text-[var(--muted)] tracking-wider">
+                      Expected Output Columns
+                    </div>
+                    <div className="border border-[var(--border)] overflow-x-auto bg-[var(--ground)]">
                       <table className="w-full text-left text-xs border-collapse">
-                        <thead className="bg-[#0C1019] text-[#94A3B8] border-b border-[#1C2438] light:bg-slate-100">
+                        <thead className="bg-[var(--surface-app)] text-[var(--muted)] border-b border-[var(--border)]">
                           <tr>
                             {problem.expectedOutput.columns.map((c: string, idx: number) => (
-                              <th key={idx} className="py-1.5 px-2.5 font-mono text-[11px] text-[#22D3EE]">{c}</th>
+                              <th key={idx} className="py-1.5 px-2.5 font-mono text-[11px] font-semibold text-[var(--ink)]">{c}</th>
                             ))}
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#1C2438]/50 light:divide-slate-200">
+                        <tbody className="divide-y divide-[var(--rule)]">
                           {problem.expectedOutput.rows.slice(0, 5).map((row: any[], rIdx: number) => (
                             <tr key={rIdx}>
                               {row.map((val: any, cIdx: number) => (
-                                <td key={cIdx} className="py-1.5 px-2.5 font-mono text-[11px] text-[#CBD5E1] light:text-slate-800">
+                                <td key={cIdx} className="py-1.5 px-2.5 font-mono text-[11px] text-[var(--ink)]">
                                   {val === null ? (
-                                    <span className="text-amber-400 italic text-[10px]">NULL</span>
+                                    <span className="text-[var(--warning)] italic text-[10px]">NULL</span>
                                   ) : (
                                     String(val)
                                   )}
@@ -403,23 +397,23 @@ export const PracticeWorkspace: React.FC = () => {
             {/* 3. Hints Tab */}
             {leftTab === 'hints' && (
               <div className="space-y-3">
-                <p className="text-xs text-[#94A3B8]">
-                  Stuck on this problem? Reveal hints progressively to guide your reasoning without spoiling the solution.
+                <p className="text-xs text-[var(--muted)]">
+                  Reveal progressive hints to guide your formulation without spoiling the final answer.
                 </p>
 
                 {(!problem.hints || problem.hints.length === 0) ? (
-                  <p className="text-xs text-[#94A3B8] font-mono italic">No hints available for this problem.</p>
+                  <p className="text-xs text-[var(--muted)] italic">No hints available for this problem.</p>
                 ) : (
                   <div className="space-y-3">
                     {problem.hints.slice(0, revealedHints + 1).map((hint: string, hIdx: number) => (
                       <div
                         key={hIdx}
-                        className="p-3.5 rounded-xl border border-[#06B6D4]/30 bg-[#06B6D4]/5 text-xs text-[#F1F5F9] space-y-1.5"
+                        className="p-3.5 border border-[var(--border)] bg-[var(--ground)] text-xs text-[var(--ink)] space-y-1.5"
                       >
-                        <span className="font-mono font-semibold text-[#06B6D4] uppercase text-[10px] tracking-wider">
-                          Hint {hIdx + 1}
+                        <span className="font-mono text-[10px] uppercase text-[var(--muted)] tracking-wider">
+                          Hint {hIdx + 1} of {problem.hints.length}
                         </span>
-                        <div className="prose prose-invert max-w-none text-xs text-[#CBD5E1]">
+                        <div className="text-xs leading-relaxed opacity-95">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{hint}</ReactMarkdown>
                         </div>
                       </div>
@@ -430,7 +424,7 @@ export const PracticeWorkspace: React.FC = () => {
                         variant="secondary"
                         size="sm"
                         onClick={() => setRevealedHints((prev) => prev + 1)}
-                        className="w-full text-xs font-mono"
+                        className="w-full text-xs rounded-none"
                       >
                         Reveal Next Hint ({revealedHints + 2}/{problem.hints.length})
                       </Button>
@@ -444,40 +438,40 @@ export const PracticeWorkspace: React.FC = () => {
             {leftTab === 'solution' && (
               <div className="space-y-4">
                 {!isSolutionUnlocked ? (
-                  <div className="p-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 text-center space-y-3">
-                    <Lock className="h-8 w-8 mx-auto text-amber-400" />
-                    <h3 className="text-sm font-bold font-heading text-[#F1F5F9] light:text-slate-900">Solution Locked</h3>
-                    <p className="text-xs text-[#94A3B8] max-w-xs mx-auto">
-                      Submit an accepted solution to unlock the official reference code, or give up to view it immediately.
+                  <div className="p-6 border border-[var(--border)] bg-[var(--ground)] text-center space-y-3">
+                    <Lock className="h-6 w-6 mx-auto text-[var(--muted)]" />
+                    <h3 className="text-sm font-medium text-[var(--ink)]">Solution Locked</h3>
+                    <p className="text-xs text-[var(--muted)] max-w-xs mx-auto">
+                      Submit an accepted solution to automatically unlock the reference query, or choose to reveal it now.
                     </p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setIsSolutionUnlocked(true)}
-                      className="text-xs font-mono border-amber-500/40 text-amber-300 hover:bg-amber-500/20"
+                      className="text-xs rounded-none border-[var(--border)] text-[var(--ink)]"
                     >
-                      Give Up & Reveal Solution
+                      Reveal Reference Solution
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-1.5 text-xs font-mono font-semibold text-emerald-400">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--positive)] font-medium">
                       <Unlock className="h-4 w-4" />
-                      <span>Official Reference Solution</span>
+                      <span>Official Reference Query</span>
                     </div>
 
-                    <div className="rounded-xl border border-[#1C2438] bg-[#07090E] p-4 overflow-x-auto">
-                      <pre className="font-mono text-xs text-[#22D3EE] leading-relaxed">
+                    <div className="border border-[var(--border)] bg-[var(--ground)] p-4 overflow-x-auto">
+                      <pre className="font-mono text-xs text-[var(--ink)] leading-relaxed">
                         <code>{problem.solutionSql}</code>
                       </pre>
                     </div>
 
                     {problem.explanation && (
-                      <div className="p-4 rounded-xl border border-[#1C2438] bg-[#07090E] text-xs space-y-2 light:bg-white">
-                        <h4 className="font-mono font-semibold text-[#06B6D4] uppercase text-[10px] tracking-wider">
-                          Explanation & Trade-offs
-                        </h4>
-                        <div className="prose prose-invert max-w-none text-xs text-[#CBD5E1]">
+                      <div className="p-4 border border-[var(--border)] bg-[var(--ground)] text-xs space-y-2">
+                        <div className="font-mono text-[10px] uppercase text-[var(--muted)] tracking-wider">
+                          Approach and Reasoning
+                        </div>
+                        <div className="text-xs leading-relaxed opacity-95">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{problem.explanation}</ReactMarkdown>
                         </div>
                       </div>
@@ -490,15 +484,14 @@ export const PracticeWorkspace: React.FC = () => {
         </div>
 
         {/* RIGHT COLUMN: CodeMirror Editor & Results Table */}
-        <div className="lg:col-span-7 flex flex-col h-full bg-[#07090E] overflow-hidden">
+        <div className="lg:col-span-7 flex flex-col h-full bg-[var(--ground)] overflow-hidden">
           {/* Editor Header Bar with Run & Submit */}
-          <div className="h-12 border-b border-[#1C2438] bg-[#0C1019] px-4 flex items-center justify-between shrink-0 light:bg-slate-100 light:border-slate-200">
+          <div className="h-12 border-b border-[var(--border)] bg-[var(--surface-app)] px-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
-              <Code2 className="h-4 w-4 text-[#06B6D4]" />
-              <span className="text-xs font-mono font-medium text-[#F1F5F9] light:text-slate-800">
+              <span className="text-xs font-medium text-[var(--ink)]">
                 SQL Console
               </span>
-              <span className="text-[10px] text-[#64748B] font-mono hidden sm:inline-block">
+              <span className="text-[11px] text-[var(--muted)] hidden sm:inline-block">
                 (Ctrl+Enter to Execute)
               </span>
             </div>
@@ -509,7 +502,7 @@ export const PracticeWorkspace: React.FC = () => {
                 size="sm"
                 onClick={handleReset}
                 title="Reset Database to original seed"
-                className="text-xs font-mono gap-1 text-[#94A3B8] hover:text-[#F1F5F9]"
+                className="text-xs gap-1 text-[var(--muted)] hover:text-[var(--ink)] rounded-none"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Reset DB</span>
@@ -520,9 +513,9 @@ export const PracticeWorkspace: React.FC = () => {
                 size="sm"
                 onClick={handleRun}
                 disabled={isRunning}
-                className="gap-1.5 text-xs font-mono border-[#1C2438]"
+                className="gap-1.5 text-xs rounded-none border-[var(--border)]"
               >
-                <Play className="h-3.5 w-3.5 text-[#22D3EE] fill-[#22D3EE]" />
+                <Play className="h-3.5 w-3.5 fill-current" />
                 <span>Run</span>
               </Button>
 
@@ -531,7 +524,7 @@ export const PracticeWorkspace: React.FC = () => {
                 size="sm"
                 onClick={handleSubmit}
                 disabled={isRunning}
-                className="gap-1.5 text-xs font-mono bg-[#06B6D4] hover:bg-[#0891B2] text-[#07090E] font-semibold"
+                className="gap-1.5 text-xs rounded-none font-medium"
               >
                 <Send className="h-3.5 w-3.5" />
                 <span>Submit</span>
@@ -552,7 +545,7 @@ export const PracticeWorkspace: React.FC = () => {
           </div>
 
           {/* Bottom Half: Results Panel */}
-          <div className="h-[280px] border-t border-[#1C2438] bg-[#0C1019] p-3 overflow-hidden flex flex-col shrink-0 light:bg-white light:border-slate-200">
+          <div className="h-[280px] border-t border-[var(--border)] bg-[var(--surface-app)] p-3 overflow-hidden flex flex-col shrink-0">
             <ResultsPanel
               result={queryResult}
               isLoading={isRunning}

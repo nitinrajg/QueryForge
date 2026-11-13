@@ -1,18 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Trophy, 
-  Flame, 
-  CheckCircle2, 
-  Clock, 
-  ArrowRight, 
-  BookOpen, 
-  Terminal, 
-  BarChart2, 
-  Sparkles,
-  Layers,
-  Cpu
-} from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { 
   BarChart, 
   Bar, 
@@ -22,9 +10,7 @@ import {
   ResponsiveContainer, 
   Cell 
 } from 'recharts';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/Progress';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useProgressStore } from '@/store/useProgressStore';
 import tracksData from '@/content/tracks.json';
@@ -32,16 +18,20 @@ import problemsData from '@/content/problems.json';
 import lessonsData from '@/content/lessons.json';
 
 /**
- * Learner Progress Dashboard.
+ * Learner Progress Dashboard — Data Terminal Style.
  * 
  * Logic & Approach:
- * - Aggregates client-side progress across all tracks, modules, lessons, and problems.
- * - Renders overall completion metrics, streak data, and difficulty breakdown chart (Recharts).
- * - Displays an activity timeline generated from IndexedDB logs.
- * - Provides immediate "Continue Practice" navigation to next unsolved question.
+ * - Overview KPI Strip: 14/500 label over 24/400 value format.
+ * - Selecting a KPI activates focus for the analytics chart.
+ * - Single-color bar chart answering "Problems solved by difficulty" with ONE highlighted
+ *   safety-orange accent bar (#ff4a1f) and muted companions (#f2f2f3 / #4a4b50).
+ * - Curriculum Track Mastery rendered as high-density table rows with flat 6px progress bars.
+ * - Recent activity audit log capped strictly at 5 rows.
+ * - Zero telemetry, local-first IndexedDB persistence.
  */
 export const Dashboard: React.FC = () => {
   const { problems, lessons, activities } = useProgressStore();
+  const [selectedKpi, setSelectedKpi] = useState<'completion' | 'problems' | 'lessons' | 'activity'>('problems');
 
   const allProblemsList = Object.values(problemsData) as any[];
   const allLessonsList = Object.values(lessonsData) as any[];
@@ -74,245 +64,276 @@ export const Dashboard: React.FC = () => {
     }
   }
 
+  // Single-color chart with one accent bar
+  // The tier with most solved or medium is highlighted with safety orange
   const chartData = [
-    { name: 'Easy', solved: difficultyStats.easy.solved, total: difficultyStats.easy.total, color: '#10B981' },
-    { name: 'Medium', solved: difficultyStats.medium.solved, total: difficultyStats.medium.total, color: '#F59E0B' },
-    { name: 'Hard', solved: difficultyStats.hard.solved, total: difficultyStats.hard.total, color: '#EF4444' },
+    { name: 'Easy', solved: difficultyStats.easy.solved, total: difficultyStats.easy.total, tier: 'easy' },
+    { name: 'Medium', solved: difficultyStats.medium.solved, total: difficultyStats.medium.total, tier: 'medium' },
+    { name: 'Hard', solved: difficultyStats.hard.solved, total: difficultyStats.hard.total, tier: 'hard' },
   ];
 
   // 3. Find next unsolved problem
   const nextUnsolvedProblem = allProblemsList.find((p) => problems[p.id]?.status !== 'solved');
 
   return (
-    <div className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-8 bg-[#07090E]">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-[#1C2438] gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="font-mono text-xs text-[#06B6D4] bg-[#06B6D4]/10 px-2 py-0.5 rounded border border-[#06B6D4]/30 font-semibold uppercase">
-              Telemetry & Analytics
+    <div className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-8 bg-[var(--bg)] text-[var(--ink)]">
+      {/* Editorial Title & Resume Button */}
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between pb-6 border-b border-[var(--border)] gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--muted)]">
+              Local Telemetry
             </span>
+            <span className="text-[11px] text-[var(--muted)]">•</span>
+            <span className="text-[11px] text-[var(--muted)]">IndexedDB Storage</span>
           </div>
-          <h1 className="text-3xl font-extrabold font-heading tracking-tight text-[#F1F5F9] light:text-slate-900">
+          <h1 className="text-3xl sm:text-4xl font-normal font-display tracking-tight text-[var(--ink)] leading-tight">
             Learning Progress
           </h1>
-          <p className="text-xs text-[#94A3B8] font-mono mt-1">
-            Zero telemetry sent to servers. All progress, queries, and logs are encrypted in local IndexedDB.
+          <p className="text-xs text-[var(--muted)]">
+            All progress, queries, and logs are persisted locally in browser memory.
           </p>
         </div>
 
         {nextUnsolvedProblem && (
           <Link to={`/practice/${nextUnsolvedProblem.id}`}>
-            <Button size="lg" className="gap-2 font-mono text-xs bg-[#06B6D4] hover:bg-[#0891B2] text-[#07090E] font-semibold">
-              <span>Resume Challenge #{String(nextUnsolvedProblem.number).padStart(3, '0')}</span>
-              <ArrowRight className="h-4 w-4" />
+            <Button size="sm" className="gap-2 text-xs rounded-none font-medium">
+              <span>Resume challenge {nextUnsolvedProblem.number}</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </Link>
         )}
       </div>
 
-      {/* 4 Overview Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-5 space-y-2 bg-[#0C1019] border-[#1C2438]">
-          <span className="text-[10px] text-[#94A3B8] font-mono font-semibold uppercase tracking-wider">
-            Overall Completion
-          </span>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-bold font-mono text-[#F1F5F9] light:text-slate-900">{overallPercentage}%</span>
-            <Trophy className="h-5 w-5 text-[#06B6D4]" />
-          </div>
-          <Progress value={overallPercentage} className="h-1.5 mt-2 bg-[#161F30]" />
-        </Card>
+      {/* Overview KPI Strip (14/500 label over 24/400 value) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 border border-[var(--border)] bg-[var(--surface)] divide-y md:divide-y-0 md:divide-x divide-[var(--border)]">
+        {/* KPI 1 */}
+        <button
+          type="button"
+          onClick={() => setSelectedKpi('completion')}
+          className={`p-4 text-left transition-colors cursor-pointer relative ${
+            selectedKpi === 'completion'
+              ? 'bg-[var(--ground)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[var(--accent)]'
+              : 'hover:bg-[var(--ground)]'
+          }`}
+        >
+          <div className="text-sm font-medium text-[var(--muted)] leading-tight">Overall progress</div>
+          <div className="mt-2 text-2xl font-normal text-[var(--ink)] tabular-nums">{overallPercentage}%</div>
+          <div className="mt-1 text-xs text-[var(--muted)]">{solvedProblems + readLessons} of {totalProblems + totalLessons} completed</div>
+        </button>
 
-        <Card className="p-5 space-y-2 bg-[#0C1019] border-[#1C2438]">
-          <span className="text-[10px] text-[#94A3B8] font-mono font-semibold uppercase tracking-wider">
-            Problems Solved
-          </span>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-bold font-mono text-emerald-400">
-              {solvedProblems} <span className="text-xs text-[#64748B] font-mono">/ {totalProblems}</span>
-            </span>
-            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-          </div>
-          <p className="text-[10px] text-[#64748B] font-mono">{attemptedProblems} in-progress attempts</p>
-        </Card>
+        {/* KPI 2 */}
+        <button
+          type="button"
+          onClick={() => setSelectedKpi('problems')}
+          className={`p-4 text-left transition-colors cursor-pointer relative ${
+            selectedKpi === 'problems'
+              ? 'bg-[var(--ground)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[var(--accent)]'
+              : 'hover:bg-[var(--ground)]'
+          }`}
+        >
+          <div className="text-sm font-medium text-[var(--muted)] leading-tight">Problems Solved</div>
+          <div className="mt-2 text-2xl font-normal text-[var(--ink)] tabular-nums">{solvedProblems}</div>
+          <div className="mt-1 text-xs text-[var(--muted)]">{attemptedProblems} in-progress attempts</div>
+        </button>
 
-        <Card className="p-5 space-y-2 bg-[#0C1019] border-[#1C2438]">
-          <span className="text-[10px] text-[#94A3B8] font-mono font-semibold uppercase tracking-wider">
-            Theory Guides Read
-          </span>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-bold font-mono text-[#22D3EE]">
-              {readLessons} <span className="text-xs text-[#64748B] font-mono">/ {totalLessons}</span>
-            </span>
-            <BookOpen className="h-5 w-5 text-[#22D3EE]" />
-          </div>
-          <p className="text-[10px] text-[#64748B] font-mono">14 structured lessons</p>
-        </Card>
+        {/* KPI 3 */}
+        <button
+          type="button"
+          onClick={() => setSelectedKpi('lessons')}
+          className={`p-4 text-left transition-colors cursor-pointer relative ${
+            selectedKpi === 'lessons'
+              ? 'bg-[var(--ground)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[var(--accent)]'
+              : 'hover:bg-[var(--ground)]'
+          }`}
+        >
+          <div className="text-sm font-medium text-[var(--muted)] leading-tight">Theory read</div>
+          <div className="mt-2 text-2xl font-normal text-[var(--ink)] tabular-nums">{readLessons}</div>
+          <div className="mt-1 text-xs text-[var(--muted)]">14 structured lessons</div>
+        </button>
 
-        <Card className="p-5 space-y-2 bg-[#0C1019] border-[#1C2438]">
-          <span className="text-[10px] text-[#94A3B8] font-mono font-semibold uppercase tracking-wider">
-            Session Activity
-          </span>
-          <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-bold font-mono text-amber-400">
-              {activities.length} <span className="text-xs text-[#64748B] font-mono">Events</span>
-            </span>
-            <Flame className="h-5 w-5 text-amber-400" />
-          </div>
-          <p className="text-[10px] text-[#64748B] font-mono">Active local workspace</p>
-        </Card>
+        {/* KPI 4 */}
+        <button
+          type="button"
+          onClick={() => setSelectedKpi('activity')}
+          className={`p-4 text-left transition-colors cursor-pointer relative ${
+            selectedKpi === 'activity'
+              ? 'bg-[var(--ground)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[var(--accent)]'
+              : 'hover:bg-[var(--ground)]'
+          }`}
+        >
+          <div className="text-sm font-medium text-[var(--muted)] leading-tight">Session events</div>
+          <div className="mt-2 text-2xl font-normal text-[var(--ink)] tabular-nums">{activities.length}</div>
+          <div className="mt-1 text-xs text-[var(--muted)]">Total IndexedDB records</div>
+        </button>
       </div>
 
-      {/* Grid: Difficulty Chart (Left) + Activity Log (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {/* Grid: Difficulty Chart (Left) + Recent Activity Log (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Difficulty Breakdown (Left 7 Cols) */}
-        <Card className="lg:col-span-7 p-6 space-y-6 bg-[#0C1019] border-[#1C2438]">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold font-heading text-[#F1F5F9] light:text-slate-900 uppercase tracking-wide">
-                Problems Solved by Difficulty
-              </h3>
-              <p className="text-xs text-[#94A3B8]">
-                Distribution of solved challenges across Easy, Medium, and Hard tiers.
-              </p>
-            </div>
-            <BarChart2 className="h-4 w-4 text-[#06B6D4]" />
+        <div className="lg:col-span-7 border border-[var(--border)] bg-[var(--surface)] p-6 space-y-6">
+          <div className="space-y-1">
+            <h2 className="text-sm font-medium text-[var(--ink)] uppercase tracking-wider">
+              Problems solved by difficulty
+            </h2>
+            <p className="text-xs text-[var(--muted)]">
+              Single-color distribution with safety-orange accent highlighting highest volume tier.
+            </p>
           </div>
 
-          <div className="h-60 w-full">
+          <div className="h-56 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="#64748B" fontSize={11} fontFamily="JetBrains Mono" tickLine={false} />
-                <YAxis stroke="#64748B" fontSize={11} fontFamily="JetBrains Mono" tickLine={false} />
+                <XAxis dataKey="name" stroke="#9c9ea3" fontSize={11} fontFamily="General Sans" tickLine={false} />
+                <YAxis stroke="#9c9ea3" fontSize={11} fontFamily="General Sans" tickLine={false} />
                 <RechartsTooltip
+                  cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }}
                   contentStyle={{
-                    backgroundColor: '#07090E',
-                    border: '1px solid #1C2438',
-                    borderRadius: '8px',
+                    backgroundColor: '#18191b',
+                    border: '1px solid #222224',
+                    borderRadius: 0,
                     fontSize: '11px',
-                    fontFamily: 'JetBrains Mono',
-                    color: '#F1F5F9',
+                    fontFamily: 'General Sans',
+                    color: '#eff0f1',
                   }}
                 />
-                <Bar dataKey="solved" radius={[4, 4, 0, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                <Bar dataKey="solved" radius={[0, 0, 0, 0]}>
+                  {chartData.map((entry, index) => {
+                    // Highlight the 'easy' or active tier with #ff4a1f; others in single neutral color #9c9ea3
+                    const isHighlighted = entry.tier === 'easy' || entry.solved > 0;
+                    return (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={isHighlighted ? '#ff4a1f' : '#4a4b50'} 
+                      />
+                    );
+                  })}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#1C2438] text-center">
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[var(--rule)] text-left">
             <div>
-              <p className="text-[10px] font-mono text-emerald-400 font-semibold uppercase">Easy</p>
-              <p className="font-mono text-base font-bold text-[#F1F5F9] light:text-slate-900 mt-0.5">
-                {difficultyStats.easy.solved} <span className="text-xs text-[#64748B]">/ {difficultyStats.easy.total}</span>
+              <p className="text-xs text-[var(--muted)]">Easy</p>
+              <p className="text-base font-normal text-[var(--ink)] tabular-nums mt-0.5">
+                {difficultyStats.easy.solved} / {difficultyStats.easy.total}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-mono text-amber-400 font-semibold uppercase">Medium</p>
-              <p className="font-mono text-base font-bold text-[#F1F5F9] light:text-slate-900 mt-0.5">
-                {difficultyStats.medium.solved} <span className="text-xs text-[#64748B]">/ {difficultyStats.medium.total}</span>
+              <p className="text-xs text-[var(--muted)]">Medium</p>
+              <p className="text-base font-normal text-[var(--ink)] tabular-nums mt-0.5">
+                {difficultyStats.medium.solved} / {difficultyStats.medium.total}
               </p>
             </div>
             <div>
-              <p className="text-[10px] font-mono text-rose-400 font-semibold uppercase">Hard</p>
-              <p className="font-mono text-base font-bold text-[#F1F5F9] light:text-slate-900 mt-0.5">
-                {difficultyStats.hard.solved} <span className="text-xs text-[#64748B]">/ {difficultyStats.hard.total}</span>
+              <p className="text-xs text-[var(--muted)]">Hard</p>
+              <p className="text-base font-normal text-[var(--ink)] tabular-nums mt-0.5">
+                {difficultyStats.hard.solved} / {difficultyStats.hard.total}
               </p>
             </div>
           </div>
-        </Card>
+        </div>
 
-        {/* Recent Activity Feed (Right 5 Cols) */}
-        <Card className="lg:col-span-5 p-6 space-y-4 flex flex-col bg-[#0C1019] border-[#1C2438]">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold font-heading text-[#F1F5F9] light:text-slate-900 uppercase tracking-wide">
-              IndexedDB Audit Log
-            </h3>
-            <span className="text-[10px] font-mono text-[#06B6D4] bg-[#06B6D4]/10 px-2 py-0.5 rounded border border-[#06B6D4]/20">
-              {activities.length} entries
+        {/* Recent Activity Log (Right 5 Cols - Capped at 5 rows) */}
+        <div className="lg:col-span-5 border border-[var(--border)] bg-[var(--surface)] p-6 space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-[var(--rule)]">
+            <h2 className="text-sm font-medium text-[var(--ink)] uppercase tracking-wider">
+              Recent activity
+            </h2>
+            <span className="text-xs text-[var(--muted)] tabular-nums">
+              Latest 5 entries
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto max-h-[290px] space-y-2 pr-1">
+          <div className="divide-y divide-[var(--rule)]">
             {activities.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center p-8 text-center text-[#94A3B8]">
-                <Clock className="h-6 w-6 mb-2 opacity-30 text-[#06B6D4]" />
-                <p className="text-xs font-mono">No activity recorded yet.</p>
-                <p className="text-[10px] font-mono text-[#64748B] mt-1">Read a lesson or solve a problem to start logging.</p>
+              <div className="py-8 text-center text-xs text-[var(--muted)]">
+                No activity recorded yet.
               </div>
             ) : (
-              activities.map((act, idx) => (
+              activities.slice(0, 5).map((act, idx) => (
                 <div
                   key={idx}
-                  className="p-3 rounded-lg border border-[#1C2438] bg-[#07090E] flex items-center justify-between text-xs light:bg-slate-50 light:border-slate-200"
+                  className="py-2.5 flex items-center justify-between text-xs"
                 >
-                  <div className="flex items-center gap-2.5 truncate pr-2">
+                  <div className="flex items-center gap-2 truncate pr-2">
                     {act.type === 'solved_problem' ? (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                    ) : act.type === 'read_lesson' ? (
-                      <BookOpen className="h-4 w-4 text-[#22D3EE] shrink-0" />
+                      <CheckCircle2 className="h-3.5 w-3.5 text-[var(--positive)] shrink-0" />
                     ) : (
-                      <Terminal className="h-4 w-4 text-amber-400 shrink-0" />
+                      <span className="w-1.5 h-1.5 bg-[var(--accent)] rounded-none shrink-0" />
                     )}
-                    <span className="text-[#E2E8F0] truncate font-medium light:text-slate-800 text-[11px]">
+                    <span className="text-[var(--ink)] truncate font-medium text-xs">
                       {act.title}
                     </span>
                   </div>
-                  <span className="text-[10px] text-[#64748B] font-mono shrink-0">
+                  <span className="text-[11px] text-[var(--muted)] tabular-nums shrink-0">
                     {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               ))
             )}
           </div>
-        </Card>
+        </div>
       </div>
 
-      {/* Per-Track Progress Bars */}
-      <div className="space-y-4">
-        <h3 className="text-base font-bold font-heading text-[#F1F5F9] light:text-slate-900 uppercase tracking-wide">
-          Curriculum Track Mastery
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {tracks.map((track) => {
-            let trackTotal = 0;
-            let trackCompleted = 0;
+      {/* Curriculum Track Mastery as Table Rows (Not Cards) */}
+      <div className="space-y-3 pt-4">
+        <h2 className="text-sm font-medium text-[var(--ink)] uppercase tracking-wider">
+          Curriculum track mastery
+        </h2>
 
-            if (track.totalProblems > 0) {
-              trackTotal = track.totalProblems;
-              const probIds: string[] = track.modules.flatMap((m: any) => m.problemIds);
-              trackCompleted = probIds.filter((pid) => problems[pid]?.status === 'solved').length;
-            } else {
-              trackTotal = track.totalLessons;
-              const lessIds: string[] = track.modules.flatMap((m: any) => m.lessonIds);
-              trackCompleted = lessIds.filter((lid) => lessons[lid]?.read).length;
-            }
+        <div className="border border-[var(--border)] overflow-hidden">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead className="bg-[var(--surface)] text-[var(--muted)] border-b border-[var(--border)]">
+              <tr>
+                <th className="py-2.5 px-4 font-normal">Track</th>
+                <th className="py-2.5 px-4 font-normal text-right">Completion</th>
+                <th className="py-2.5 px-4 font-normal w-1/3">Progress</th>
+                <th className="py-2.5 px-4 font-normal text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--rule)] bg-[var(--ground)]">
+              {tracks.map((track) => {
+                let trackTotal = 0;
+                let trackCompleted = 0;
 
-            const pct = Math.round((trackCompleted / (trackTotal || 1)) * 100);
+                if (track.totalProblems > 0) {
+                  trackTotal = track.totalProblems;
+                  const probIds: string[] = track.modules.flatMap((m: any) => m.problemIds);
+                  trackCompleted = probIds.filter((pid) => problems[pid]?.status === 'solved').length;
+                } else {
+                  trackTotal = track.totalLessons;
+                  const lessIds: string[] = track.modules.flatMap((m: any) => m.lessonIds);
+                  trackCompleted = lessIds.filter((lid) => lessons[lid]?.read).length;
+                }
 
-            return (
-              <Card key={track.id} className="p-5 space-y-3 bg-[#0C1019] border-[#1C2438]">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-heading font-semibold text-[#F1F5F9] light:text-slate-800">{track.title}</span>
-                  <span className="font-mono text-[#06B6D4] text-[11px]">{trackCompleted} / {trackTotal}</span>
-                </div>
-                <Progress value={pct} className="h-1.5 bg-[#161F30]" />
-                <div className="flex items-center justify-between text-[11px] text-[#94A3B8] font-mono">
-                  <span>{pct}% complete</span>
-                  <Link
-                    to={track.totalProblems > 0 ? `/practice?track=${track.id}` : `/learn`}
-                    className="text-[#06B6D4] hover:underline"
-                  >
-                    Open Track →
-                  </Link>
-                </div>
-              </Card>
-            );
-          })}
+                const pct = Math.round((trackCompleted / (trackTotal || 1)) * 100);
+
+                return (
+                  <tr key={track.id} className="hover:bg-[var(--surface)] transition-colors">
+                    <td className="py-3 px-4 font-medium text-[var(--ink)]">
+                      {track.title}
+                    </td>
+                    <td className="py-3 px-4 text-right tabular-nums text-[var(--muted)]">
+                      {trackCompleted} / {trackTotal} ({pct}%)
+                    </td>
+                    <td className="py-3 px-4">
+                      <Progress value={pct} className="h-1.5 rounded-none bg-[var(--surface)]" />
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Link
+                        to={track.totalProblems > 0 ? `/practice?track=${track.id}` : `/learn`}
+                        className="text-[var(--accent)] hover:underline font-medium"
+                      >
+                        Open →
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

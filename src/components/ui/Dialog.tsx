@@ -15,7 +15,7 @@ export const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      'fixed inset-0 z-50 bg-black/70 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-50 bg-[#18191b]/60 transition-opacity',
       className
     )}
     {...props}
@@ -32,13 +32,13 @@ export const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[#222C55] bg-[#111936] p-6 shadow-2xl duration-200 sm:rounded-2xl',
+        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border border-[var(--border)] bg-[var(--surface-app)] p-6 shadow-2xl duration-150 rounded-[6px]',
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1 text-[#8B93B7] opacity-70 transition-opacity hover:opacity-100 focus:outline-none hover:bg-[#172044]">
+      <DialogPrimitive.Close className="absolute right-4 top-4 text-[var(--muted)] hover:text-[var(--text)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)] cursor-pointer">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -67,10 +67,7 @@ export const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn(
-      'text-lg font-semibold leading-none tracking-tight text-[#E6E9F5]',
-      className
-    )}
+    className={cn('text-base font-normal tracking-tight text-[var(--text)]', className)}
     {...props}
   />
 ));
@@ -82,9 +79,8 @@ export const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-[#8B93B7]', className)}
+    className={cn('text-xs text-[var(--muted)]', className)}
     {...props}
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
-

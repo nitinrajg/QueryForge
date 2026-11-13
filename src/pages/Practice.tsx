@@ -1,19 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { 
-  Terminal, 
-  Search, 
-  CheckCircle2, 
-  CircleDot, 
-  Circle, 
-  ChevronRight, 
-  Filter,
-  Sparkles,
-  ArrowRight
-} from 'lucide-react';
+import { Search, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
 import { useProgressStore } from '@/store/useProgressStore';
 import tracksData from '@/content/tracks.json';
 import problemsData from '@/content/problems.json';
@@ -26,12 +14,15 @@ function sanitizeTitle(text: string): string {
 }
 
 /**
- * High-Density SQL Problem Arena Catalog.
+ * High-Density SQL Problem Arena Catalog — Data Terminal List.
  * 
  * Logic & Approach:
- * - High-speed search and multi-dimensional filter bar.
- * - Interactive list with status indicators, difficulty badges, and quick launch triggers.
- * - Zero emoji clutter for clean engineering posture.
+ * - Clean Data Terminal list without bulky card frames.
+ * - Underline status tabs: All, Unsolved, Attempted, Solved with 1px accent indicator.
+ * - Flat search input and discrete track/difficulty selectors.
+ * - Row pitch 48-52px with title dominance, plain sentence-case difficulty (Easy/Medium/Hard),
+ *   and status pills using the design system's --pill-* tokens.
+ * - Natural unpadded challenge numbers.
  */
 export const Practice: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,11 +30,11 @@ export const Practice: React.FC = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'solved' | 'attempted' | 'todo'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'unsolved' | 'attempted' | 'solved'>('all');
 
   const { problems: progressProblems } = useProgressStore();
   const tracks = tracksData as any[];
-  const allProblems = Object.values(problemsData) as any[];
+  const allProblems = useMemo(() => Object.values(problemsData) as any[], []);
 
   // Filter problems based on active parameters
   const filteredProblems = useMemo(() => {
@@ -55,10 +46,10 @@ export const Practice: React.FC = () => {
       if (difficultyFilter !== 'all' && p.difficulty !== difficultyFilter) return false;
 
       // 3. Status filter
-      const pStatus = progressProblems[p.id]?.status;
+      const pStatus = progressProblems[p.id]?.status || 'unsolved';
       if (statusFilter === 'solved' && pStatus !== 'solved') return false;
       if (statusFilter === 'attempted' && pStatus !== 'attempted') return false;
-      if (statusFilter === 'todo' && pStatus === 'solved') return false;
+      if (statusFilter === 'unsolved' && pStatus === 'solved') return false;
 
       // 4. Search query
       if (searchQuery.trim().length > 0) {
@@ -72,131 +63,190 @@ export const Practice: React.FC = () => {
     });
   }, [allProblems, activeTrackFilter, difficultyFilter, statusFilter, searchQuery, progressProblems]);
 
+  // Counts for tabs
+  const solvedCount = useMemo(() => {
+    return allProblems.filter((p) => progressProblems[p.id]?.status === 'solved').length;
+  }, [allProblems, progressProblems]);
+
+  const attemptedCount = useMemo(() => {
+    return allProblems.filter((p) => progressProblems[p.id]?.status === 'attempted').length;
+  }, [allProblems, progressProblems]);
+
   return (
-    <div className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full space-y-6">
-      {/* Header */}
-      <div className="space-y-2 pb-4 border-b border-[#1C2438]">
+    <div className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto w-full space-y-8 bg-[var(--bg)] text-[var(--ink)]">
+      {/* Editorial Title Row */}
+      <div className="space-y-2 pb-6 border-b border-[var(--border)]">
         <div className="flex items-center gap-2">
-          <Badge variant="accent">PRACTICE ARENA</Badge>
-          <span className="text-xs text-[#7E8B9F] font-mono">111 VERIFIED PROBLEMS</span>
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--muted)]">
+            Execution Sandbox
+          </span>
+          <span className="text-[11px] text-[var(--muted)]">•</span>
+          <span className="text-[11px] text-[var(--muted)] tabular-nums">
+            {allProblems.length} Problems Total
+          </span>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-          <h1 className="text-3xl font-extrabold font-display text-white tracking-tight light:text-slate-900">
+          <h1 className="text-3xl sm:text-4xl font-normal font-display tracking-tight text-[var(--ink)] leading-tight">
             SQL Problem Catalog
           </h1>
-          <span className="text-xs font-mono text-[#7E8B9F]">
-            AUTO-CHECKED IN CLIENT WASM
+          <span className="text-xs text-[var(--muted)]">
+            Verified client-side via SQLite WASM
           </span>
         </div>
       </div>
 
-      {/* Filter Matrix Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-3 rounded-xl border border-[#1C2438] bg-[#0C1019] surface-cockpit">
-        {/* Search */}
-        <div className="sm:col-span-5 relative">
-          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[#7E8B9F]" />
-          <Input
-            type="text"
-            placeholder="Filter by title, join, window, cte..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-8 text-xs font-mono"
-          />
+      {/* Underline Tabs & Controls */}
+      <div className="space-y-4">
+        {/* Underline Tabs */}
+        <div className="flex items-center gap-6 border-b border-[var(--border)] overflow-x-auto -mb-px">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('all')}
+            className={`pb-3 text-sm font-medium transition-colors relative cursor-pointer whitespace-nowrap ${
+              statusFilter === 'all'
+                ? 'text-[var(--ink)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            }`}
+          >
+            All problems ({allProblems.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('unsolved')}
+            className={`pb-3 text-sm font-medium transition-colors relative cursor-pointer whitespace-nowrap ${
+              statusFilter === 'unsolved'
+                ? 'text-[var(--ink)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            }`}
+          >
+            Unsolved ({allProblems.length - solvedCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('attempted')}
+            className={`pb-3 text-sm font-medium transition-colors relative cursor-pointer whitespace-nowrap ${
+              statusFilter === 'attempted'
+                ? 'text-[var(--ink)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            }`}
+          >
+            Attempted ({attemptedCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('solved')}
+            className={`pb-3 text-sm font-medium transition-colors relative cursor-pointer whitespace-nowrap ${
+              statusFilter === 'solved'
+                ? 'text-[var(--ink)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
+                : 'text-[var(--muted)] hover:text-[var(--ink)]'
+            }`}
+          >
+            Solved ({solvedCount})
+          </button>
         </div>
 
-        {/* Track Selector */}
-        <div className="sm:col-span-3">
-          <select
-            value={activeTrackFilter}
-            onChange={(e) => setSearchParams({ track: e.target.value })}
-            className="h-8 w-full rounded-lg border border-[#1C2438] bg-[#07090E] px-2.5 text-xs font-mono text-[#F1F5F9] focus:outline-none focus:ring-1 focus:ring-cyan-400"
-          >
-            <option value="all">ALL TRACKS ({allProblems.length})</option>
-            {tracks.filter((t) => t.totalProblems > 0).map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.title} ({t.totalProblems})
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Toolbar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+          {/* Search (280px wide) */}
+          <div className="relative w-full sm:w-[280px]">
+            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[var(--muted)]" />
+            <Input
+              type="text"
+              placeholder="Search title, join, window..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 h-8 text-xs bg-[var(--surface)] border-[var(--border)] focus:border-[var(--accent)] rounded-none"
+            />
+          </div>
 
-        {/* Difficulty */}
-        <div className="sm:col-span-2">
-          <select
-            value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value as any)}
-            className="h-8 w-full rounded-lg border border-[#1C2438] bg-[#07090E] px-2.5 text-xs font-mono text-[#F1F5F9] focus:outline-none focus:ring-1 focus:ring-cyan-400"
-          >
-            <option value="all">ANY DIFFICULTY</option>
-            <option value="easy">EASY</option>
-            <option value="medium">MEDIUM</option>
-            <option value="hard">HARD</option>
-          </select>
-        </div>
+          <div className="flex items-center gap-3">
+            {/* Track Selector */}
+            <select
+              value={activeTrackFilter}
+              onChange={(e) => setSearchParams({ track: e.target.value })}
+              className="h-8 rounded-none border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--accent)]"
+            >
+              <option value="all">All Tracks</option>
+              {tracks.filter((t) => t.totalProblems > 0).map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.title} ({t.totalProblems})
+                </option>
+              ))}
+            </select>
 
-        {/* Status */}
-        <div className="sm:col-span-2">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="h-8 w-full rounded-lg border border-[#1C2438] bg-[#07090E] px-2.5 text-xs font-mono text-[#F1F5F9] focus:outline-none focus:ring-1 focus:ring-cyan-400"
-          >
-            <option value="all">ANY STATUS</option>
-            <option value="solved">SOLVED</option>
-            <option value="attempted">ATTEMPTED</option>
-            <option value="todo">TO DO</option>
-          </select>
+            {/* Difficulty Selector */}
+            <select
+              value={difficultyFilter}
+              onChange={(e) => setDifficultyFilter(e.target.value as any)}
+              className="h-8 rounded-none border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs text-[var(--ink)] focus:outline-none focus:border-[var(--accent)]"
+            >
+              <option value="all">All Difficulties</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* High-Density Problem Rows */}
-      <div className="border border-[#1C2438] rounded-xl overflow-hidden bg-[#0C1019] surface-cockpit">
+      {/* Problem List (No outer card container) */}
+      <div className="border-t border-[var(--border)]">
         {filteredProblems.length === 0 ? (
-          <div className="p-12 text-center text-[#7E8B9F] space-y-2">
-            <Terminal className="h-6 w-6 mx-auto opacity-40 text-cyan-400" />
-            <p className="text-xs font-mono">NO MATCHING CHALLENGES FOUND</p>
+          <div className="py-16 text-center text-[var(--muted)]">
+            <p className="text-sm">No matching SQL problems found.</p>
           </div>
         ) : (
-          <div className="divide-y divide-[#161D2E]">
+          <div className="divide-y divide-[var(--rule)]">
             {filteredProblems.map((prob) => {
-              const status = progressProblems[prob.id]?.status || 'todo';
+              const pStatus = progressProblems[prob.id]?.status || 'unsolved';
               const cleanTitle = sanitizeTitle(prob.title);
 
               return (
                 <Link
                   key={prob.id}
                   to={`/practice/${prob.id}`}
-                  className="flex items-center justify-between p-3 sm:px-4 sm:py-3 hover:bg-[#121826] transition-colors group"
+                  className="flex items-center justify-between min-h-[50px] py-3 px-3 hover:bg-[var(--surface)] transition-colors group"
                 >
-                  <div className="flex items-center gap-3 min-w-0 pr-4">
-                    {/* Status Dot */}
-                    <div>
-                      {status === 'solved' ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                      ) : status === 'attempted' ? (
-                        <CircleDot className="h-4 w-4 text-amber-400 shrink-0" />
-                      ) : (
-                        <Circle className="h-4 w-4 text-[#3E4A63] shrink-0" />
-                      )}
-                    </div>
+                  {/* Left: Number and Title (Dominant Width) */}
+                  <div className="flex items-center gap-4 min-w-0 pr-4">
+                    <span className="w-8 text-right text-xs tabular-nums text-[var(--muted)] shrink-0">
+                      {prob.number}.
+                    </span>
 
-                    {/* Problem Number & Title */}
-                    <div className="flex items-center gap-2.5 min-w-0 font-mono text-xs">
-                      <span className="text-[#7E8B9F] shrink-0 font-bold">
-                        #{String(prob.number).padStart(2, '0')}
-                      </span>
-                      <span className="font-semibold text-[#F1F5F9] group-hover:text-cyan-300 transition-colors truncate">
-                        {cleanTitle}
-                      </span>
-                    </div>
+                    <span className="text-sm font-medium text-[var(--ink)] group-hover:text-white transition-colors truncate">
+                      {cleanTitle}
+                    </span>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <Badge variant={prob.difficulty as any} className="uppercase text-[9px] font-mono">
+                  {/* Right: Difficulty Word and Status Pill */}
+                  <div className="flex items-center gap-4 shrink-0 text-xs">
+                    {/* Plain Difficulty Word */}
+                    <span className={`capitalize text-xs ${
+                      prob.difficulty === 'easy'
+                        ? 'text-[var(--positive)]'
+                        : prob.difficulty === 'medium'
+                        ? 'text-[var(--warning)]'
+                        : 'text-[var(--negative)]'
+                    }`}>
                       {prob.difficulty}
-                    </Badge>
+                    </span>
 
-                    <ChevronRight className="h-3.5 w-3.5 text-[#7E8B9F] group-hover:translate-x-1 group-hover:text-white transition-transform" />
+                    {/* Status Pill */}
+                    {pStatus === 'solved' ? (
+                      <span className="px-2 py-0.5 text-[11px] font-medium bg-[var(--pill-positive-bg)] text-[var(--positive)] rounded-none">
+                        Solved
+                      </span>
+                    ) : pStatus === 'attempted' ? (
+                      <span className="px-2 py-0.5 text-[11px] font-medium bg-[var(--pill-warning-bg)] text-[var(--warning)] rounded-none">
+                        Attempted
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 text-[11px] font-medium bg-[var(--pill-neutral-bg)] text-[var(--muted)] rounded-none">
+                        Unsolved
+                      </span>
+                    )}
+
+                    <ChevronRight className="h-3.5 w-3.5 text-[var(--muted)] group-hover:text-[var(--ink)] group-hover:translate-x-0.5 transition-transform" />
                   </div>
                 </Link>
               );

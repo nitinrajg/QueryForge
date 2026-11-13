@@ -14,11 +14,10 @@ export const TooltipContent = React.forwardRef<
     ref={ref}
     sideOffset={sideOffset}
     className={cn(
-      'z-50 overflow-hidden rounded-lg border border-[#222C55] bg-[#111936] px-3 py-1.5 text-xs text-[#E6E9F5] shadow-md animate-in fade-in-0 zoom-in-95',
+      'z-50 overflow-hidden rounded-none border border-[var(--border)] bg-[var(--raised)] px-2.5 py-1 text-xs text-[var(--text)] shadow-md animate-in fade-in-0 zoom-in-95',
       className
     )}
     {...props}
   />
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
-

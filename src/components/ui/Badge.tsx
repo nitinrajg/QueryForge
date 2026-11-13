@@ -3,27 +3,34 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/cn';
 
 /**
- * Micro-Badge for technical metadata, difficulty ratings, and execution stats.
+ * Data Terminal Indicator & Badge.
+ * 
+ * Rules:
+ * - Difficulty is plain sentence-case text (Easy / Medium / Hard) without tinted chip borders.
+ * - Status pills (Solved, Attempted) use flat pill tokens exclusively in list rows.
+ * - No icon-in-tinted-square.
  */
 export const badgeVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-mono font-medium tracking-wide border select-none transition-colors',
+  'inline-flex items-center gap-1.5 text-xs font-normal select-none',
   {
     variants: {
       variant: {
         default:
-          'border-[#1C2438] bg-[#0C1019] text-[#94A3B8]',
-        outline:
-          'border-[#1C2438] text-[#7E8B9F] bg-transparent',
+          'text-[var(--muted)]',
         easy:
-          'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-semibold',
+          'text-[var(--positive)]',
         medium:
-          'border-amber-500/30 bg-amber-500/10 text-amber-400 font-semibold',
+          'text-[var(--warning)]',
         hard:
-          'border-rose-500/30 bg-rose-500/10 text-rose-400 font-semibold',
+          'text-[var(--negative)]',
+        solved:
+          'bg-[var(--pill-positive-bg)] text-[var(--pill-positive-ink)] px-2 py-0.5 rounded-none font-medium text-[12px]',
+        attempted:
+          'bg-[var(--pill-warning-bg)] text-[var(--pill-warning-ink)] px-2 py-0.5 rounded-none font-medium text-[12px]',
+        neutral:
+          'bg-[var(--pill-neutral-bg)] text-[var(--pill-neutral-ink)] px-2 py-0.5 rounded-none font-medium text-[12px]',
         accent:
-          'border-cyan-500/30 bg-cyan-500/10 text-cyan-400 font-semibold',
-        primary:
-          'border-cyan-500/40 bg-cyan-950/30 text-cyan-300 font-semibold',
+          'text-[var(--accent)] font-medium',
       },
     },
     defaultVariants: {

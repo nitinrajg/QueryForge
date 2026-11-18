@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
+supabase/.temp
 test-results/
 playwright-report/
 
@@ -24,3 +28,9 @@ playwright-report/
 *.njsproj
 *.sln
 *.sw?
+
+# Agent and temporary runtimes
+.agent/
+.agents/
+.claude-flow/
+.swarm/

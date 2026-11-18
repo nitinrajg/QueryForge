@@ -5,7 +5,7 @@
 
 export interface ExpectedOutput {
   columns: string[];
-  rows: (string | number | null)[][];
+  rows: (string | number | boolean | null)[][];
 }
 
 export interface ProblemItem {

@@ -24,17 +24,25 @@ export interface ActivityRecord {
   timestamp: string;
 }
 
+export interface PendingSyncRecord {
+  id?: number;
+  entity: 'user_progress' | 'submission' | 'custom_testcase';
+  payload: any;
+  timestamp: string;
+}
+
 /**
  * Client-Side Dexie (IndexedDB) Database.
  * 
  * Logic & Approach:
  * Stores all progress locally on the learner's machine with 0 backend dependencies.
- * Automatically synchronizes changes and supports full export/import/reset.
+ * Provides offline queue and instant optimistic mutations.
  */
 class QueryForgeDatabase extends Dexie {
   problemProgress!: EntityTable<ProblemProgressRecord, 'id'>;
   lessonProgress!: EntityTable<LessonProgressRecord, 'id'>;
   activity!: EntityTable<ActivityRecord, 'id'>;
+  pendingSync!: EntityTable<PendingSyncRecord, 'id'>;
 
   constructor() {
     super('QueryForgeDatabase');
@@ -43,8 +51,13 @@ class QueryForgeDatabase extends Dexie {
       lessonProgress: 'id, read, updatedAt',
       activity: '++id, type, targetId, timestamp',
     });
+    this.version(2).stores({
+      problemProgress: 'id, status, attempts, updatedAt',
+      lessonProgress: 'id, read, updatedAt',
+      activity: '++id, type, targetId, timestamp',
+      pendingSync: '++id, entity, timestamp',
+    });
   }
 }
 
 export const db = new QueryForgeDatabase();
-

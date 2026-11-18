@@ -177,10 +177,20 @@ export class SqliteEngine implements EngineInterface {
           }
         } catch (e) {}
 
+        // Fetch sample rows for LeetCode problem description display
+        let sampleRows: (string | number | boolean | null)[][] = [];
+        try {
+          const rowsRes = this.db.exec(`SELECT * FROM "${tableName}" LIMIT 10;`);
+          if (rowsRes.length && rowsRes[0].values) {
+            sampleRows = rowsRes[0].values as (string | number | boolean | null)[][];
+          }
+        } catch (e) {}
+
         tables.push({
           name: tableName,
           columns,
           rowCount,
+          sampleRows,
         });
       }
 

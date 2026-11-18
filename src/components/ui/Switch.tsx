@@ -10,8 +10,11 @@ interface SwitchProps {
 }
 
 /**
- * Data-Terminal Switch Component.
- * Minimal tactile toggle with flat square indicator and 1px accent feedback.
+ * Cohesive Tactile Switch Component.
+ * 
+ * Rules:
+ * - Rounded pill track (`rounded-full`) with smooth sliding thumb.
+ * - Warm Forge Flame active state with high visual contrast.
  */
 export const Switch: React.FC<SwitchProps> = ({
   checked,
@@ -30,17 +33,15 @@ export const Switch: React.FC<SwitchProps> = ({
       data-ui="switch"
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-none border border-[var(--control)] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]',
-        checked ? 'bg-[var(--accent)]' : 'bg-[var(--raised)]',
+        'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border border-[var(--border)] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]',
+        checked ? 'bg-[var(--accent)] border-[var(--accent)]' : 'bg-[var(--raised)]',
         className
       )}
     >
       <span
         className={cn(
-          'pointer-events-none block h-5 w-5 rounded-none transition-transform duration-150',
-          checked
-            ? 'translate-x-5 bg-[var(--accent-ink)]'
-            : 'translate-x-0 bg-[var(--muted)]'
+          'pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out',
+          checked ? 'translate-x-5' : 'translate-x-0'
         )}
       />
     </button>

@@ -1,21 +1,39 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 
 /**
- * Root application layout.
- * Provides sticky header, dynamic route content via <Outlet />, and responsive footer.
+ * Root Application Layout.
+ * 
+ * Rules:
+ * - On the Practice Workspace (`/practice/:id`), provides a locked 100dvh full-viewport
+ *   application shell with zero page scroll, dedicated IDE panels, and no footer.
+ * - On all other pages (Home, Learn, Practice Catalog, Dashboard, Playground),
+ *   renders the full standard editorial page layout with footer.
  */
 export const Layout: React.FC = () => {
+  const location = useLocation();
+  const isPracticeWorkspace = location.pathname.startsWith('/practice/') && location.pathname !== '/practice';
+
+  if (isPracticeWorkspace) {
+    return (
+      <div className="h-screen max-h-[100dvh] flex flex-col bg-[var(--bg)] text-[var(--ink)] overflow-hidden select-none">
+        <Navbar />
+        <main className="flex-1 flex flex-col w-full min-h-0 overflow-hidden">
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFF] dark:bg-[#0B1020] text-[#0F172A] dark:text-[#E6E9F5] transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--ink)] transition-colors duration-150">
       <Navbar />
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col w-full">
         <Outlet />
       </main>
       <Footer />
     </div>
   );
 };
-

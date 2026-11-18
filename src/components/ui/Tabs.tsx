@@ -3,12 +3,11 @@ import * as TabsPrimitive from '@radix-ui/react-tabs';
 import { cn } from '@/lib/cn';
 
 /**
- * Data Terminal Underline Tabs.
+ * Cohesive Tabs Component.
  * 
  * Rules:
- * - Full-width bottom rule border-b border-[var(--border)].
- * - Active tab has a 1px accent indicator exactly as wide as the label.
- * - Replaces filled segmented pill tabs.
+ * - Refined indicator with `--accent`.
+ * - Clean text contrast and transitions.
  */
 export const Tabs = TabsPrimitive.Root;
 
@@ -34,8 +33,8 @@ export const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'relative inline-flex items-center justify-center whitespace-nowrap py-2.5 text-xs font-normal transition-colors cursor-pointer focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 text-[var(--muted)] hover:text-[var(--text)] data-[state=active]:text-[var(--text)] data-[state=active]:font-medium',
-      'data-[state=active]:after:absolute data-[state=active]:after:bottom-[-1px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[1px] data-[state=active]:after:bg-[var(--accent)]',
+      'relative inline-flex items-center justify-center whitespace-nowrap py-2.5 text-xs font-medium transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] disabled:pointer-events-none disabled:opacity-50 text-[var(--muted)] hover:text-[var(--ink)] data-[state=active]:text-[var(--ink)]',
+      'data-[state=active]:after:absolute data-[state=active]:after:bottom-[-1px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-[var(--accent)] data-[state=active]:after:rounded-full',
       className
     )}
     {...props}

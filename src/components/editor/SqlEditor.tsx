@@ -1,9 +1,24 @@
 import React, { useEffect, useRef } from 'react';
-import { EditorState } from '@codemirror/state';
-import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightSpecialChars, drawSelection, dropCursor } from '@codemirror/view';
+import { Compartment, EditorState, Extension } from '@codemirror/state';
+import { 
+  EditorView, 
+  keymap, 
+  lineNumbers, 
+  highlightActiveLineGutter, 
+  highlightSpecialChars, 
+  drawSelection, 
+  dropCursor 
+} from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
-import { sql, StandardSQL, MySQL, PostgreSQL, SQLite } from '@codemirror/lang-sql';
-import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
+import { sql, MySQL, PostgreSQL, SQLite } from '@codemirror/lang-sql';
+import { 
+  autocompletion, 
+  completionKeymap, 
+  closeBrackets, 
+  closeBracketsKeymap,
+  CompletionContext,
+  CompletionResult
+} from '@codemirror/autocomplete';
 import { bracketMatching, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
 import { oneDark } from '@codemirror/theme-one-dark';
 import { useThemeStore } from '@/store/useThemeStore';
@@ -23,11 +38,17 @@ interface SqlEditorProps {
 /**
  * Professional in-browser CodeMirror 6 SQL Editor.
  * 
- * Logic & Features:
- * - Dynamically configures schema autocompletion based on introspected tables/columns.
- * - Supports keyboard shortcut `Ctrl+Enter` / `Cmd+Enter` to execute queries immediately.
- * - Reactive to app theme (matches OneDark in dark mode vs clean light theme).
- * - Proper line numbers, bracket matching, history undo/redo, and tab indentation.
+ * Logic & Approach:
+ * - Dynamic Schema Autocompletion:
+ *   In SQL, columns are frequently typed in `SELECT <col>` before the `FROM <table>` clause exists.
+ *   Standard context-sensitive completers cannot resolve the active table at that stage.
+ *   We inject both CodeMirror's table-scoped schema and a global schema completer facet
+ *   so columns and tables autocompletes seamlessly as you type.
+ * - Reactive Compartments:
+ *   Uses CodeMirror Compartments for dynamic dialect, schema, and theme reconfigurations
+ *   without tearing down the EditorView or losing cursor / undo history.
+ * - Fast Execution Shortcut:
+ *   Supports `Ctrl+Enter` / `Cmd+Enter` to run the query immediately.
  */
 export const SqlEditor: React.FC<SqlEditorProps> = ({
   value,
@@ -35,15 +56,19 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
   onRun,
   schema = [],
   engine = 'sqlite',
-  fontSize = 14,
+  fontSize = 13,
   readOnly = false,
-  minHeight = '240px',
+  minHeight = '100%',
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const { theme } = useThemeStore();
 
-  // Pick dialect
+  // Compartments for dynamic reconfiguration
+  const sqlCompartment = useRef(new Compartment()).current;
+  const themeCompartment = useRef(new Compartment()).current;
+
+  // Pick SQL dialect based on active engine
   const getDialect = () => {
     switch (engine) {
       case 'mysql':
@@ -56,15 +81,129 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
     }
   };
 
-  // Convert schema into CodeMirror autocompletion schema format: { [tableName]: [col1, col2] }
-  const buildSchemaCompleter = () => {
+  // Build SQL extension with both table-scoped schema and global column completer
+  const buildSqlExtension = (activeEngine: SupportedEngine, currentSchema: TableSchema[]): Extension => {
+    let dialect = SQLite;
+    if (activeEngine === 'mysql') dialect = MySQL;
+    if (activeEngine === 'pglite') dialect = PostgreSQL;
+
+    // 1. Table-scoped dictionary: { [tableName]: [col1, col2] }
     const tableDict: Record<string, string[]> = {};
-    for (const t of schema) {
+    for (const t of currentSchema) {
       tableDict[t.name] = t.columns.map((c) => c.name);
     }
-    return tableDict;
+
+    const baseSql = sql({
+      dialect,
+      schema: tableDict,
+      upperCaseKeywords: true,
+    });
+
+    // 2. Global column and table autocompleter
+    const globalCompleter = (context: CompletionContext): CompletionResult | null => {
+      const word = context.matchBefore(/[\w.]*/);
+      if (!word || (word.from === word.to && !context.explicit)) return null;
+
+      const options: any[] = [];
+      const seen = new Set<string>();
+
+      for (const table of currentSchema) {
+        // Table name completion
+        const tableKey = `tbl:${table.name.toLowerCase()}`;
+        if (!seen.has(tableKey)) {
+          seen.add(tableKey);
+          options.push({
+            label: table.name,
+            type: 'class',
+            detail: 'table',
+            boost: 1.5,
+          });
+        }
+
+        // Column name completions
+        for (const col of table.columns) {
+          const colKey = `col:${col.name.toLowerCase()}:${table.name.toLowerCase()}`;
+          if (!seen.has(colKey)) {
+            seen.add(colKey);
+            options.push({
+              label: col.name,
+              type: 'property',
+              detail: `${col.type ? col.type.toLowerCase() : 'column'} (${table.name})`,
+              boost: 1.2,
+            });
+          }
+        }
+      }
+
+      if (options.length === 0) return null;
+
+      return {
+        from: word.from,
+        options,
+        validFor: /^[\w.]*$/,
+      };
+    };
+
+    return [
+      baseSql,
+      dialect.language.data.of({ autocomplete: globalCompleter }),
+    ];
   };
 
+  // Build theme styling extension
+  const buildThemeExtension = (currentTheme: string, size: number, height: string): Extension => {
+    const isDark = currentTheme === 'dark';
+
+    const customTheme = EditorView.theme({
+      '&': {
+        height: '100%',
+        fontSize: `${size}px`,
+        fontFamily: "'JetBrains Mono', monospace",
+        backgroundColor: isDark ? '#0f1013' : '#ffffff',
+        color: isDark ? '#f1f5f9' : '#0f172a',
+      },
+      '.cm-scroller': {
+        overflow: 'auto',
+        minHeight: height,
+        fontFamily: "'JetBrains Mono', monospace",
+      },
+      '.cm-content': {
+        padding: '12px 0',
+        caretColor: '#f97316',
+      },
+      '&.cm-focused .cm-cursor': {
+        borderLeftColor: '#f97316',
+        borderLeftWidth: '2px',
+      },
+      '&.cm-focused .cm-selectionBackground, ::selection': {
+        backgroundColor: isDark ? 'rgba(249, 115, 22, 0.25)' : 'rgba(249, 115, 22, 0.18)',
+      },
+      '.cm-gutters': {
+        backgroundColor: isDark ? '#141518' : '#f8fafc',
+        color: isDark ? '#525866' : '#94a3b8',
+        border: 'none',
+        borderRight: isDark ? '1px solid #242830' : '1px solid #e2e8f0',
+        paddingRight: '6px',
+      },
+      '.cm-lineNumbers .cm-gutterElement': {
+        minWidth: '32px',
+        textAlign: 'right',
+        fontSize: '11px',
+      },
+      '.cm-activeLine': {
+        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)',
+      },
+      '.cm-activeLineGutter': {
+        backgroundColor: isDark ? '#1a1c22' : '#f1f5f9',
+        color: '#f97316',
+        fontWeight: '600',
+      },
+    });
+
+    return [isDark ? oneDark : [], customTheme];
+  };
+
+  // Mount editor once on container attachment
   useEffect(() => {
     if (!editorRef.current) return;
 
@@ -82,47 +221,6 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
       },
     ]);
 
-    const sqlExtension = sql({
-      dialect: getDialect(),
-      schema: buildSchemaCompleter(),
-      upperCaseKeywords: true,
-    });
-
-    const themeExtension = EditorView.theme({
-      '&': {
-        height: '100%',
-        fontSize: `${fontSize}px`,
-        fontFamily: "'JetBrains Mono', monospace",
-        backgroundColor: theme === 'dark' ? '#131217' : '#FFFFFF',
-      },
-      '.cm-scroller': {
-        overflow: 'auto',
-        minHeight,
-      },
-      '.cm-content': {
-        caretColor: '#ff4a1f',
-      },
-      '&.cm-focused .cm-cursor': {
-        borderLeftColor: '#ff4a1f',
-      },
-      '&.cm-focused .cm-selectionBackground, ::selection': {
-        backgroundColor: theme === 'dark' ? 'rgba(255, 74, 31, 0.25)' : 'rgba(255, 74, 31, 0.15)',
-      },
-      '.cm-gutters': {
-        backgroundColor: theme === 'dark' ? '#171719' : '#eff0f1',
-        color: theme === 'dark' ? '#8a8c92' : '#6b6d72',
-        border: 'none',
-        borderRight: theme === 'dark' ? '1px solid #1b1a1f' : '1px solid #d4d7dc',
-      },
-      '.cm-activeLine': {
-        backgroundColor: theme === 'dark' ? 'rgba(33, 32, 35, 0.6)' : 'rgba(226, 228, 231, 0.5)',
-      },
-      '.cm-activeLineGutter': {
-        backgroundColor: theme === 'dark' ? '#212023' : '#e2e4e7',
-        color: '#ff4a1f',
-      },
-    });
-
     const state = EditorState.create({
       doc: value,
       extensions: [
@@ -134,11 +232,13 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
         dropCursor(),
         bracketMatching(),
         closeBrackets(),
-        autocompletion(),
+        autocompletion({
+          defaultKeymap: true,
+          icons: true,
+        }),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-        theme === 'dark' ? oneDark : [],
-        themeExtension,
-        sqlExtension,
+        themeCompartment.of(buildThemeExtension(theme, fontSize, minHeight)),
+        sqlCompartment.of(buildSqlExtension(engine, schema)),
         runKeymap,
         keymap.of([...defaultKeymap, ...historyKeymap, ...completionKeymap, ...closeBracketsKeymap, indentWithTab]),
         EditorState.readOnly.of(readOnly),
@@ -161,7 +261,27 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
       view.destroy();
       viewRef.current = null;
     };
-  }, [theme, engine, fontSize, minHeight]);
+  }, []);
+
+  // Dynamically reconfigure SQL engine and schema when they change
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+
+    view.dispatch({
+      effects: sqlCompartment.reconfigure(buildSqlExtension(engine, schema)),
+    });
+  }, [engine, JSON.stringify(schema)]);
+
+  // Dynamically reconfigure theme when theme, fontSize, or minHeight change
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+
+    view.dispatch({
+      effects: themeCompartment.reconfigure(buildThemeExtension(theme, fontSize, minHeight)),
+    });
+  }, [theme, fontSize, minHeight]);
 
   // Sync external value changes without losing cursor
   useEffect(() => {
@@ -178,8 +298,7 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
   return (
     <div
       ref={editorRef}
-      className="w-full h-full border border-[#222C55] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500/50 light:border-slate-200"
+      className="w-full h-full rounded-lg border border-[var(--border)] overflow-hidden focus-within:border-[var(--accent)] focus-within:ring-1 focus-within:ring-[var(--accent)] transition-colors bg-[var(--surface-app)]"
     />
   );
 };
-

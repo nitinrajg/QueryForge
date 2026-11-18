@@ -23,10 +23,10 @@ export const RangeStages: React.FC<RangeStagesProps> = ({
       <div className="relative flex items-center h-10 w-full">
         {/* 8px Track */}
         <div className="relative w-full h-2 bg-[var(--rule)] rounded-none">
-          {/* Active fill */}
+          {/* Active fill (Hardware-Accelerated ScaleX) */}
           <div
-            className="h-full bg-[var(--accent)] transition-all duration-150"
-            style={{ width: `${(stage / 3) * 100}%` }}
+            className="h-full w-full bg-[var(--accent)] origin-left transition-transform duration-150 ease-out will-change-transform"
+            style={{ transform: `scaleX(${stage / 3})` }}
           />
 
           {/* 4 Discrete Stop Marks */}
@@ -58,7 +58,7 @@ export const RangeStages: React.FC<RangeStagesProps> = ({
         />
 
         <div
-          className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-none bg-[var(--accent)] text-[var(--accent-ink)] flex items-center justify-center font-bold text-xs select-none shadow-sm transition-all duration-150"
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-8 h-8 rounded-none bg-[var(--accent)] text-[var(--accent-ink)] flex items-center justify-center font-bold text-xs select-none shadow-sm transition-[left] duration-150 ease-out"
           style={{ left: `calc(${((stage / 3) * 100)}% - 16px)` }}
         >
           {stage + 1}
@@ -86,3 +86,4 @@ export const RangeStages: React.FC<RangeStagesProps> = ({
     </div>
   );
 };
+

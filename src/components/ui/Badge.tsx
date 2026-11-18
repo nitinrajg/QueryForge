@@ -3,34 +3,34 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/cn';
 
 /**
- * Data Terminal Indicator & Badge.
+ * Cohesive Badge & Status Indicator Component.
  * 
  * Rules:
- * - Difficulty is plain sentence-case text (Easy / Medium / Hard) without tinted chip borders.
- * - Status pills (Solved, Attempted) use flat pill tokens exclusively in list rows.
- * - No icon-in-tinted-square.
+ * - Clear contrast for difficulty indicators and solve progress.
+ * - Subtle background tints with matched borders to eliminate garish blocks.
+ * - Perfectly aligned typography and dot indicators.
  */
 export const badgeVariants = cva(
-  'inline-flex items-center gap-1.5 text-xs font-normal select-none',
+  'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors select-none tabular-nums',
   {
     variants: {
       variant: {
         default:
-          'text-[var(--muted)]',
+          'bg-[var(--raised)] border border-[var(--border)] text-[var(--muted)]',
         easy:
-          'text-[var(--positive)]',
+          'bg-[var(--pill-positive-bg)] border border-[var(--positive)]/30 text-[var(--positive)]',
         medium:
-          'text-[var(--warning)]',
+          'bg-[var(--pill-warning-bg)] border border-[var(--warning)]/30 text-[var(--warning)]',
         hard:
-          'text-[var(--negative)]',
+          'bg-[var(--pill-negative-bg)] border border-[var(--negative)]/30 text-[var(--negative)]',
         solved:
-          'bg-[var(--pill-positive-bg)] text-[var(--pill-positive-ink)] px-2 py-0.5 rounded-none font-medium text-[12px]',
+          'bg-[var(--pill-positive-bg)] border border-[var(--positive)]/30 text-[var(--positive)]',
         attempted:
-          'bg-[var(--pill-warning-bg)] text-[var(--pill-warning-ink)] px-2 py-0.5 rounded-none font-medium text-[12px]',
+          'bg-[var(--pill-warning-bg)] border border-[var(--warning)]/30 text-[var(--warning)]',
         neutral:
-          'bg-[var(--pill-neutral-bg)] text-[var(--pill-neutral-ink)] px-2 py-0.5 rounded-none font-medium text-[12px]',
+          'bg-[var(--pill-neutral-bg)] border border-[var(--border)] text-[var(--muted)]',
         accent:
-          'text-[var(--accent)] font-medium',
+          'bg-[var(--accent-subtle)] border border-[var(--accent)]/30 text-[var(--accent)]',
       },
     },
     defaultVariants: {
@@ -41,10 +41,30 @@ export const badgeVariants = cva(
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
+    VariantProps<typeof badgeVariants> {
+  dot?: boolean;
+}
 
-export function Badge({ className, variant, ...props }: BadgeProps) {
+export function Badge({ className, variant, dot = false, children, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div className={cn(badgeVariants({ variant }), className)} {...props}>
+      {dot && (
+        <span
+          className={cn(
+            'w-1.5 h-1.5 rounded-full shrink-0',
+            variant === 'easy' || variant === 'solved'
+              ? 'bg-[var(--positive)]'
+              : variant === 'medium' || variant === 'attempted'
+              ? 'bg-[var(--warning)]'
+              : variant === 'hard'
+              ? 'bg-[var(--negative)]'
+              : variant === 'accent'
+              ? 'bg-[var(--accent)]'
+              : 'bg-[var(--muted)]'
+          )}
+        />
+      )}
+      {children}
+    </div>
   );
 }

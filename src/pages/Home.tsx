@@ -1,8 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Play, 
+  ArrowRight, 
+  Terminal, 
+  Cpu, 
+  Shield, 
+  CheckCircle2, 
+  BookOpen, 
+  Code2, 
+  Layers, 
+  Zap,
+  Sparkles,
+  Database
+} from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Switch } from '@/components/ui/Switch';
-import { RangeStages } from '@/components/ui/RangeStages';
+import { Badge } from '@/components/ui/Badge';
 import { QueryInput } from '@/components/ui/QueryInput';
 import { useProgressStore } from '@/store/useProgressStore';
 import tracksData from '@/content/tracks.json';
@@ -12,16 +25,12 @@ import lessonsData from '@/content/lessons.json';
 /**
  * Rebuilt QueryForge Home Page.
  * 
- * Design Direction:
- * - Direction: "The sentence is the layout", hero "Photograph for a letter", motion "Shutter image".
- * - Palette: Graphite dark (#18191b), tone-step surfaces (#222427), Safety Orange accent (#ff4a1f).
- * - Typography: Gambarino for display headers, General Sans for all UI and body text.
- * - Hero: "QueryForge" on one line at vertical centre, the 'o' replaced by real result of Problem #1.
- * - Features: "Sentences with switches" across 4 full-bleed bands.
- * - How it works: "Drag through the stages" 50/50 split at 88svh.
- * - Showcase: "Headline you can type" with live WebAssembly query execution.
- * - Stats: Ledger aligned on the decimal with real content counts.
- * - CTA: "A sentence with a blank" (inline select).
+ * Design Architecture:
+ * - Authoritative Developer-Workbench Hero with live interactive query preview.
+ * - Purposeful value pillars replacing artificial switch gimmicks.
+ * - Interactive SQL Sandbox showcase executing locally in WebAssembly.
+ * - Structured curriculum tracks overview with real metrics.
+ * - Focused call-to-action to begin practice immediately with zero sign-up friction.
  */
 export const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -31,424 +40,419 @@ export const Home: React.FC = () => {
   const allLessons = Object.values(lessonsData) as any[];
   const tracks = tracksData as any[];
 
-  // Find last attempted or first unsolved problem for resume line
-  const lastActivity = activities[0];
+  // Find last attempted or first unsolved problem for quick resume
   const nextUnsolved = allProblems.find((p) => problems[p.id]?.status !== 'solved') || allProblems[0];
+  const solvedCount = Object.values(problems).filter((p) => p.status === 'solved').length;
 
-  // Features switch states (two on at load)
-  const [switch1, setSwitch1] = useState(true);
-  const [switch2, setSwitch2] = useState(true);
-  const [switch3, setSwitch3] = useState(false);
-  const [switch4, setSwitch4] = useState(false);
-
-  // How it works stage slider (0 to 3)
-  const [stage, setStage] = useState(0);
-
-  // CTA Inline select state
+  // Selected track for quick-start CTA
   const [selectedTrackId, setSelectedTrackId] = useState(tracks[0]?.id || 'leetcode-sql-50');
 
-  const handleStartTrack = () => {
-    const selectedTrack = tracks.find((t) => t.id === selectedTrackId);
-    if (selectedTrack && selectedTrack.totalProblems > 0) {
-      navigate(`/practice?track=${selectedTrackId}`);
-    } else {
-      navigate('/learn');
-    }
+  // Hero interactive preview active tab
+  const [activeHeroTab, setActiveHeroTab] = useState<'filter' | 'join' | 'window'>('filter');
+
+  const heroQueries = {
+    filter: {
+      title: 'Problem #1: Recyclable & Low Fat Products',
+      sql: `SELECT product_id\nFROM Products\nWHERE low_fats = 'Y' AND recyclable = 'Y';`,
+      output: [
+        { product_id: 1, name: 'Eco Bottle', status: 'In Stock' },
+        { product_id: 3, name: 'Glass Tumbler', status: 'In Stock' },
+      ],
+      time: '1.2ms',
+    },
+    join: {
+      title: 'Problem #17: Customer Order Anti-Join',
+      sql: `SELECT c.customer_name, c.email\nFROM Customers c\nLEFT JOIN Orders o ON c.id = o.customer_id\nWHERE o.order_id IS NULL;`,
+      output: [
+        { customer_name: 'Sarah Connor', email: 'sarah@resistance.org' },
+        { customer_name: 'Arthur Dent', email: 'dent@galaxy.net' },
+      ],
+      time: '2.4ms',
+    },
+    window: {
+      title: 'Problem #34: Department Salary Ranking',
+      sql: `SELECT employee_name, department, salary,\n  DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) as rk\nFROM Employees;`,
+      output: [
+        { employee_name: 'Elena Rostova', department: 'Engineering', salary: 145000, rk: 1 },
+        { employee_name: 'David Kim', department: 'Engineering', salary: 132000, rk: 2 },
+      ],
+      time: '3.1ms',
+    },
   };
+
+  const currentHeroQuery = heroQueries[activeHeroTab];
 
   return (
     <div className="w-full bg-[var(--bg)] text-[var(--ink)]">
-      {/* Optional Top Resume Line */}
+      {/* Top Resume Banner for Returning Learners */}
       {activities.length > 0 && (
-        <div className="w-full bg-[var(--surface)] border-b border-[var(--border)] px-4 sm:px-6 lg:px-8 py-2 text-xs text-[var(--muted)] flex items-center justify-between">
-          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
-            <span>Resume where you left off:</span>
-            <Link
-              to={`/practice/${nextUnsolved.id}`}
-              className="text-[var(--ink)] font-medium hover:text-[var(--accent)] underline-offset-4 hover:underline"
-            >
-              {nextUnsolved.title} →
-            </Link>
+        <aside aria-label="Resume learning" className="w-full bg-[var(--surface)] border-b border-[var(--border)] px-4 sm:px-6 lg:px-8 py-2.5 text-xs text-[var(--muted)]">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[var(--positive)] inline-block" />
+              <span>Resume session:</span>
+              <Link
+                to={`/practice/${nextUnsolved.id}`}
+                className="text-[var(--ink)] font-medium hover:text-[var(--accent)] underline-offset-4 hover:underline transition-colors"
+              >
+                #{nextUnsolved.number} {nextUnsolved.title}
+              </Link>
+            </div>
+            <span className="hidden sm:inline font-mono text-[11px] text-[var(--muted)]">
+              {solvedCount} of {allProblems.length} solved
+            </span>
           </div>
-        </div>
+        </aside>
       )}
 
       {/* 1. HERO SECTION */}
-      <section className="relative min-h-[92svh] flex flex-col justify-between px-4 sm:px-6 lg:px-8 py-10 max-w-7xl mx-auto w-full">
-        <div className="h-4" />
+      <section className="relative px-4 sm:px-6 lg:px-8 pt-16 pb-20 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column: Value Proposition & CTAs */}
+          <div className="lg:col-span-6 space-y-6 text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--surface)] border border-[var(--border)] text-xs text-[var(--muted)]">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]"></span>
+              </span>
+              <span className="font-medium text-[var(--ink)]">In-Browser SQL Studio</span>
+              <span className="text-[var(--faint)]">•</span>
+              <span>100% Client-Side WASM</span>
+            </div>
 
-        {/* Center Display: QueryForge with the 'o' replaced by real Problem #1 result fragment */}
-        <div className="my-auto py-8 text-center sm:text-left">
-          {/* Desktop Single-Line Name spanning 82% of width */}
-          <div className="hidden sm:flex items-center justify-center font-display text-[9vw] lg:text-[7.5vw] font-bold leading-none tracking-[-0.04em] text-[var(--ink)] select-none">
-            <span>QueryF</span>
-            {/* The 'o' replaced by a live square fragment one cap-height tall */}
-            <div className="relative inline-flex items-center justify-center mx-[0.04em] w-[0.72em] h-[0.72em] border border-[var(--border)] bg-[var(--surface-app)] overflow-hidden align-middle animate-shutter">
-              <div className="p-1 w-full h-full flex flex-col justify-center text-left text-[10px] leading-tight font-sans bg-[var(--ground)]">
-                <span className="text-[var(--muted)] text-[8px] font-mono border-b border-[var(--rule)] pb-0.5">
-                  Q1 Result
-                </span>
-                <span className="text-[var(--positive)] font-mono text-[9px] pt-0.5">
-                  id: 1, 3
-                </span>
-                <span className="text-[var(--muted)] text-[7px]">
-                  low_fat & rec
-                </span>
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display tracking-tight text-[var(--ink)] leading-[1.08]">
+                Master SQL with <span className="text-[var(--accent)]">Real Engines</span> in Your Browser.
+              </h1>
+              <p className="text-base sm:text-lg text-[var(--muted)] leading-relaxed max-w-xl">
+                Solve 111 curated LeetCode and interview challenges, master database theory through 14 comprehensive guides, and grade queries against test datasets with sub-10ms WebAssembly execution.
+              </p>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+              <Link to="/practice">
+                <Button size="lg" className="w-full sm:w-auto gap-2">
+                  <Play className="h-4 w-4 fill-current" />
+                  <span>Start Practicing (111 Problems)</span>
+                </Button>
+              </Link>
+              <Link to="/learn">
+                <Button variant="secondary" size="lg" className="w-full sm:w-auto gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  <span>Theory Guides (14 Modules)</span>
+                </Button>
+              </Link>
+            </div>
+
+            {/* Micro guarantees */}
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[var(--border)] text-xs text-[var(--muted)]">
+              <div>
+                <span className="font-semibold text-[var(--ink)] block">0 ms</span>
+                <span className="text-[11px]">Network latency</span>
+              </div>
+              <div>
+                <span className="font-semibold text-[var(--ink)] block">100% Private</span>
+                <span className="text-[11px]">Local IndexedDB</span>
+              </div>
+              <div>
+                <span className="font-semibold text-[var(--ink)] block">Zero Cost</span>
+                <span className="text-[11px]">Open source & free</span>
               </div>
             </div>
-            <span>rge</span>
           </div>
 
-          {/* Mobile Phone Fallback: Two Centered Lines with Frame */}
-          <div className="sm:hidden flex flex-col items-center justify-center font-display text-[19vw] font-bold leading-[0.88] tracking-[-0.04em] text-[var(--ink)]">
-            <span>Query</span>
-            <div className="my-2 w-28 h-16 border border-[var(--border)] bg-[var(--surface-app)] p-2 text-left text-[11px] animate-shutter flex flex-col justify-center">
-              <span className="text-[var(--muted)] text-[9px] font-mono">Q1: Recyclable</span>
-              <span className="text-[var(--positive)] font-mono text-[11px]">product_id: 1, 3</span>
-            </div>
-            <span>Forge</span>
-          </div>
-        </div>
-
-        {/* Hero Bottom Row: Column 6 Sentence + Primary Action */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline pt-8 border-t border-[var(--rule)]">
-          <div className="md:col-span-5 text-xs text-[var(--muted)]">
-            <span className="tabular-nums">111</span> interview challenges · <span className="tabular-nums">14</span> theory lessons · In-browser WebAssembly
-          </div>
-
-          <div className="md:col-span-5 text-sm sm:text-base text-[var(--ink)] leading-relaxed font-sans">
-            A free, client-side SQL laboratory with real engines running directly in your browser. Nothing to install, zero telemetry, and zero cost.
-          </div>
-
-          <div className="md:col-span-2 flex justify-start md:justify-end">
-            <Link to="/practice">
-              <Button size="lg" className="w-full sm:w-auto h-11 px-6 text-sm">
-                Start practicing
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. FEATURES = SENTENCES WITH SWITCHES (4 Full-bleed Bands) */}
-      <section className="w-full border-t border-[var(--border)]">
-        {/* Band 1 */}
-        <div
-          className={`w-full py-12 px-4 sm:px-6 lg:px-8 border-b border-[var(--border)] transition-colors duration-150 ${
-            switch1 ? 'bg-[var(--surface)] text-[var(--ink)]' : 'bg-[var(--bg)] text-[var(--muted)]'
-          }`}
-        >
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <h3 className="font-display text-2xl sm:text-3xl text-[var(--ink)]">
-                Engine runs SQLite, MySQL, and PostgreSQL locally.
-              </h3>
-              {switch1 && (
-                <p className="text-sm text-[var(--muted)] max-w-2xl">
-                  Client-side WebAssembly execution eliminates remote server latency and executes test queries in under 10 milliseconds.
-                </p>
-              )}
-            </div>
-            <Switch checked={switch1} onCheckedChange={setSwitch1} aria-label="Toggle engine feature" />
-          </div>
-        </div>
-
-        {/* Band 2 */}
-        <div
-          className={`w-full py-12 px-4 sm:px-6 lg:px-8 border-b border-[var(--border)] transition-colors duration-150 ${
-            switch2 ? 'bg-[var(--surface)] text-[var(--ink)]' : 'bg-[var(--bg)] text-[var(--muted)]'
-          }`}
-        >
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <h3 className="font-display text-2xl sm:text-3xl text-[var(--ink)]">
-                Submissions are verified against authentic test sets.
-              </h3>
-              {switch2 && (
-                <p className="text-sm text-[var(--muted)] max-w-2xl">
-                  Automated checker parses column cardinality, row ordering, and numeric tolerance (0.02) to grade answers objectively.
-                </p>
-              )}
-            </div>
-            <Switch checked={switch2} onCheckedChange={setSwitch2} aria-label="Toggle test set verification" />
-          </div>
-        </div>
-
-        {/* Band 3 */}
-        <div
-          className={`w-full py-12 px-4 sm:px-6 lg:px-8 border-b border-[var(--border)] transition-colors duration-150 ${
-            switch3 ? 'bg-[var(--surface)] text-[var(--ink)]' : 'bg-[var(--bg)] text-[var(--muted)]'
-          }`}
-        >
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <h3 className="font-display text-2xl sm:text-3xl text-[var(--ink)]">
-                Progress is stored exclusively on your device.
-              </h3>
-              {switch3 && (
-                <p className="text-sm text-[var(--muted)] max-w-2xl">
-                  IndexedDB encrypts and persists draft solutions, solve history, and timestamps locally. You can export or wipe your data anytime.
-                </p>
-              )}
-            </div>
-            <Switch checked={switch3} onCheckedChange={setSwitch3} aria-label="Toggle local storage" />
-          </div>
-        </div>
-
-        {/* Band 4 */}
-        <div
-          className={`w-full py-12 px-4 sm:px-6 lg:px-8 border-b border-[var(--border)] transition-colors duration-150 ${
-            switch4 ? 'bg-[var(--surface)] text-[var(--ink)]' : 'bg-[var(--bg)] text-[var(--muted)]'
-          }`}
-        >
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <h3 className="font-display text-2xl sm:text-3xl text-[var(--ink)]">
-                Platform works completely offline without a network.
-              </h3>
-              {switch4 && (
-                <p className="text-sm text-[var(--muted)] max-w-2xl">
-                  Service workers cache all 111 questions, 14 masterclass lessons, and relational datasets for offline practice.
-                </p>
-              )}
-            </div>
-            <Switch checked={switch4} onCheckedChange={setSwitch4} aria-label="Toggle offline capability" />
-          </div>
-        </div>
-      </section>
-
-      {/* 3. HOW IT WORKS = DRAG THROUGH THE STAGES (50/50 Split at 88svh) */}
-      <section className="w-full border-b border-[var(--border)] min-h-[88svh] flex flex-col justify-center px-4 sm:px-6 lg:px-8 py-16 max-w-7xl mx-auto">
-        <div className="mb-8">
-          <p className="text-xs text-[var(--muted)]">Workflow</p>
-          <h2 className="font-display text-3xl sm:text-4xl text-[var(--ink)] mt-1">
-            How a problem is studied, executed, and validated.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          {/* Left Column (5 Cols): Stage Explanation & Slider */}
-          <div className="lg:col-span-5 space-y-8">
-            <div className="space-y-4">
-              <span className="text-xs text-[var(--accent)] font-medium">Stage {stage + 1} of 4</span>
-              
-              {stage === 0 && (
-                <div className="space-y-3">
-                  <h3 className="font-display text-2xl text-[var(--ink)]">Read the theory clause.</h3>
-                  <p className="text-sm text-[var(--muted)] leading-relaxed">
-                    Understand core relational operators (filtering, joins, window frames, CTEs) with clear syntax explanations and real table schemas before touching code.
-                  </p>
+          {/* Right Column: Interactive Live SQL IDE Stage */}
+          <div className="lg:col-span-6">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-xl overflow-hidden">
+              {/* Window Chrome Header */}
+              <div className="h-11 px-4 bg-[var(--surface-app)] border-b border-[var(--border)] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-[#f43f5e]/80 inline-block" />
+                    <span className="w-3 h-3 rounded-full bg-[#f59e0b]/80 inline-block" />
+                    <span className="w-3 h-3 rounded-full bg-[#10b981]/80 inline-block" />
+                  </div>
+                  <span className="text-[11px] font-mono text-[var(--muted)] ml-2">sqlite3_worker.wasm</span>
                 </div>
-              )}
 
-              {stage === 1 && (
-                <div className="space-y-3">
-                  <h3 className="font-display text-2xl text-[var(--ink)]">Run in the browser engine.</h3>
-                  <p className="text-sm text-[var(--muted)] leading-relaxed">
-                    Write queries in a CodeMirror editor with schema-aware autocomplete. Execute statements locally against SQLite or MySQL compatibility mode via WebAssembly.
-                  </p>
+                {/* Tabs */}
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setActiveHeroTab('filter')}
+                    className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                      activeHeroTab === 'filter'
+                        ? 'bg-[var(--raised)] text-[var(--ink)] font-semibold'
+                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                    }`}
+                  >
+                    Filter
+                  </button>
+                  <button
+                    onClick={() => setActiveHeroTab('join')}
+                    className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                      activeHeroTab === 'join'
+                        ? 'bg-[var(--raised)] text-[var(--ink)] font-semibold'
+                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                    }`}
+                  >
+                    Anti-Join
+                  </button>
+                  <button
+                    onClick={() => setActiveHeroTab('window')}
+                    className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
+                      activeHeroTab === 'window'
+                        ? 'bg-[var(--raised)] text-[var(--ink)] font-semibold'
+                        : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                    }`}
+                  >
+                    Window Func
+                  </button>
                 </div>
-              )}
+              </div>
 
-              {stage === 2 && (
-                <div className="space-y-3">
-                  <h3 className="font-display text-2xl text-[var(--ink)]">Check against the test output.</h3>
-                  <p className="text-sm text-[var(--muted)] leading-relaxed">
-                    Automated verification compares row counts, types, and values with floating-point tolerance. Discrepancies are highlighted in aligned diff tables.
-                  </p>
+              {/* Code Editor Region */}
+              <div className="p-4 bg-[var(--surface-app)] border-b border-[var(--border)] text-left font-mono text-xs">
+                <div className="flex items-center justify-between pb-2 text-[var(--muted)] text-[11px]">
+                  <span>{currentHeroQuery.title}</span>
+                  <span className="text-[var(--positive)] font-medium">Test Set Passed</span>
                 </div>
-              )}
-
-              {stage === 3 && (
-                <div className="space-y-3">
-                  <h3 className="font-display text-2xl text-[var(--ink)]">Track mastery across tracks.</h3>
-                  <p className="text-sm text-[var(--muted)] leading-relaxed">
-                    Attempts, execution latency, and solved states are stored in your device's IndexedDB. Review difficulty distributions and activity logs without external accounts.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Range Controller */}
-            <RangeStages stage={stage} onStageChange={setStage} />
-          </div>
-
-          {/* Right Column (7 Cols): Real fragment of the app at true size */}
-          <div className="lg:col-span-7 border border-[var(--border)] bg-[var(--surface-app)] p-6 min-h-[380px] flex flex-col justify-center">
-            {stage === 0 && (
-              <div className="space-y-3 font-sans text-xs">
-                <div className="border-b border-[var(--rule)] pb-2 text-[var(--muted)] flex justify-between">
-                  <span>Lesson excerpt: Joins & Anti-Joins</span>
-                  <span>docs/03-joins.md</span>
-                </div>
-                <blockquote className="border-l-2 border-[var(--accent)] pl-3 text-[var(--ink)] bg-[var(--surface)] p-2">
-                  <strong>Tip:</strong> An anti-join filters for missing relationships by joining on a foreign key and filtering for <code>WHERE right_table.id IS NULL</code>.
-                </blockquote>
-                <pre className="font-mono text-xs bg-[var(--ground)] p-3 border border-[var(--rule)] text-[var(--ink)] overflow-x-auto">
-{`SELECT c.id, c.name
-FROM customers c
-LEFT JOIN orders o ON c.id = o.customer_id
-WHERE o.order_id IS NULL;`}
+                <pre className="text-[var(--ink)] whitespace-pre-wrap leading-relaxed py-2">
+                  <code>{currentHeroQuery.sql}</code>
                 </pre>
               </div>
-            )}
 
-            {stage === 1 && (
-              <div className="space-y-3 font-mono text-xs">
-                <div className="border-b border-[var(--rule)] pb-2 text-[var(--muted)] flex justify-between">
-                  <span>Editor Console</span>
-                  <span>SQLite WASM</span>
+              {/* Live Output Region */}
+              <div className="p-4 bg-[var(--surface)] text-left text-xs">
+                <div className="flex items-center justify-between pb-2 text-[var(--muted)]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[var(--positive)] inline-block" />
+                    <span className="font-semibold text-[var(--ink)]">Query Results</span>
+                  </div>
+                  <span className="tabular-nums font-mono text-[11px] px-2 py-0.5 rounded bg-[var(--raised)] border border-[var(--border)]">
+                    {currentHeroQuery.time}
+                  </span>
                 </div>
-                <div className="bg-[var(--ground)] p-4 border border-[var(--border)] space-y-1 text-[var(--ink)]">
-                  <div className="text-[var(--muted)]">-- Problem #1 Solution draft</div>
-                  <div><span className="text-[var(--accent)]">SELECT</span> product_id</div>
-                  <div><span className="text-[var(--accent)]">FROM</span> Products</div>
-                  <div><span className="text-[var(--accent)]">WHERE</span> low_fats = 'Y' <span className="text-[var(--accent)]">AND</span> recyclable = 'Y';</div>
-                </div>
-                <div className="flex justify-between items-center text-[var(--muted)] pt-1">
-                  <span>Press Ctrl+Enter</span>
-                  <span className="text-[var(--positive)]">Ready</span>
-                </div>
-              </div>
-            )}
 
-            {stage === 2 && (
-              <div className="space-y-3 text-xs">
-                <div className="p-3 bg-[var(--pill-positive-bg)] border border-[var(--positive)] text-[var(--pill-positive-ink)] flex justify-between">
-                  <span className="font-medium">Accepted</span>
-                  <span className="tabular-nums font-mono">4.1ms</span>
-                </div>
-                <div className="border border-[var(--rule)] bg-[var(--ground)] overflow-hidden">
-                  <table className="w-full text-left text-xs border-collapse font-sans">
-                    <thead className="border-b border-[var(--border)] text-[var(--muted)]">
+                <div className="overflow-x-auto border border-[var(--border)] rounded-md">
+                  <table className="w-full text-left text-xs border-collapse font-mono">
+                    <thead className="bg-[var(--raised)] text-[var(--muted)] border-b border-[var(--border)]">
                       <tr>
-                        <th className="p-2 font-normal">#</th>
-                        <th className="p-2 font-normal">product_id</th>
+                        {Object.keys(currentHeroQuery.output[0]).map((key) => (
+                          <th key={key} className="py-2 px-3 font-semibold text-[11px] text-[var(--ink)]">
+                            {key}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[var(--rule)]">
-                      <tr>
-                        <td className="p-2 text-[var(--muted)] font-mono">1</td>
-                        <td className="p-2 font-mono">1</td>
-                      </tr>
-                      <tr>
-                        <td className="p-2 text-[var(--muted)] font-mono">2</td>
-                        <td className="p-2 font-mono">3</td>
-                      </tr>
+                    <tbody className="divide-y divide-[var(--border)]">
+                      {currentHeroQuery.output.map((row, idx) => (
+                        <tr key={idx} className="hover:bg-[var(--raised)]/50 transition-colors">
+                          {Object.values(row).map((val, cIdx) => (
+                            <td key={cIdx} className="py-2 px-3 text-[var(--ink)] text-[11px]">
+                              {String(val)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
-              </div>
-            )}
 
-            {stage === 3 && (
-              <div className="space-y-4 text-xs font-sans">
-                <div className="border-b border-[var(--rule)] pb-2 text-[var(--muted)] flex justify-between">
-                  <span>Progress Ledger</span>
-                  <span>IndexedDB persistent</span>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="p-3 bg-[var(--ground)] border border-[var(--rule)]">
-                    <p className="text-[var(--muted)] text-[11px]">Solved</p>
-                    <p className="text-xl font-normal text-[var(--ink)] tabular-nums mt-1">48 / 111</p>
-                  </div>
-                  <div className="p-3 bg-[var(--ground)] border border-[var(--rule)]">
-                    <p className="text-[var(--muted)] text-[11px]">Accuracy</p>
-                    <p className="text-xl font-normal text-[var(--positive)] tabular-nums mt-1">94.2%</p>
-                  </div>
-                  <div className="p-3 bg-[var(--ground)] border border-[var(--rule)]">
-                    <p className="text-[var(--muted)] text-[11px]">Guides Read</p>
-                    <p className="text-xl font-normal text-[var(--ink)] tabular-nums mt-1">14 / 14</p>
-                  </div>
+                <div className="mt-3 flex items-center justify-between pt-1">
+                  <span className="text-[11px] text-[var(--muted)]">Evaluated against in-memory SQLite table</span>
+                  <Link
+                    to="/practice"
+                    className="text-xs font-medium text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+                  >
+                    <span>Try all 111 questions</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 4. SHOWCASE = HEADLINE YOU CAN TYPE */}
-      <section className="w-full border-b border-[var(--border)] py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="mb-6 space-y-1">
-          <p className="text-xs text-[var(--muted)]">Live Sandbox</p>
-          <h2 className="font-display text-3xl sm:text-4xl text-[var(--ink)]">
-            A query typed into the headline returns real rows.
+      {/* 2. CORE ENGINEERING PILLARS */}
+      <section className="w-full border-y border-[var(--border)] bg-[var(--surface)] py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <h2 className="text-xs font-semibold tracking-wider uppercase text-[var(--accent)]">
+              Architecture & Features
+            </h2>
+            <h3 className="text-2xl sm:text-3xl font-bold font-display text-[var(--ink)]">
+              Engineered for Serious Database Mastery
+            </h3>
+            <p className="text-sm text-[var(--muted)]">
+              Everything runs client-side inside your browser with enterprise-grade developer tooling.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Feature 1 */}
+            <div className="p-6 rounded-lg border border-[var(--border)] bg-[var(--bg)] space-y-3 text-left hover:border-[var(--control)] transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-[var(--accent-subtle)] border border-[var(--accent)]/20 flex items-center justify-center text-[var(--accent)]">
+                <Cpu className="h-5 w-5" />
+              </div>
+              <h4 className="text-base font-semibold text-[var(--ink)]">In-Browser WASM Kernel</h4>
+              <p className="text-xs text-[var(--muted)] leading-relaxed">
+                Full relational SQLite engine compiled to WebAssembly. Zero round-trip server latency, instant query feedback, and offline execution.
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="p-6 rounded-lg border border-[var(--border)] bg-[var(--bg)] space-y-3 text-left hover:border-[var(--control)] transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-[var(--pill-positive-bg)] border border-[var(--positive)]/20 flex items-center justify-center text-[var(--positive)]">
+                <Code2 className="h-5 w-5" />
+              </div>
+              <h4 className="text-base font-semibold text-[var(--ink)]">111 Graded Problems</h4>
+              <p className="text-xs text-[var(--muted)] leading-relaxed">
+                Covers LeetCode Top SQL 50, window ranking, anti-joins, aggregation, and company assessment sets with automatic output verification.
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="p-6 rounded-lg border border-[var(--border)] bg-[var(--bg)] space-y-3 text-left hover:border-[var(--control)] transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-[var(--pill-warning-bg)] border border-[var(--warning)]/20 flex items-center justify-center text-[var(--warning)]">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <h4 className="text-base font-semibold text-[var(--ink)]">14 Theory Masterclasses</h4>
+              <p className="text-xs text-[var(--muted)] leading-relaxed">
+                Exhaustive architectural deep dives from relational filtering and subqueries to recursive CTEs, indexing internals, and transaction isolation.
+              </p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="p-6 rounded-lg border border-[var(--border)] bg-[var(--bg)] space-y-3 text-left hover:border-[var(--control)] transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-[var(--raised)] border border-[var(--border)] flex items-center justify-center text-[var(--ink)]">
+                <Shield className="h-5 w-5" />
+              </div>
+              <h4 className="text-base font-semibold text-[var(--ink)]">Local-First Privacy</h4>
+              <p className="text-xs text-[var(--muted)] leading-relaxed">
+                Your code drafts, solve history, and analytics reside strictly in your browser's IndexedDB. Export or wipe your data anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. INTERACTIVE SQL SHOWCASE (Live Sandbox in View) */}
+      <section className="w-full py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-left">
+        <div className="space-y-2 mb-6">
+          <Badge variant="accent" dot>
+            Live WASM Terminal
+          </Badge>
+          <h2 className="text-2xl sm:text-3xl font-bold font-display text-[var(--ink)]">
+            Execute Live Statements in Real-Time
           </h2>
+          <p className="text-sm text-[var(--muted)] max-w-2xl">
+            Type any valid SQL statement against our 9-table seeded sample schema. Notice the instant sub-millisecond execution powered by WebAssembly.
+          </p>
         </div>
 
-        <QueryInput />
-      </section>
-
-      {/* 5. STATS = LEDGER ALIGNED ON THE DECIMAL */}
-      <section className="w-full border-b border-[var(--border)] py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="mb-8">
-          <p className="text-xs text-[var(--muted)]">Inventory</p>
-          <h2 className="font-display text-3xl sm:text-4xl text-[var(--ink)]">
-            Content generated from the repository.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-left">
-          <div className="border-t border-[var(--border)] pt-4 space-y-1">
-            <span className="font-display text-4xl sm:text-5xl text-[var(--ink)] tabular-nums block">
-              {allProblems.length}
-            </span>
-            <span className="text-xs text-[var(--muted)] block">Practice problems</span>
-            <p className="text-[11px] text-[var(--muted)]">LeetCode Top SQL 50, Accenture, TCS</p>
-          </div>
-
-          <div className="border-t border-[var(--border)] pt-4 space-y-1">
-            <span className="font-display text-4xl sm:text-5xl text-[var(--ink)] tabular-nums block">
-              {allLessons.length}
-            </span>
-            <span className="text-xs text-[var(--muted)] block">Theory masterclasses</span>
-            <p className="text-[11px] text-[var(--muted)]">SELECT to Recursive CTEs and Indexes</p>
-          </div>
-
-          <div className="border-t border-[var(--border)] pt-4 space-y-1">
-            <span className="font-display text-4xl sm:text-5xl text-[var(--ink)] tabular-nums block">
-              9
-            </span>
-            <span className="text-xs text-[var(--muted)] block">Relational tables</span>
-            <p className="text-[11px] text-[var(--muted)]">Employees, payroll, attendance, projects</p>
-          </div>
-
-          <div className="border-t border-[var(--border)] pt-4 space-y-1">
-            <span className="font-display text-4xl sm:text-5xl text-[var(--positive)] tabular-nums block">
-              0
-            </span>
-            <span className="text-xs text-[var(--muted)] block">Backend calls</span>
-            <p className="text-[11px] text-[var(--muted)]">100% Client-side privacy</p>
-          </div>
+        <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+          <QueryInput />
         </div>
       </section>
 
-      {/* 6. CTA = A SENTENCE WITH A BLANK */}
-      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-left">
-        <div className="max-w-4xl space-y-6">
-          <p className="text-xs text-[var(--muted)]">Begin study</p>
-          
-          <div className="font-display text-2xl sm:text-4xl text-[var(--ink)] leading-snug">
-            <span>I want to study </span>
-            <select
-              value={selectedTrackId}
-              onChange={(e) => setSelectedTrackId(e.target.value)}
-              aria-label="Select study track"
-              className="inline-block bg-[var(--surface)] text-[var(--accent)] font-display text-2xl sm:text-4xl px-2 py-0 border-b border-[var(--accent)] rounded-none focus:outline-none cursor-pointer"
-            >
-              {tracks.map((t) => (
-                <option key={t.id} value={t.id} className="bg-[var(--surface)] text-[var(--ink)] font-sans text-sm">
-                  {t.title}
-                </option>
-              ))}
-            </select>
-            <span> right now in the browser.</span>
+      {/* 4. CURRICULUM TRACKS SHOWCASE */}
+      <section className="w-full border-t border-[var(--border)] bg-[var(--surface)] py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto space-y-8 text-left">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="space-y-1">
+              <h2 className="text-xs font-semibold tracking-wider uppercase text-[var(--accent)]">
+                Structured Tracks
+              </h2>
+              <h3 className="text-2xl sm:text-3xl font-bold font-display text-[var(--ink)]">
+                Guided Paths from Basics to Staff Engineer
+              </h3>
+            </div>
+            <Link to="/practice" className="text-xs font-semibold text-[var(--accent)] hover:underline flex items-center gap-1">
+              <span>View all tracks</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
 
-          <div>
-            <Button size="lg" onClick={handleStartTrack} className="h-11 px-8 text-sm">
-              Open track
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {tracks.map((track) => {
+              const trackProblems = allProblems.filter((p) => p.trackId === track.id);
+              const trackSolved = trackProblems.filter((p) => problems[p.id]?.status === 'solved').length;
+              const percent = trackProblems.length > 0 ? Math.round((trackSolved / trackProblems.length) * 100) : 0;
+
+              return (
+                <div
+                  key={track.id}
+                  className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-6 flex flex-col justify-between hover:border-[var(--control)] transition-colors space-y-6"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-[var(--muted)]">Track 0{track.order || 1}</span>
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[var(--raised)] border border-[var(--border)] text-[var(--muted)]">
+                        {track.totalProblems} challenges
+                      </span>
+                    </div>
+
+                    <h4 className="text-lg font-bold text-[var(--ink)]">{track.title}</h4>
+                    <p className="text-xs text-[var(--muted)] leading-relaxed">
+                      {track.description}
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 pt-4 border-t border-[var(--border)]">
+                    <div className="flex items-center justify-between text-xs text-[var(--muted)]">
+                      <span>Progress</span>
+                      <span className="tabular-nums font-mono">{trackSolved} / {track.totalProblems} ({percent}%)</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-[var(--raised)] rounded-full overflow-hidden">
+                      <div 
+                        className="h-full w-full bg-[var(--accent)] rounded-full origin-left transition-transform duration-300 ease-out will-change-transform"
+                        style={{ transform: `scaleX(${percent / 100})` }}
+                      />
+                    </div>
+
+                    <Link to={`/practice?track=${track.id}`} className="block w-full pt-1">
+                      <Button variant="secondary" size="sm" className="w-full text-xs">
+                        Open Track
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. CALL TO ACTION */}
+      <section className="w-full py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
+        <div className="p-8 sm:p-12 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-6 shadow-sm">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--accent)] text-white shadow-md shadow-[var(--accent)]/20 mx-auto">
+            <Database className="w-6 h-6" />
+          </div>
+
+          <div className="space-y-2 max-w-xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold font-display text-[var(--ink)]">
+              Ready to Upgrade Your SQL Skills?
+            </h2>
+            <p className="text-sm text-[var(--muted)] leading-relaxed">
+              No account creation, no cloud infrastructure costs, and zero latency. Start your first challenge immediately.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Link to="/practice">
+              <Button size="lg" className="w-full sm:w-auto px-8 gap-2">
+                <span>Start Practice Problem #1</span>
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/learn">
+              <Button variant="outline" size="lg" className="w-full sm:w-auto px-6">
+                Read Theory Lessons
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

@@ -2,22 +2,22 @@ import React from 'react';
 import { cn } from '@/lib/cn';
 
 /**
- * Data Terminal Card / Panel Primitive.
+ * Cohesive Card / Surface Container.
  * 
  * Rules:
- * - Tone-step surface (var(--surface-app) or var(--surface)).
- * - 1px border var(--border).
- * - No drop shadow at rest.
- * - Corner radius: exactly 6px (var(--radius-card)).
+ * - Tone-step surface (var(--surface)) with clean border (var(--border)).
+ * - 8px radius (`rounded-lg`) for polished software craftsmanship.
+ * - Flat, clean hierarchy with subtle hover options when interactive.
  */
 export const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { interactive?: boolean }
+>(({ className, interactive, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      'rounded-[6px] border border-[var(--border)] bg-[var(--surface-app)] text-[var(--text)] transition-colors',
+      'rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)] transition-colors duration-150',
+      interactive && 'hover:border-[var(--control)] hover:bg-[var(--raised)] cursor-pointer',
       className
     )}
     {...props}
@@ -31,7 +31,7 @@ export const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex flex-col space-y-1 p-5 border-b border-[var(--rule)]', className)}
+    className={cn('flex flex-col space-y-1.5 p-5 border-b border-[var(--border)]', className)}
     {...props}
   />
 ));
@@ -44,7 +44,7 @@ export const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      'text-base font-normal tracking-tight text-[var(--text)]',
+      'text-base font-semibold tracking-tight text-[var(--ink)]',
       className
     )}
     {...props}
@@ -78,7 +78,7 @@ export const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center p-5 pt-0', className)}
+    className={cn('flex items-center p-5 pt-0 border-t border-[var(--rule)] mt-5', className)}
     {...props}
   />
 ));

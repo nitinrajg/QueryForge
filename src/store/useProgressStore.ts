@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { db, ProblemProgressRecord, LessonProgressRecord, ActivityRecord } from '@/lib/db';
+import { supabase, isSupabaseConfigured, UserProgressRow } from '@/lib/supabase';
+import { syncService } from '@/services/syncService';
 
 export interface ProgressState {
   problems: Record<string, ProblemProgressRecord>;
@@ -9,6 +11,7 @@ export interface ProgressState {
 
   // Actions
   init: () => Promise<void>;
+  hydrateFromCloud: (userId: string) => Promise<void>;
   markProblem: (id: string, status: 'attempted' | 'solved', code?: string, title?: string) => Promise<void>;
   saveDraft: (id: string, code: string) => Promise<void>;
   markLessonRead: (id: string, title?: string) => Promise<void>;
@@ -42,9 +45,85 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
         activities: recentActivities,
         isLoaded: true,
       });
+
+      // If user is currently authenticated in Supabase, hydrate cloud updates
+      if (isSupabaseConfigured) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          await get().hydrateFromCloud(session.user.id);
+        }
+      }
     } catch (err) {
       console.warn('Failed to load progress from IndexedDB:', err);
       set({ isLoaded: true });
+    }
+  },
+
+  hydrateFromCloud: async (userId: string) => {
+    if (!isSupabaseConfigured || !userId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.warn('Error fetching cloud progress:', error);
+        return;
+      }
+
+      if (!data || !data.length) return;
+
+      const currentProblems = { ...get().problems };
+      const recordsToPut: ProblemProgressRecord[] = [];
+
+      for (const row of data as UserProgressRow[]) {
+        const local = currentProblems[row.problem_id];
+        const mergedStatus = syncService.resolveMonotonicStatus(
+          local?.status || 'not_started',
+          row.status
+        );
+
+        // Code resolution: if remote is newer or local is empty, take remote
+        let mergedCode = local?.lastCode || '';
+        if (row.last_code) {
+          if (!local?.lastCode) {
+            mergedCode = row.last_code;
+          } else if (row.updated_at && local.updatedAt) {
+            const remoteTime = new Date(row.updated_at).getTime();
+            const localTime = new Date(local.updatedAt).getTime();
+            if (remoteTime > localTime) {
+              mergedCode = row.last_code;
+            } else {
+              mergedCode = local.lastCode;
+            }
+          }
+        }
+
+        const mergedRecord: ProblemProgressRecord = {
+          id: row.problem_id,
+          status: mergedStatus,
+          attempts: Math.max(local?.attempts || 0, row.attempts || 0),
+          timeSpentSeconds: Math.max(local?.timeSpentSeconds || 0, row.time_spent_seconds || 0),
+          hintsUsed: Math.max(local?.hintsUsed || 0, row.hints_used || 0),
+          lastCode: mergedCode,
+          updatedAt: row.updated_at || new Date().toISOString(),
+        };
+
+        currentProblems[row.problem_id] = mergedRecord;
+        recordsToPut.push(mergedRecord);
+      }
+
+      // Update in-memory state
+      set({ problems: currentProblems });
+
+      // Save to Dexie cache
+      if (recordsToPut.length > 0) {
+        await db.problemProgress.bulkPut(recordsToPut);
+      }
+    } catch (err) {
+      console.warn('Exception during cloud progress hydration:', err);
     }
   },
 
@@ -60,7 +139,7 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
       updatedAt: now,
     };
 
-    const nextStatus = status === 'solved' || existing.status === 'solved' ? 'solved' : status;
+    const nextStatus = syncService.resolveMonotonicStatus(existing.status, status);
     const updated: ProblemProgressRecord = {
       ...existing,
       status: nextStatus,
@@ -89,6 +168,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     } catch (e) {
       console.error('Error saving problem progress:', e);
     }
+
+    // Cloud synchronization
+    if (isSupabaseConfigured) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          syncService.syncProblemProgress(session.user.id, updated).catch(() => {});
+        }
+      } catch (e) {}
+    }
   },
 
   saveDraft: async (id, code) => {
@@ -115,6 +204,16 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     try {
       await db.problemProgress.put(updated);
     } catch (e) {}
+
+    // Debounced cloud synchronization
+    if (isSupabaseConfigured) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          syncService.scheduleDraftSync(session.user.id, updated);
+        }
+      } catch (e) {}
+    }
   },
 
   markLessonRead: async (id, title = id) => {
@@ -156,6 +255,15 @@ export const useProgressStore = create<ProgressState>((set, get) => ({
     try {
       await db.problemProgress.put(updated);
     } catch (e) {}
+
+    if (isSupabaseConfigured) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          syncService.scheduleDraftSync(session.user.id, updated);
+        }
+      } catch (e) {}
+    }
   },
 
   exportProgress: async () => {

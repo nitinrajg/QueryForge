@@ -21,6 +21,7 @@ export interface TableSchema {
   name: string;
   columns: TableColumn[];
   rowCount?: number;
+  sampleRows?: (string | number | boolean | null)[][];
 }
 
 export type SupportedEngine = 'sqlite' | 'mysql' | 'pglite' | 'pandas';

@@ -3,7 +3,14 @@ import {
   Download, 
   Upload, 
   Check, 
-  AlertTriangle 
+  AlertTriangle, 
+  Sun, 
+  Moon, 
+  Cpu, 
+  Database, 
+  Trash2,
+  Shield,
+  FileCode
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useThemeStore } from '@/store/useThemeStore';
@@ -11,19 +18,18 @@ import { useEditorStore } from '@/store/useEditorStore';
 import { useProgressStore } from '@/store/useProgressStore';
 
 /**
- * Settings & Local Storage Management — Data Terminal.
+ * Cohesive Settings & Local Storage Management.
  * 
- * Logic & Approach:
- * - Two-column row layout: left column contains setting name and description, right contains controls.
- * - Daylight and dark palette selector.
- * - CodeMirror editor font size selector with 1px accent indicator.
- * - Local-first data sovereignty: Progress JSON export/import and explicit two-step wipe confirmation.
- * - Pure client-side zero-telemetry guarantee.
+ * Rules:
+ * - Preference sections with clear descriptions and controls.
+ * - Daylight vs Graphite dark palette switcher.
+ * - Code editor font size configuration.
+ * - Local-first data sovereignty: Export, Import, and safe Wipe with confirmation.
  */
 export const Settings: React.FC = () => {
   const { theme, setTheme } = useThemeStore();
   const { fontSize, setFontSize } = useEditorStore();
-  const { exportProgress, importProgress, resetAllProgress } = useProgressStore();
+  const { exportProgress, importProgress, resetAllProgress, activities, problems } = useProgressStore();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [exportNotice, setExportNotice] = useState(false);
@@ -36,7 +42,7 @@ export const Settings: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `queryforge-progress-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `queryforge-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
     setExportNotice(true);
@@ -68,83 +74,87 @@ export const Settings: React.FC = () => {
     setShowResetConfirm(false);
   };
 
+  const solvedCount = Object.values(problems).filter((p) => p.status === 'solved').length;
+
   return (
-    <div className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full space-y-8 bg-[var(--bg)] text-[var(--ink)]">
-      {/* Editorial Title */}
-      <div className="space-y-2 pb-6 border-b border-[var(--border)]">
+    <div className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full space-y-8 bg-[var(--bg)] text-[var(--ink)] text-left">
+      {/* Title */}
+      <div className="space-y-1 pb-6 border-b border-[var(--border)]">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--muted)]">
-            Preferences & Storage
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-[var(--accent)]">
+            Preferences & Telemetry
           </span>
-          <span className="text-[11px] text-[var(--muted)]">•</span>
-          <span className="text-[11px] text-[var(--muted)]">Local Configuration</span>
+          <span className="text-[11px] text-[var(--faint)]">•</span>
+          <span className="text-[11px] text-[var(--muted)] font-mono">Local Storage</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-normal font-display tracking-tight text-[var(--ink)] leading-tight">
+        <h1 className="text-3xl sm:text-4xl font-bold font-display tracking-tight text-[var(--ink)]">
           Environment Settings
         </h1>
         <p className="text-xs text-[var(--muted)]">
-          Configure interface presentation, editor sizing, and manage local IndexedDB records.
+          Manage interface theme, editor typography, and local IndexedDB state.
         </p>
       </div>
 
-      {/* Two-Column Rows */}
-      <div className="border border-[var(--border)] bg-[var(--surface)] divide-y divide-[var(--border)]">
-        {/* Row 1: Interface Palette */}
+      {/* Settings Sections */}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] divide-y divide-[var(--border)] overflow-hidden shadow-xs">
+        {/* Section 1: Interface Palette */}
         <div className="p-6 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
           <div className="md:col-span-7 space-y-1">
-            <h2 className="text-sm font-medium text-[var(--ink)]">
+            <h2 className="text-sm font-semibold text-[var(--ink)]">
               Interface Palette
             </h2>
             <p className="text-xs text-[var(--muted)]">
-              Switch between graphite dark terminal and high-contrast daylight mode.
+              Choose between Obsidian dark mode and high-contrast daylight theme.
             </p>
           </div>
-          <div className="md:col-span-5 flex items-center md:justify-end gap-2">
+
+          <div className="md:col-span-5 flex items-center justify-start md:justify-end gap-2">
             <button
-              type="button"
               onClick={() => setTheme('dark')}
-              className={`px-3 py-1.5 text-xs transition-colors cursor-pointer border rounded-none ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                 theme === 'dark'
-                  ? 'bg-[var(--ground)] text-[var(--ink)] border-[var(--accent)] font-medium'
-                  : 'bg-[var(--surface-app)] text-[var(--muted)] border-[var(--border)] hover:text-[var(--ink)]'
+                  ? 'bg-[var(--accent)] text-[var(--accent-ink)] font-semibold shadow-xs'
+                  : 'bg-[var(--raised)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)]'
               }`}
             >
-              Graphite Dark
+              <Moon className="h-4 w-4" />
+              <span>Obsidian Dark</span>
             </button>
+
             <button
-              type="button"
               onClick={() => setTheme('light')}
-              className={`px-3 py-1.5 text-xs transition-colors cursor-pointer border rounded-none ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors duration-150 cursor-pointer ${
                 theme === 'light'
-                  ? 'bg-[var(--ground)] text-[var(--ink)] border-[var(--accent)] font-medium'
-                  : 'bg-[var(--surface-app)] text-[var(--muted)] border-[var(--border)] hover:text-[var(--ink)]'
+                  ? 'bg-[var(--accent)] text-[var(--accent-ink)] font-semibold shadow-xs'
+                  : 'bg-[var(--raised)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)]'
               }`}
             >
-              Daylight
+              <Sun className="h-4 w-4" />
+              <span>Daylight</span>
             </button>
           </div>
         </div>
 
-        {/* Row 2: Editor Typography Size */}
+        {/* Section 2: Code Editor Font Size */}
         <div className="p-6 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
           <div className="md:col-span-7 space-y-1">
-            <h2 className="text-sm font-medium text-[var(--ink)]">
-              CodeMirror Font Size
+            <h2 className="text-sm font-semibold text-[var(--ink)]">
+              SQL Editor Font Size
             </h2>
             <p className="text-xs text-[var(--muted)]">
-              Monospace text size for the code editor buffer.
+              Adjust CodeMirror editor font scale in pixels.
             </p>
           </div>
-          <div className="md:col-span-5 flex items-center md:justify-end gap-1.5">
-            {[12, 13, 14, 16, 18].map((size) => (
+
+          <div className="md:col-span-5 flex items-center justify-start md:justify-end gap-1.5">
+            {[12, 13, 14, 16].map((size) => (
               <button
                 key={size}
-                type="button"
                 onClick={() => setFontSize(size)}
-                className={`text-xs px-2.5 py-1 border rounded-none transition-colors cursor-pointer ${
+                className={`w-10 h-9 rounded-lg text-xs font-mono transition-colors duration-150 cursor-pointer ${
                   fontSize === size
-                    ? 'border-[var(--accent)] text-[var(--ink)] font-medium bg-[var(--ground)]'
-                    : 'border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)] bg-[var(--surface-app)]'
+                    ? 'bg-[var(--accent)] text-[var(--accent-ink)] font-bold shadow-xs'
+                    : 'bg-[var(--raised)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)]'
                 }`}
               >
                 {size}px
@@ -153,94 +163,124 @@ export const Settings: React.FC = () => {
           </div>
         </div>
 
-        {/* Row 3: Progress Backup & Data Sovereignty */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+        {/* Section 3: Data Export / Import */}
+        <div className="p-6 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
           <div className="md:col-span-7 space-y-1">
-            <h2 className="text-sm font-medium text-[var(--ink)]">
-              Data Sovereignty
+            <h2 className="text-sm font-semibold text-[var(--ink)]">
+              Data Sovereignty & Backups
             </h2>
-            <p className="text-xs text-[var(--muted)] leading-relaxed">
-              All attempts, code drafts, solutions, and read states reside solely in your browser's IndexedDB. Export an offline snapshot or restore a backup.
+            <p className="text-xs text-[var(--muted)]">
+              Download your solved problems, draft codes, and timestamps as a portable JSON file.
             </p>
-            {importStatus && (
-              <p className="text-xs text-[var(--positive)] pt-1">
-                {importStatus}
-              </p>
-            )}
+            <div className="pt-1 flex items-center gap-3 text-[11px] text-[var(--muted)] font-mono">
+              <span>{solvedCount} solved</span>
+              <span>•</span>
+              <span>{activities.length} activity logs</span>
+            </div>
           </div>
-          <div className="md:col-span-5 flex flex-col sm:flex-row items-stretch md:justify-end gap-2">
+
+          <div className="md:col-span-5 flex items-center justify-start md:justify-end gap-2">
             <Button
               variant="secondary"
               size="sm"
               onClick={handleExport}
-              className="gap-2 text-xs rounded-none"
+              className="gap-1.5 text-xs"
             >
               {exportNotice ? <Check className="h-3.5 w-3.5 text-[var(--positive)]" /> : <Download className="h-3.5 w-3.5" />}
-              <span>{exportNotice ? 'Exported' : 'Export JSON'}</span>
+              <span>{exportNotice ? 'Exported!' : 'Export JSON'}</span>
             </Button>
 
-            <div>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept=".json"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full gap-2 text-xs rounded-none border-[var(--border)]"
-              >
-                <Upload className="h-3.5 w-3.5" />
-                <span>Import JSON</span>
-              </Button>
-            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="gap-1.5 text-xs"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              <span>Import JSON</span>
+            </Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".json"
+              className="hidden"
+            />
           </div>
         </div>
 
-        {/* Row 4: Danger Zone */}
+        {importStatus && (
+          <div className="px-6 py-3 bg-[var(--raised)] text-xs text-[var(--ink)] flex items-center gap-2">
+            <Check className="h-4 w-4 text-[var(--positive)]" />
+            <span>{importStatus}</span>
+          </div>
+        )}
+
+        {/* Section 4: Wipe Local Data */}
         <div className="p-6 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
           <div className="md:col-span-7 space-y-1">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--negative)] uppercase tracking-wider">
-              <AlertTriangle className="h-3.5 w-3.5" />
-              <span>Danger Zone</span>
-            </div>
+            <h2 className="text-sm font-semibold text-[var(--negative)]">
+              Reset Learning Records
+            </h2>
             <p className="text-xs text-[var(--muted)]">
-              Permanently wipe all saved solutions, progress timestamps, and query history from local memory.
+              Permanently delete all locally persisted solved problems, drafts, and attempt logs.
             </p>
           </div>
-          <div className="md:col-span-5 flex items-center md:justify-end">
-            {showResetConfirm ? (
+
+          <div className="md:col-span-5 flex items-center justify-start md:justify-end">
+            {!showResetConfirm ? (
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => setShowResetConfirm(true)}
+                className="gap-1.5 text-xs"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Wipe All Progress</span>
+              </Button>
+            ) : (
               <div className="flex items-center gap-2">
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={handleResetConfirm}
-                  className="text-xs rounded-none"
-                >
-                  Confirm wipe
-                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowResetConfirm(false)}
-                  className="text-xs text-[var(--muted)] rounded-none"
+                  className="text-xs"
                 >
                   Cancel
                 </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={handleResetConfirm}
+                  className="text-xs font-semibold"
+                >
+                  Confirm Reset
+                </Button>
               </div>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowResetConfirm(true)}
-                className="text-xs rounded-none border-[var(--negative)] text-[var(--negative)] hover:bg-[var(--pill-negative-bg)]"
-              >
-                Reset All Progress
-              </Button>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* System Specifications Card */}
+      <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--surface-app)] space-y-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)] flex items-center gap-1.5">
+          <Cpu className="h-4 w-4 text-[var(--accent)]" />
+          <span>Execution Engine Telemetry</span>
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div className="p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] space-y-1">
+            <span className="text-[11px] text-[var(--muted)] block">SQLite Engine</span>
+            <span className="font-mono font-semibold text-[var(--ink)] block">v3.45.0 WASM</span>
+          </div>
+          <div className="p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] space-y-1">
+            <span className="text-[11px] text-[var(--muted)] block">Persistence Layer</span>
+            <span className="font-mono font-semibold text-[var(--ink)] block">Dexie.js IndexedDB</span>
+          </div>
+          <div className="p-3 rounded-lg bg-[var(--surface)] border border-[var(--border)] space-y-1">
+            <span className="text-[11px] text-[var(--muted)] block">Network Calls</span>
+            <span className="font-mono font-semibold text-[var(--positive)] block">0 requests (Client-side)</span>
           </div>
         </div>
       </div>

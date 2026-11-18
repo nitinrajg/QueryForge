@@ -9,9 +9,12 @@ import {
   Check, 
   Play, 
   CheckCircle2, 
-  Clock 
+  Clock,
+  BookOpen,
+  ListOrdered
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { useProgressStore } from '@/store/useProgressStore';
 import { useEditorStore } from '@/store/useEditorStore';
 import lessonsData from '@/content/lessons.json';
@@ -24,14 +27,13 @@ function sanitizeHeading(text: string): string {
 }
 
 /**
- * Editorial Theory Masterclass Reader — Data Terminal Style.
+ * Editorial Theory Masterclass Reader Component.
  * 
- * Logic & Approach:
- * - 2px flat safety-orange reading progress indicator at viewport top.
- * - Left or sticky Table of Contents with active 1px accent line indicator.
- * - High-contrast typography: Gambarino display titles, General Sans prose.
- * - Callouts strictly starting with bold labels ("Tip", "Warning", "Note") without emojis.
- * - Runnable SQL snippets with instant Playground transfer and clipboard copy.
+ * Rules:
+ * - Fluid reading progress bar at top of viewport.
+ * - Sticky Table of Contents with active heading spy.
+ * - Clean prose typography with syntax-highlighted code blocks.
+ * - Runnable SQL snippets with one-click Playground transfer.
  */
 export const LearnLesson: React.FC = () => {
   const { slug } = useParams<{ track?: string; slug?: string }>();
@@ -82,7 +84,7 @@ export const LearnLesson: React.FC = () => {
   if (!currentLesson) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[60vh] bg-[var(--bg)] text-[var(--ink)]">
-        <h2 className="text-2xl font-normal font-display mb-2">Lesson Not Located</h2>
+        <h2 className="text-2xl font-bold font-display mb-2">Lesson Not Found</h2>
         <p className="text-xs text-[var(--muted)] mb-6">The requested theory guide does not exist in the catalog.</p>
         <Link to="/learn">
           <Button size="sm">Back to Theory Catalog</Button>
@@ -114,130 +116,82 @@ export const LearnLesson: React.FC = () => {
 
   return (
     <div className="flex-1 w-full bg-[var(--bg)] text-[var(--ink)]">
-      {/* Top Reading Progress Bar (2px flat accent fill, zero gradient) */}
+      {/* Top Reading Progress Bar (Hardware-Accelerated ScaleX) */}
       <div className="fixed top-14 left-0 right-0 h-[2px] bg-[var(--border)] z-30 pointer-events-none">
         <div
-          className="h-full bg-[var(--accent)] transition-all duration-75"
-          style={{ width: `${scrollProgress}%` }}
+          className="h-full w-full bg-[var(--accent)] origin-left transition-transform duration-75 ease-out will-change-transform"
+          style={{ transform: `scaleX(${scrollProgress / 100})` }}
         />
       </div>
 
       <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        {/* Navigation Breadcrumb & Action Header */}
+        {/* Navigation Breadcrumb & Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-8 border-b border-[var(--border)] gap-4">
           <div className="flex items-center gap-2 text-xs">
             <Link to="/learn" className="text-[var(--muted)] hover:text-[var(--ink)] transition-colors flex items-center gap-1">
               <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Theory Index</span>
+              <span>Theory Catalog</span>
             </Link>
-            <span className="text-[var(--muted)]">/</span>
-            <span className="text-[var(--ink)] font-medium">{currentLesson.slug}</span>
+            <span className="text-[var(--border)]">/</span>
+            <span className="text-[var(--ink)] font-semibold">{currentLesson.slug}</span>
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-[var(--muted)] font-mono">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{readTimeMin} min read</span>
+            </div>
+
             <Button
               variant={isRead ? 'secondary' : 'default'}
               size="sm"
               onClick={handleMarkComplete}
-              className="gap-1.5 text-xs rounded-none"
+              className="gap-1.5 text-xs font-semibold"
             >
               <CheckCircle2 className={`h-3.5 w-3.5 ${isRead ? 'text-[var(--positive)]' : ''}`} />
-              <span>{isRead ? 'Completed' : 'Mark as read'}</span>
+              <span>{isRead ? 'Completed' : 'Mark Complete'}</span>
             </Button>
-
-            <Link to="/practice">
-              <Button variant="outline" size="sm" className="gap-1.5 text-xs rounded-none">
-                <span>Practice problems</span>
-              </Button>
-            </Link>
           </div>
         </div>
 
-        {/* 2-Column Editorial Grid: Main Prose (Left) + Reading TOC Compass (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          {/* Main Article Content */}
-          <main className="lg:col-span-8 space-y-6">
-            {/* Guide Meta Header */}
+        {/* Article Grid: Left Sidebar TOC + Right Prose */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Article Content (8 cols) */}
+          <article className="lg:col-span-8 text-left space-y-6">
             <div className="space-y-3 pb-6 border-b border-[var(--border)]">
-              <div className="flex items-center gap-3 text-xs text-[var(--muted)]">
-                <span className="text-[var(--ink)] font-medium">Lesson {currentLesson.order}</span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  <span>{readTimeMin} min read</span>
-                </span>
-                <span>•</span>
-                <span>MySQL 8.0 Reference</span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl font-normal font-display text-[var(--ink)] tracking-tight leading-tight">
+              <span className="text-xs font-mono font-semibold text-[var(--accent)] uppercase tracking-wider">
+                Module {currentIndex + 1} of {allLessons.length}
+              </span>
+              <h1 className="text-3xl sm:text-4xl font-bold font-display tracking-tight text-[var(--ink)]">
                 {sanitizeHeading(currentLesson.title)}
               </h1>
             </div>
 
             {/* Markdown Body */}
-            <div className="editorial-prose text-sm text-[var(--ink)] leading-relaxed space-y-4">
+            <div className="editorial-prose text-left">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  h1: ({ children }) => (
-                    <h1 className="text-2xl font-normal font-display text-[var(--ink)] mt-8 mb-4 border-b border-[var(--border)] pb-2">
-                      {sanitizeHeading(String(children))}
-                    </h1>
-                  ),
-                  h2: ({ children }) => {
-                    const text = sanitizeHeading(String(children));
-                    const id = text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-                    return (
-                      <h2 id={id} className="text-xl font-normal font-display text-[var(--ink)] mt-10 mb-3 pt-2">
-                        {text}
-                      </h2>
-                    );
-                  },
-                  h3: ({ children }) => (
-                    <h3 className="text-base font-medium text-[var(--ink)] mt-6 mb-2">
-                      {sanitizeHeading(String(children))}
-                    </h3>
-                  ),
-                  p: ({ children }) => (
-                    <p className="my-3 text-sm leading-relaxed text-[var(--ink)] opacity-90">
-                      {children}
-                    </p>
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="list-disc pl-5 my-3 space-y-1.5 text-sm text-[var(--ink)]">
-                      {children}
-                    </ul>
-                  ),
-                  ol: ({ children }) => (
-                    <ol className="list-decimal pl-5 my-3 space-y-1.5 text-sm text-[var(--ink)]">
-                      {children}
-                    </ol>
-                  ),
-                  // Code Block Renderer
-                  code({ node, className, children, ...props }) {
+                  // Code block with Run in Playground & Copy
+                  code({ node, inline, className, children, ...props }: any) {
                     const match = /language-(\w+)/.exec(className || '');
                     const codeText = String(children).replace(/\n$/, '');
-                    const codeId = String(Math.random());
+                    const codeId = `code-${Math.random().toString(36).substring(2, 9)}`;
 
-                    if (match) {
-                      const lang = match[1].toLowerCase();
-                      const isSql = lang === 'sql';
-
+                    if (!inline && match) {
                       return (
-                        <div className="my-6 border border-[var(--border)] bg-[var(--surface-app)] not-prose">
-                          {/* Code Frame Header */}
-                          <div className="flex items-center justify-between px-3.5 py-2 border-b border-[var(--border)] bg-[var(--ground)] text-xs text-[var(--muted)]">
-                            <span className="text-[11px] font-mono uppercase tracking-wider">
-                              {lang} snippet
+                        <div className="my-6 rounded-lg border border-[var(--border)] bg-[var(--surface-app)] overflow-hidden shadow-xs">
+                          {/* Code Block Header */}
+                          <div className="flex items-center justify-between px-3.5 py-2 border-b border-[var(--border)] bg-[var(--raised)] text-xs text-[var(--muted)]">
+                            <span className="font-mono text-[11px] font-semibold uppercase text-[var(--ink)]">
+                              {match[1]}
                             </span>
-
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
+                            <div className="flex items-center gap-1.5">
+                              <Button
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => handleCopy(codeText, codeId)}
-                                className="flex items-center gap-1 px-2 py-0.5 border border-[var(--border)] bg-[var(--surface-app)] hover:bg-[var(--raised)] text-[var(--ink)] transition-colors cursor-pointer text-[10px]"
-                                title="Copy code"
+                                className="h-7 px-2 text-xs gap-1"
                               >
                                 {copiedCodeId === codeId ? (
                                   <>
@@ -250,133 +204,151 @@ export const LearnLesson: React.FC = () => {
                                     <span>Copy</span>
                                   </>
                                 )}
-                              </button>
+                              </Button>
 
-                              {isSql && (
-                                <button
-                                  type="button"
+                              {match[1].toLowerCase() === 'sql' && (
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
                                   onClick={() => handlePlayground(codeText)}
-                                  className="flex items-center gap-1 px-2 py-0.5 bg-[var(--accent)] text-[var(--accent-ink)] font-semibold transition-transform active:scale-[0.98] cursor-pointer text-[10px]"
-                                  title="Run in free playground"
+                                  className="h-7 px-2 text-xs gap-1"
                                 >
-                                  <Play className="h-2.5 w-2.5 fill-current" />
-                                  <span>Run in playground</span>
-                                </button>
+                                  <Play className="h-3 w-3 fill-current text-[var(--accent)]" />
+                                  <span>Playground</span>
+                                </Button>
                               )}
                             </div>
                           </div>
 
-                          {/* Code Presentation */}
-                          <pre className="p-4 overflow-x-auto text-xs font-mono text-[var(--ink)] leading-relaxed bg-[var(--surface-app)]">
-                            <code>{codeText}</code>
-                          </pre>
+                          {/* Code Content */}
+                          <div className="p-4 overflow-x-auto font-mono text-xs text-[var(--ink)] leading-relaxed">
+                            <pre>
+                              <code>{codeText}</code>
+                            </pre>
+                          </div>
                         </div>
                       );
                     }
 
                     return (
-                      <code className="font-mono text-xs text-[var(--ink)] bg-[var(--surface)] px-1.5 py-0.5 border border-[var(--border)]" {...props}>
+                      <code className="px-1.5 py-0.5 rounded bg-[var(--raised)] border border-[var(--border)] font-mono text-xs text-[var(--accent)]" {...props}>
                         {children}
                       </code>
                     );
                   },
-                  // Tone-stepped blockquote with bold label
-                  blockquote({ children }) {
+
+                  // Headings with auto ID for TOC scroll-spy
+                  h2({ children }: any) {
+                    const headingText = String(children);
+                    const id = headingText
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, '-')
+                      .replace(/(^-|-$)/g, '');
                     return (
-                      <blockquote className="my-5 p-4 border-l-2 border-[var(--accent)] bg-[var(--surface)] text-xs text-[var(--ink)] space-y-1.5 not-prose">
-                        <div className="text-[11px] font-semibold text-[var(--ink)] uppercase tracking-wider">
-                          Technical note
-                        </div>
-                        <div className="leading-relaxed opacity-90">
-                          {children}
-                        </div>
-                      </blockquote>
+                      <h2 id={id} className="scroll-mt-24">
+                        {children}
+                      </h2>
                     );
                   },
-                  table: ({ children }) => (
-                    <div className="overflow-x-auto my-6 border border-[var(--border)]">
-                      <table className="w-full text-xs text-left border-collapse">
+                  h3({ children }: any) {
+                    const headingText = String(children);
+                    const id = headingText
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, '-')
+                      .replace(/(^-|-$)/g, '');
+                    return (
+                      <h3 id={id} className="scroll-mt-24">
                         {children}
-                      </table>
-                    </div>
-                  ),
-                  th: ({ children }) => (
-                    <th className="border-b border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--ink)]">
-                      {children}
-                    </th>
-                  ),
-                  td: ({ children }) => (
-                    <td className="border-b border-[var(--rule)] px-3 py-2 text-xs text-[var(--ink)] font-mono">
-                      {children}
-                    </td>
-                  ),
+                      </h3>
+                    );
+                  },
                 }}
               >
                 {currentLesson.content}
               </ReactMarkdown>
             </div>
 
-            {/* Bottom Next / Prev Navigation */}
-            <div className="pt-8 mt-12 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Pagination Controls */}
+            <div className="pt-10 mt-10 border-t border-[var(--border)] grid grid-cols-1 sm:grid-cols-2 gap-4">
               {prevLesson ? (
-                <Link to={`/learn/sql-fundamentals/${prevLesson.slug}`} className="w-full sm:w-auto">
-                  <Button variant="secondary" className="w-full justify-start gap-2 text-xs rounded-none h-10">
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    <span className="truncate max-w-[220px]">Prev: {sanitizeHeading(prevLesson.title)}</span>
-                  </Button>
+                <Link
+                  to={`/learn/sql-fundamentals/${prevLesson.slug}`}
+                  className="p-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--control)] transition-colors duration-150 flex flex-col space-y-1 group"
+                >
+                  <span className="text-[11px] text-[var(--muted)] flex items-center gap-1">
+                    <ArrowLeft className="h-3 w-3 group-hover:-translate-x-0.5 transition-transform duration-150 ease-out" />
+                    <span>Previous Lesson</span>
+                  </span>
+                  <span className="text-sm font-semibold text-[var(--ink)] group-hover:text-[var(--accent)] transition-colors">
+                    {sanitizeHeading(prevLesson.title)}
+                  </span>
                 </Link>
               ) : <div />}
 
               {nextLesson && (
-                <Link to={`/learn/sql-fundamentals/${nextLesson.slug}`} className="w-full sm:w-auto">
-                  <Button className="w-full justify-end gap-2 text-xs rounded-none h-10">
-                    <span className="truncate max-w-[220px]">Next: {sanitizeHeading(nextLesson.title)}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
+                <Link
+                  to={`/learn/sql-fundamentals/${nextLesson.slug}`}
+                  className="p-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--control)] transition-colors duration-150 flex flex-col space-y-1 text-right sm:text-right group ml-auto w-full"
+                >
+                  <span className="text-[11px] text-[var(--muted)] flex items-center justify-end gap-1">
+                    <span>Next Lesson</span>
+                    <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform duration-150 ease-out" />
+                  </span>
+                  <span className="text-sm font-semibold text-[var(--ink)] group-hover:text-[var(--accent)] transition-colors">
+                    {sanitizeHeading(nextLesson.title)}
+                  </span>
                 </Link>
               )}
             </div>
-          </main>
+          </article>
 
-          {/* Right Sticky Column: Table of Contents Compass with 1px accent indicator */}
-          <aside className="hidden lg:block lg:col-span-4 sticky top-20 space-y-4">
-            <div className="p-4 border border-[var(--border)] bg-[var(--surface)] space-y-3">
-              <div className="flex items-center justify-between text-xs text-[var(--muted)] pb-2 border-b border-[var(--border)]">
-                <span className="font-semibold text-[var(--ink)] uppercase tracking-wider text-[11px]">
+          {/* Sticky Table of Contents Sidebar (4 cols) */}
+          <aside className="hidden lg:block lg:col-span-4 sticky top-20 space-y-6 text-left">
+            <div className="p-5 rounded-lg border border-[var(--border)] bg-[var(--surface)] space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
+                <ListOrdered className="h-4 w-4 text-[var(--accent)]" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--ink)]">
                   On this page
-                </span>
-                <span className="tabular-nums">{currentLesson.toc?.length || 0} sections</span>
+                </h3>
               </div>
 
-              <nav className="space-y-1 text-xs max-h-[60vh] overflow-y-auto pr-1">
-                {currentLesson.toc?.map((heading: any, idx: number) => {
-                  const cleanText = sanitizeHeading(heading.text);
-                  const isActive = activeHeadingId === heading.id;
+              {currentLesson.toc && currentLesson.toc.length > 0 ? (
+                <nav className="space-y-1 text-xs">
+                  {currentLesson.toc.map((item: any) => {
+                    const isActive = activeHeadingId === item.id;
+                    const label = item.text || item.title;
+                    return (
+                      <a
+                        key={item.id}
+                        href={`#${item.id}`}
+                        className={`block py-1.5 transition-colors border-l-2 pl-3 text-xs leading-relaxed ${
+                          isActive
+                            ? 'border-[var(--accent)] text-[var(--accent)] font-semibold'
+                            : 'border-transparent text-[var(--muted)] hover:text-[var(--ink)]'
+                        }`}
+                        style={{ paddingLeft: item.level === 3 ? '1.5rem' : '0.75rem' }}
+                      >
+                        {label}
+                      </a>
+                    );
+                  })}
+                </nav>
+              ) : (
+                <p className="text-xs text-[var(--muted)]">Scroll to navigate this module.</p>
+              )}
+            </div>
 
-                  return (
-                    <a
-                      key={idx}
-                      href={`#${heading.id}`}
-                      style={{ paddingLeft: `${Math.max(8, (heading.level - 2) * 12 + 8)}px` }}
-                      className={`block py-1.5 transition-colors truncate text-[11px] relative cursor-pointer ${
-                        isActive
-                          ? 'text-[var(--ink)] font-semibold after:absolute after:left-0 after:top-1.5 after:bottom-1.5 after:w-[2px] after:bg-[var(--accent)]'
-                          : 'text-[var(--muted)] hover:text-[var(--ink)]'
-                      }`}
-                    >
-                      {cleanText}
-                    </a>
-                  );
-                })}
-              </nav>
-
-              <div className="pt-3 border-t border-[var(--border)]">
-                <Link to="/practice">
-                  <Button variant="outline" size="sm" className="w-full text-xs gap-1.5 justify-center rounded-none">
-                    <span>Practice Problems</span>
-                  </Button>
-                </Link>
-              </div>
+            {/* Quick Practice Suggestion */}
+            <div className="p-5 rounded-lg border border-[var(--border)] bg-[var(--surface-app)] space-y-3">
+              <h4 className="text-xs font-semibold text-[var(--ink)]">Apply in the Arena</h4>
+              <p className="text-xs text-[var(--muted)] leading-relaxed">
+                Test the concepts learned in this lesson against authentic LeetCode problems in the practice catalog.
+              </p>
+              <Link to="/practice">
+                <Button size="sm" variant="secondary" className="w-full text-xs">
+                  Open Problem Arena
+                </Button>
+              </Link>
             </div>
           </aside>
         </div>

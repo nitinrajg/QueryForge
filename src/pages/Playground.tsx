@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, RotateCcw } from 'lucide-react';
+import { Play, RotateCcw, Terminal, Cpu, Database, Trash2, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SqlEditor } from '@/components/editor/SqlEditor';
 import { ResultsPanel } from '@/components/editor/ResultsPanel';
@@ -58,17 +58,16 @@ SELECT * FROM employees LIMIT 10;`,
 ];
 
 /**
- * Free SQL Playground — Data Terminal Environment.
+ * Cohesive Free SQL Playground Component.
  * 
- * Logic & Approach:
+ * Rules:
  * - Unrestricted SQL sandbox running locally in browser WebAssembly.
- * - Preloaded with relational 'employer_database' dataset.
- * - Multi-engine switcher (SQLite, MySQL compatibility mode, PostgreSQL, pandas).
- * - Preset queries formatted as plain text tab buttons on a shared rule.
- * - Schema viewer sidebar on the left, CodeMirror and results on the right.
+ * - Multi-engine switcher (SQLite WASM, MySQL compatibility, PostgreSQL, pandas).
+ * - Preset queries formatted as clean tabs.
+ * - Schema explorer sidebar on the left, CodeMirror editor and results on the right.
  */
 export const Playground: React.FC = () => {
-  const { engine, setEngine, sql, setSql } = useEditorStore();
+  const { engine, setEngine, sql, setSql, fontSize } = useEditorStore();
   const [code, setCode] = useState(sql || QUERY_PRESETS[0].sql);
   const [isRunning, setIsRunning] = useState(false);
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
@@ -99,8 +98,6 @@ export const Playground: React.FC = () => {
     try {
       const res = await engineManager.run(code);
       setQueryResult(res);
-      const currentSchema = await engineManager.getSchema();
-      setSchema(currentSchema);
     } catch (err: any) {
       setQueryResult({
         columns: [],
@@ -123,6 +120,17 @@ export const Playground: React.FC = () => {
     }
   };
 
+  const handleClear = () => {
+    setCode('-- Clean editor buffer\n');
+    setQueryResult(null);
+  };
+
+  const handleSelectPreset = (preset: typeof QUERY_PRESETS[0]) => {
+    setActivePreset(preset.name);
+    setCode(preset.sql);
+    setSql(preset.sql);
+  };
+
   const handleEngineChange = async (newEngine: SupportedEngine) => {
     setEngine(newEngine);
     await engineManager.setActiveEngine(newEngine);
@@ -133,67 +141,70 @@ export const Playground: React.FC = () => {
     }
   };
 
-  const loadPreset = (presetName: string, querySql: string) => {
-    setActivePreset(presetName);
-    setCode(querySql);
-    setSql(querySql);
-  };
-
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-[var(--ground)] text-[var(--ink)]">
-      {/* Top Header Bar */}
-      <header className="h-12 border-b border-[var(--border)] bg-[var(--surface-app)] px-4 flex items-center justify-between shrink-0">
+    <div className="flex-1 flex flex-col h-[calc(100vh-56px)] overflow-hidden bg-[var(--bg)] text-[var(--ink)]">
+      {/* Top Playground Header Bar */}
+      <header className="h-12 border-b border-[var(--border)] bg-[var(--surface)] px-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-medium text-[var(--ink)]">
-            Playground
-          </span>
-          <span className="text-[11px] text-[var(--muted)] hidden md:inline">
-            (Connected: employer_database)
-          </span>
+          <div className="flex items-center gap-2">
+            <Terminal className="h-4 w-4 text-[var(--accent)]" />
+            <span className="text-xs font-bold text-[var(--ink)]">
+              SQL Playground
+            </span>
+          </div>
+
+          <div className="hidden md:flex items-center gap-1 border-l border-[var(--border)] pl-3">
+            {QUERY_PRESETS.map((p) => (
+              <button
+                key={p.name}
+                onClick={() => handleSelectPreset(p)}
+                className={`px-2.5 py-1 text-xs rounded-md transition-colors cursor-pointer ${
+                  activePreset === p.name
+                    ? 'bg-[var(--raised)] text-[var(--ink)] font-semibold'
+                    : 'text-[var(--muted)] hover:text-[var(--ink)]'
+                }`}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Preset Selectors as Plain Text Buttons */}
-        <div className="hidden lg:flex items-center gap-4">
-          <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">Presets:</span>
-          {QUERY_PRESETS.map((p) => (
-            <button
-              key={p.name}
-              type="button"
-              onClick={() => loadPreset(p.name, p.sql)}
-              className={`text-xs transition-colors cursor-pointer relative py-1 ${
-                activePreset === p.name
-                  ? 'text-[var(--ink)] font-medium after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[var(--accent)]'
-                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
-              }`}
-            >
-              {p.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Engine Switcher + Controls */}
+        {/* Engine Switcher & Primary Run */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 border border-[var(--border)] bg-[var(--ground)] px-2 py-1 text-xs">
-            <span className="text-[10px] text-[var(--muted)] uppercase">Engine:</span>
+          {/* Engine select */}
+          <div className="flex items-center gap-1.5 border border-[var(--border)] bg-[var(--raised)] px-2.5 py-1 rounded-md text-xs">
+            <Cpu className="h-3.5 w-3.5 text-[var(--muted)]" />
             <select
               value={engine}
               onChange={(e) => handleEngineChange(e.target.value as SupportedEngine)}
               aria-label="Execution engine"
-              className="bg-transparent text-xs text-[var(--ink)] focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs text-[var(--ink)] font-medium focus:outline-none cursor-pointer"
             >
-              <option value="sqlite" className="bg-[var(--surface-app)] text-[var(--ink)]">SQLite (WASM)</option>
-              <option value="mysql" className="bg-[var(--surface-app)] text-[var(--ink)]">MySQL (compat)</option>
-              <option value="pglite" className="bg-[var(--surface-app)] text-[var(--ink)]">PostgreSQL</option>
-              <option value="pandas" className="bg-[var(--surface-app)] text-[var(--ink)]">pandas (Python)</option>
+              <option value="sqlite" className="bg-[var(--surface)] text-[var(--ink)]">SQLite (WASM)</option>
+              <option value="mysql" className="bg-[var(--surface)] text-[var(--ink)]">MySQL (compat)</option>
+              <option value="pglite" className="bg-[var(--surface)] text-[var(--ink)]">PostgreSQL</option>
+              <option value="pandas" className="bg-[var(--surface)] text-[var(--ink)]">pandas (Python)</option>
             </select>
           </div>
 
           <Button
             variant="ghost"
             size="sm"
+            onClick={handleClear}
+            title="Clear editor code"
+            className="text-xs text-[var(--muted)] hover:text-[var(--ink)] h-8"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Clear</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleReset}
-            className="text-xs gap-1 text-[var(--muted)] hover:text-[var(--ink)] rounded-none"
-            title="Reset dataset to initial state"
+            title="Reset Database to original schema"
+            className="text-xs text-[var(--muted)] hover:text-[var(--ink)] h-8"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Reset DB</span>
@@ -204,7 +215,7 @@ export const Playground: React.FC = () => {
             size="sm"
             onClick={handleRun}
             disabled={isRunning}
-            className="gap-1.5 text-xs rounded-none font-medium"
+            className="gap-1.5 text-xs h-8 font-semibold shadow-xs"
           >
             <Play className="h-3.5 w-3.5 fill-current" />
             <span>Run Query</span>
@@ -212,16 +223,16 @@ export const Playground: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Grid: Schema Sidebar (Left) + Editor & Results (Right) */}
+      {/* Main Split: Left Schema Explorer + Right Editor & Results */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
-        {/* Schema Sidebar */}
-        <aside className="lg:col-span-3 border-r border-[var(--border)] bg-[var(--surface-app)] p-4 overflow-y-auto">
+        {/* Left Column: Schema Viewer (4 cols) */}
+        <div className="lg:col-span-4 border-r border-[var(--border)] bg-[var(--surface)] p-4 overflow-y-auto">
           <SchemaViewer schema={schema} />
-        </aside>
+        </div>
 
-        {/* Editor + Results */}
-        <div className="lg:col-span-9 flex flex-col h-full bg-[var(--ground)] overflow-hidden">
-          {/* Top Half: CodeMirror Editor */}
+        {/* Right Column: CodeMirror Editor & Results (8 cols) */}
+        <div className="lg:col-span-8 flex flex-col h-full bg-[var(--bg)] overflow-hidden">
+          {/* Top Half: CodeMirror */}
           <div className="flex-1 p-3 overflow-hidden min-h-[220px]">
             <SqlEditor
               value={code}
@@ -232,12 +243,13 @@ export const Playground: React.FC = () => {
               onRun={handleRun}
               schema={schema}
               engine={engine}
+              fontSize={fontSize}
               minHeight="100%"
             />
           </div>
 
           {/* Bottom Half: Results Table */}
-          <div className="h-[280px] border-t border-[var(--border)] bg-[var(--surface-app)] p-3 overflow-hidden flex flex-col shrink-0">
+          <div className="h-[300px] border-t border-[var(--border)] bg-[var(--surface)] p-3 overflow-hidden flex flex-col shrink-0">
             <ResultsPanel
               result={queryResult}
               isLoading={isRunning}
